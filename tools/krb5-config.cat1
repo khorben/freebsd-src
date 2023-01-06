@@ -1,37 +1,36 @@
-
 KRB5-CONFIG(1)            BSD General Commands Manual           KRB5-CONFIG(1)
 
-NNAAMMEE
-     kkrrbb55--ccoonnffiigg -- give information on how to link code against Heimdal
-     libraries
+[1mNAME[0m
+     [1mkrb5-config [22m-- give information on how to link code against Heimdal li-
+     braries
 
-SSYYNNOOPPSSIISS
-     kkrrbb55--ccoonnffiigg [----pprreeffiixx[=_d_i_r]] [----eexxeecc--pprreeffiixx[=_d_i_r]] [----lliibbss] [----ccffllaaggss]
-                 [_l_i_b_r_a_r_i_e_s]
+[1mSYNOPSIS[0m
+     [1mkrb5-config [22m[[1m--prefix[22m[=[4mdir[24m]] [[1m--exec-prefix[22m[=[4mdir[24m]] [[1m--libs[22m] [[1m--cflags[22m]
+                 [[4mlibraries[24m]
 
-DDEESSCCRRIIPPTTIIOONN
-     kkrrbb55--ccoonnffiigg tells the application programmer what special flags to use to
+[1mDESCRIPTION[0m
+     [1mkrb5-config [22mtells the application programmer what special flags to use to
      compile and link programs against the libraries installed by Heimdal.
 
      Options supported:
 
-     ----pprreeffiixx[=_d_i_r]
-             Print the prefix if no _d_i_r is specified, otherwise set prefix to
-             _d_i_r.
+     [1m--prefix[22m[=[4mdir[24m]
+             Print the prefix if no [4mdir[24m is specified, otherwise set prefix to
+             [4mdir[24m.
 
-     ----eexxeecc--pprreeffiixx[=_d_i_r]
-             Print the exec-prefix if no _d_i_r is specified, otherwise set exec-
-             prefix to _d_i_r.
+     [1m--exec-prefix[22m[=[4mdir[24m]
+             Print the exec-prefix if no [4mdir[24m is specified, otherwise set exec-
+             prefix to [4mdir[24m.
 
-     ----lliibbss  Output the set of libraries that should be linked against.  This
+     [1m--libs  [22mOutput the set of libraries that should be linked against.  This
              also includes rpath flags with the expectation that the C com-
              piler is used for final link-edits.
 
-     ----ccffllaaggss
+     [1m--cflags[0m
              Output the set of flags to give to the C compiler when using the
              Heimdal libraries.
 
-     By default kkrrbb55--ccoonnffiigg will output the set of flags and libraries to be
+     By default [1mkrb5-config [22mwill output the set of flags and libraries to be
      used by a normal program using the krb5 API.  The user can also supply a
      library to be used, the supported ones are:
 
@@ -45,10 +44,10 @@ DDEESSCCRRIIPPTTIIOONN
      kadm-server
              use the server-side kadmin libraries
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      cc(1)
 
-HHIISSTTOORRYY
-     kkrrbb55--ccoonnffiigg appeared in Heimdal 0.3d.
+[1mHISTORY[0m
+     [1mkrb5-config [22mappeared in Heimdal 0.3d.
 
 HEIMDAL                        November 30, 2000                       HEIMDAL

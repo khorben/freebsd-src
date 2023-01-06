@@ -1,133 +1,132 @@
-
 KDIGEST(8)                BSD System Manager's Manual               KDIGEST(8)
 
-NNAAMMEE
-     kkddiiggeesstt -- userland tool to access digest interface in the KDC
+[1mNAME[0m
+     [1mkdigest [22m-- userland tool to access digest interface in the KDC
 
-SSYYNNOOPPSSIISS
-     kkddiiggeesstt [----ccccaacchhee==_s_t_r_i_n_g] [----vveerrssiioonn] [----hheellpp] command [arguments]
+[1mSYNOPSIS[0m
+     [1mkdigest [22m[[1m--ccache=[4m[22mstring[24m] [[1m--version[22m] [[1m--help[22m] command [arguments]
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      Supported options:
 
-     ----ccccaacchhee==_s_t_r_i_n_g
+     [1m--ccache=[4m[22mstring[0m
              credential cache
 
-     ----vveerrssiioonn
+     [1m--version[0m
              print version
 
-     ----hheellpp
+     [1m--help[0m
 
      Available commands are:
 
-     digest-probe [----rreeaallmm==_s_t_r_i_n_g] [--hh | ----hheellpp]
+     digest-probe [[1m--realm=[4m[22mstring[24m] [[1m-h [22m| [1m--help[22m]
 
-             ----rreeaallmm==_s_t_r_i_n_g
+             [1m--realm=[4m[22mstring[0m
                      Kerberos realm to communicate with
 
-     digest-server-init [----ttyyppee==_s_t_r_i_n_g] [----kkeerrbbeerrooss--rreeaallmm==_r_e_a_l_m]
-             [----ddiiggeesstt==_d_i_g_e_s_t_-_t_y_p_e] [----ccbb--ttyyppee==_t_y_p_e] [----ccbb--vvaalluuee==_v_a_l_u_e]
-             [----hhoossttnnaammee==_h_o_s_t_n_a_m_e] [----rreeaallmm==_s_t_r_i_n_g]
+     digest-server-init [[1m--type=[4m[22mstring[24m] [[1m--kerberos-realm=[4m[22mrealm[24m]
+             [[1m--digest=[4m[22mdigest-type[24m] [[1m--cb-type=[4m[22mtype[24m] [[1m--cb-value=[4m[22mvalue[24m]
+             [[1m--hostname=[4m[22mhostname[24m] [[1m--realm=[4m[22mstring[24m]
 
-             ----ttyyppee==_s_t_r_i_n_g
+             [1m--type=[4m[22mstring[0m
                      digest type
 
-             ----kkeerrbbeerrooss--rreeaallmm==_r_e_a_l_m
+             [1m--kerberos-realm=[4m[22mrealm[0m
 
-             ----ddiiggeesstt==_d_i_g_e_s_t_-_t_y_p_e
+             [1m--digest=[4m[22mdigest-type[0m
                      digest type to use in the algorithm
 
-             ----ccbb--ttyyppee==_t_y_p_e
+             [1m--cb-type=[4m[22mtype[0m
                      type of channel bindings
 
-             ----ccbb--vvaalluuee==_v_a_l_u_e
+             [1m--cb-value=[4m[22mvalue[0m
                      value of channel bindings
 
-             ----hhoossttnnaammee==_h_o_s_t_n_a_m_e
+             [1m--hostname=[4m[22mhostname[0m
                      hostname of the server
 
-             ----rreeaallmm==_s_t_r_i_n_g
+             [1m--realm=[4m[22mstring[0m
                      Kerberos realm to communicate with
 
-     digest-server-request [----ttyyppee==_s_t_r_i_n_g] [----kkeerrbbeerrooss--rreeaallmm==_r_e_a_l_m]
-             [----uusseerrnnaammee==_n_a_m_e] [----sseerrvveerr--nnoonnccee==_n_o_n_c_e]
-             [----sseerrvveerr--iiddeennttiiffiieerr==_n_o_n_c_e] [----cclliieenntt--nnoonnccee==_n_o_n_c_e]
-             [----cclliieenntt--rreessppoonnssee==_r_e_s_p_o_n_s_e] [----ooppaaqquuee==_s_t_r_i_n_g]
-             [----aauutthheennttiiccaattiioonn--nnaammee==_n_a_m_e] [----rreeaallmm==_r_e_a_l_m] [----mmeetthhoodd==_m_e_t_h_o_d]
-             [----uurrii==_u_r_i] [----nnoouunnccee--ccoouunntt==_c_o_u_n_t] [----qqoopp==_q_o_p] [----ccccaacchhee==_c_c_a_c_h_e]
+     digest-server-request [[1m--type=[4m[22mstring[24m] [[1m--kerberos-realm=[4m[22mrealm[24m]
+             [[1m--username=[4m[22mname[24m] [[1m--server-nonce=[4m[22mnonce[24m]
+             [[1m--server-identifier=[4m[22mnonce[24m] [[1m--client-nonce=[4m[22mnonce[24m]
+             [[1m--client-response=[4m[22mresponse[24m] [[1m--opaque=[4m[22mstring[24m]
+             [[1m--authentication-name=[4m[22mname[24m] [[1m--realm=[4m[22mrealm[24m] [[1m--method=[4m[22mmethod[24m]
+             [[1m--uri=[4m[22muri[24m] [[1m--nounce-count=[4m[22mcount[24m] [[1m--qop=[4m[22mqop[24m] [[1m--ccache=[4m[22mccache[24m]
 
-             ----ttyyppee==_s_t_r_i_n_g
+             [1m--type=[4m[22mstring[0m
                      digest type
 
-             ----kkeerrbbeerrooss--rreeaallmm==_r_e_a_l_m
+             [1m--kerberos-realm=[4m[22mrealm[0m
 
-             ----uusseerrnnaammee==_n_a_m_e
+             [1m--username=[4m[22mname[0m
                      digest type
 
-             ----sseerrvveerr--nnoonnccee==_n_o_n_c_e
+             [1m--server-nonce=[4m[22mnonce[0m
 
-             ----sseerrvveerr--iiddeennttiiffiieerr==_n_o_n_c_e
+             [1m--server-identifier=[4m[22mnonce[0m
 
-             ----cclliieenntt--nnoonnccee==_n_o_n_c_e
+             [1m--client-nonce=[4m[22mnonce[0m
 
-             ----cclliieenntt--rreessppoonnssee==_r_e_s_p_o_n_s_e
+             [1m--client-response=[4m[22mresponse[0m
 
-             ----ooppaaqquuee==_s_t_r_i_n_g
+             [1m--opaque=[4m[22mstring[0m
 
-             ----aauutthheennttiiccaattiioonn--nnaammee==_n_a_m_e
+             [1m--authentication-name=[4m[22mname[0m
 
-             ----rreeaallmm==_r_e_a_l_m
+             [1m--realm=[4m[22mrealm[0m
 
-             ----mmeetthhoodd==_m_e_t_h_o_d
+             [1m--method=[4m[22mmethod[0m
 
-             ----uurrii==_u_r_i
+             [1m--uri=[4m[22muri[0m
 
-             ----nnoouunnccee--ccoouunntt==_c_o_u_n_t
+             [1m--nounce-count=[4m[22mcount[0m
 
-             ----qqoopp==_q_o_p
+             [1m--qop=[4m[22mqop[0m
 
-             ----ccccaacchhee==_c_c_a_c_h_e
+             [1m--ccache=[4m[22mccache[0m
                      Where the the credential cache is created when the KDC
                      returns tickets
 
-     digest-client-request [----ttyyppee==_s_t_r_i_n_g] [----uusseerrnnaammee==_n_a_m_e]
-             [----ppaasssswwoorrdd==_p_a_s_s_w_o_r_d] [----sseerrvveerr--nnoonnccee==_n_o_n_c_e]
-             [----sseerrvveerr--iiddeennttiiffiieerr==_n_o_n_c_e] [----cclliieenntt--nnoonnccee==_n_o_n_c_e]
-             [----ooppaaqquuee==_s_t_r_i_n_g] [----rreeaallmm==_r_e_a_l_m] [----mmeetthhoodd==_m_e_t_h_o_d] [----uurrii==_u_r_i]
-             [----nnoouunnccee--ccoouunntt==_c_o_u_n_t] [----qqoopp==_q_o_p]
+     digest-client-request [[1m--type=[4m[22mstring[24m] [[1m--username=[4m[22mname[24m]
+             [[1m--password=[4m[22mpassword[24m] [[1m--server-nonce=[4m[22mnonce[24m]
+             [[1m--server-identifier=[4m[22mnonce[24m] [[1m--client-nonce=[4m[22mnonce[24m]
+             [[1m--opaque=[4m[22mstring[24m] [[1m--realm=[4m[22mrealm[24m] [[1m--method=[4m[22mmethod[24m] [[1m--uri=[4m[22muri[24m]
+             [[1m--nounce-count=[4m[22mcount[24m] [[1m--qop=[4m[22mqop[24m]
 
-             ----ttyyppee==_s_t_r_i_n_g
+             [1m--type=[4m[22mstring[0m
                      digest type
 
-             ----uusseerrnnaammee==_n_a_m_e
+             [1m--username=[4m[22mname[0m
                      digest type
 
-             ----ppaasssswwoorrdd==_p_a_s_s_w_o_r_d
+             [1m--password=[4m[22mpassword[0m
 
-             ----sseerrvveerr--nnoonnccee==_n_o_n_c_e
+             [1m--server-nonce=[4m[22mnonce[0m
 
-             ----sseerrvveerr--iiddeennttiiffiieerr==_n_o_n_c_e
+             [1m--server-identifier=[4m[22mnonce[0m
 
-             ----cclliieenntt--nnoonnccee==_n_o_n_c_e
+             [1m--client-nonce=[4m[22mnonce[0m
 
-             ----ooppaaqquuee==_s_t_r_i_n_g
+             [1m--opaque=[4m[22mstring[0m
 
-             ----rreeaallmm==_r_e_a_l_m
+             [1m--realm=[4m[22mrealm[0m
 
-             ----mmeetthhoodd==_m_e_t_h_o_d
+             [1m--method=[4m[22mmethod[0m
 
-             ----uurrii==_u_r_i
+             [1m--uri=[4m[22muri[0m
 
-             ----nnoouunnccee--ccoouunntt==_c_o_u_n_t
+             [1m--nounce-count=[4m[22mcount[0m
 
-             ----qqoopp==_q_o_p
+             [1m--qop=[4m[22mqop[0m
 
-     ntlm-server-init [----vveerrssiioonn==_i_n_t_e_g_e_r] [----kkeerrbbeerrooss--rreeaallmm==_s_t_r_i_n_g]
+     ntlm-server-init [[1m--version=[4m[22minteger[24m] [[1m--kerberos-realm=[4m[22mstring[24m]
 
-             ----vveerrssiioonn==_i_n_t_e_g_e_r
+             [1m--version=[4m[22minteger[0m
                      ntlm version
 
-             ----kkeerrbbeerrooss--rreeaallmm==_s_t_r_i_n_g
+             [1m--kerberos-realm=[4m[22mstring[0m
                      Kerberos realm to communicate with
 
 HEIMDAL                       September 25, 2008                       HEIMDAL

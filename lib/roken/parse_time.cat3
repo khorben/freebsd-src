@@ -1,40 +1,39 @@
-
 PARSE_TIME(3)            BSD Library Functions Manual            PARSE_TIME(3)
 
-NNAAMMEE
-     ppaarrssee__ttiimmee, pprriinntt__ttiimmee__ttaabbllee, uunnppaarrssee__ttiimmee, uunnppaarrssee__ttiimmee__aapppprrooxx, -- parse
+[1mNAME[0m
+     [1mparse_time[22m, [1mprint_time_table[22m, [1munparse_time[22m, [1munparse_time_approx[22m, -- parse
      and unparse time intervals
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      The roken library (libroken, -lroken)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ppaarrssee__ttiimmee..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <parse_time.h>[0m
 
-     _i_n_t
-     ppaarrssee__ttiimmee(_c_o_n_s_t _c_h_a_r _*_t_i_m_e_s_p_e_c, _c_o_n_s_t _c_h_a_r _*_d_e_f___u_n_i_t);
+     [4mint[0m
+     [1mparse_time[22m([4mconst[24m [4mchar[24m [4m*timespec[24m, [4mconst[24m [4mchar[24m [4m*def_unit[24m);
 
-     _v_o_i_d
-     pprriinntt__ttiimmee__ttaabbllee(_F_I_L_E _*_f);
+     [4mvoid[0m
+     [1mprint_time_table[22m([4mFILE[24m [4m*f[24m);
 
-     _s_i_z_e___t
-     uunnppaarrssee__ttiimmee(_i_n_t _s_e_c_o_n_d_s, _c_h_a_r _*_b_u_f, _s_i_z_e___t _l_e_n);
+     [4msize_t[0m
+     [1munparse_time[22m([4mint[24m [4mseconds[24m, [4mchar[24m [4m*buf[24m, [4msize_t[24m [4mlen[24m);
 
-     _s_i_z_e___t
-     uunnppaarrssee__ttiimmee__aapppprrooxx(_i_n_t _s_e_c_o_n_d_s, _c_h_a_r _*_b_u_f, _s_i_z_e___t _l_e_n);
+     [4msize_t[0m
+     [1munparse_time_approx[22m([4mint[24m [4mseconds[24m, [4mchar[24m [4m*buf[24m, [4msize_t[24m [4mlen[24m);
 
-DDEESSCCRRIIPPTTIIOONN
-     The ppaarrssee__ttiimmee() function converts the period of time specified into a
-     number of seconds.  The _t_i_m_e_s_p_e_c can be any number of <number unit> pairs
+[1mDESCRIPTION[0m
+     The [1mparse_time[22m() function converts the period of time specified into a
+     number of seconds.  The [4mtimespec[24m can be any number of <number unit> pairs
      separated by comma and whitespace. The number can be negative. Numbers
-     without explicit units are taken as being _d_e_f___u_n_i_t.
+     without explicit units are taken as being [4mdef_unit[24m.
 
-     The uunnppaarrssee__ttiimmee() and uunnppaarrssee__ttiimmee__aapppprrooxx() do the opposite of
-     ppaarrssee__ttiimmee(), that is they take a number of seconds and express that as
-     human readable strings.  _u_n_p_a_r_s_e___t_i_m_e produces an exact time, while
-     _u_n_p_a_r_s_e___t_i_m_e___a_p_p_r_o_x restricts the result to include only one unit.
+     The [1munparse_time[22m() and [1munparse_time_approx[22m() do the opposite of
+     [1mparse_time[22m(), that is they take a number of seconds and express that as
+     human readable strings.  [4munparse_time[24m produces an exact time, while
+     [4munparse_time_approx[24m restricts the result to include only one unit.
 
-     pprriinntt__ttiimmee__ttaabbllee() prints a descriptive list of available units on the
+     [1mprint_time_table[22m() prints a descriptive list of available units on the
      passed file descriptor.
 
      The possible units include:
@@ -48,14 +47,14 @@ DDEESSCCRRIIPPTTIIOONN
 
      Units names can be arbitrarily abbreviated (as long as they are unique).
 
-RREETTUURRNN VVAALLUUEESS
-     ppaarrssee__ttiimmee() returns the number of seconds that represents the expression
-     in _t_i_m_e_s_p_e_c or -1 on error.  uunnppaarrssee__ttiimmee() and uunnppaarrssee__ttiimmee__aapppprrooxx()
-     return the number of characters written to _b_u_f.  if the return value is
-     greater than or equal to the _l_e_n argument, the string was too short and
+[1mRETURN VALUES[0m
+     [1mparse_time[22m() returns the number of seconds that represents the expression
+     in [4mtimespec[24m or -1 on error.  [1munparse_time[22m() and [1munparse_time_approx[22m() re-
+     turn the number of characters written to [4mbuf[24m.  if the return value is
+     greater than or equal to the [4mlen[24m argument, the string was too short and
      some of the printed characters were discarded.
 
-EEXXAAMMPPLLEESS
+[1mEXAMPLES[0m
      #include <stdio.h>
      #include <parse_time.h>
 
@@ -103,8 +102,8 @@ EEXXAAMMPPLLEESS
      unparse_time = 12 months 4 days 23 hours 59 minutes 59 seconds
      unparse_time_approx = 12 months
 
-BBUUGGSS
-     Since ppaarrssee__ttiimmee() returns -1 on error there is no way to parse "minus
+[1mBUGS[0m
+     Since [1mparse_time[22m() returns -1 on error there is no way to parse "minus
      one second".  Currently "s" at the end of units is ignored. This is a
      hack for English plural forms. If these functions are ever localised,
      this scheme will have to change.

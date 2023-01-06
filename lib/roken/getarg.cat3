@@ -1,39 +1,38 @@
-
 GETARG(3)                BSD Library Functions Manual                GETARG(3)
 
-NNAAMMEE
-     ggeettaarrgg, aarrgg__pprriinnttuussaaggee -- collect command line options
+[1mNAME[0m
+     [1mgetarg[22m, [1marg_printusage [22m-- collect command line options
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<ggeettaarrgg..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <getarg.h>[0m
 
-     _i_n_t
-     ggeettaarrgg(_s_t_r_u_c_t _g_e_t_a_r_g_s _*_a_r_g_s, _s_i_z_e___t _n_u_m___a_r_g_s, _i_n_t _a_r_g_c, _c_h_a_r _*_*_a_r_g_v,
-         _i_n_t _*_o_p_t_i_n_d);
+     [4mint[0m
+     [1mgetarg[22m([4mstruct[24m [4mgetargs[24m [4m*args[24m, [4msize_t[24m [4mnum_args[24m, [4mint[24m [4margc[24m, [4mchar[24m [4m**argv[24m,
+         [4mint[24m [4m*optind[24m);
 
-     _v_o_i_d
-     aarrgg__pprriinnttuussaaggee(_s_t_r_u_c_t _g_e_t_a_r_g_s _*_a_r_g_s, _s_i_z_e___t _n_u_m___a_r_g_s,
-         _c_o_n_s_t _c_h_a_r _*_p_r_o_g_n_a_m_e, _c_o_n_s_t _c_h_a_r _*_e_x_t_r_a___s_t_r_i_n_g);
+     [4mvoid[0m
+     [1marg_printusage[22m([4mstruct[24m [4mgetargs[24m [4m*args[24m, [4msize_t[24m [4mnum_args[24m,
+         [4mconst[24m [4mchar[24m [4m*progname[24m, [4mconst[24m [4mchar[24m [4m*extra_string[24m);
 
-DDEESSCCRRIIPPTTIIOONN
-     ggeettaarrgg() collects any command line options given to a program in an eas-
-     ily used way.  aarrgg__pprriinnttuussaaggee() pretty-prints the available options, with
+[1mDESCRIPTION[0m
+     [1mgetarg[22m() collects any command line options given to a program in an eas-
+     ily used way.  [1marg_printusage[22m() pretty-prints the available options, with
      a short help text.
 
-     _a_r_g_s is the option specification to use, and it's an array of _s_t_r_u_c_t
-     _g_e_t_a_r_g_s elements.  _n_u_m___a_r_g_s is the size of _a_r_g_s (in elements).  _a_r_g_c and
-     _a_r_g_v are the argument count and argument vector to extract option from.
-     _o_p_t_i_n_d is a pointer to an integer where the index to the last processed
+     [4margs[24m is the option specification to use, and it's an array of [4mstruct[0m
+     [4mgetargs[24m elements.  [4mnum_args[24m is the size of [4margs[24m (in elements).  [4margc[24m and
+     [4margv[24m are the argument count and argument vector to extract option from.
+     [4moptind[24m is a pointer to an integer where the index to the last processed
      argument is stored, it must be initialised to the first index (minus one)
      to process (normally 0) before the first call.
 
-     _a_r_g___p_r_i_n_t_u_s_a_g_e take the same _a_r_g_s and _n_u_m___a_r_g_s as getarg; _p_r_o_g_n_a_m_e is the
-     name of the program (to be used in the help text), and _e_x_t_r_a___s_t_r_i_n_g is a
+     [4marg_printusage[24m take the same [4margs[24m and [4mnum_args[24m as getarg; [4mprogname[24m is the
+     name of the program (to be used in the help text), and [4mextra_string[24m is a
      string to print after the actual options to indicate more arguments. The
      usefulness of this function is realised only be people who has used pro-
      grams that has help strings that doesn't match what the code does.
 
-     The _g_e_t_a_r_g_s struct has the following elements.
+     The [4mgetargs[24m struct has the following elements.
 
      struct getargs{
          const char *long_name;
@@ -51,43 +50,43 @@ DDEESSCCRRIIPPTTIIOONN
          const char *arg_help;
      };
 
-     _l_o_n_g___n_a_m_e is the long name of the option, it can be NULL, if you don't
-     want a long name.  _s_h_o_r_t___n_a_m_e is the characted to use as short option, it
-     can be zero. If the option has a value the _v_a_l_u_e field gets filled in
-     with that value interpreted as specified by the _t_y_p_e field.  _h_e_l_p is a
+     [4mlong_name[24m is the long name of the option, it can be NULL, if you don't
+     want a long name.  [4mshort_name[24m is the characted to use as short option, it
+     can be zero. If the option has a value the [4mvalue[24m field gets filled in
+     with that value interpreted as specified by the [4mtype[24m field.  [4mhelp[24m is a
      longer help string for the option as a whole, if it's NULL the help text
      for the option is omitted (but it's still displayed in the synopsis).
-     _a_r_g___h_e_l_p is a description of the argument, if NULL a default value will
+     [4marg_help[24m is a description of the argument, if NULL a default value will
      be used, depending on the type of the option:
 
-     arg_integer        the argument is a signed integer, and _v_a_l_u_e should
-                        point to an _i_n_t.
+     arg_integer        the argument is a signed integer, and [4mvalue[24m should
+                        point to an [4mint[24m.
 
-     _a_r_g___s_t_r_i_n_g         the argument is a string, and _v_a_l_u_e should point to a
-                        _c_h_a_r_*.
+     [4marg_string[24m         the argument is a string, and [4mvalue[24m should point to a
+                        [4mchar*[24m.
 
-     _a_r_g___f_l_a_g           the argument is a flag, and _v_a_l_u_e should point to a
-                        _i_n_t.  It gets filled in with either zero or one,
-                        depending on how the option is given, the normal case
+     [4marg_flag[24m           the argument is a flag, and [4mvalue[24m should point to a
+                        [4mint[24m.  It gets filled in with either zero or one, de-
+                        pending on how the option is given, the normal case
                         being one. Note that if the option isn't given, the
                         value isn't altered, so it should be initialised to
                         some useful default.
 
-     _a_r_g___n_e_g_a_t_i_v_e___f_l_a_g  this is the same as _a_r_g___f_l_a_g but it reverses the mean-
+     [4marg_negative_flag[24m  this is the same as [4marg_flag[24m but it reverses the mean-
                         ing of the flag (a given short option clears the
                         flag), and the synopsis of a long option is negated.
 
-     _a_r_g___s_t_r_i_n_g_s        the argument can be given multiple times, and the val-
-                        ues are collected in an array; _v_a_l_u_e should be a
-                        pointer to a _s_t_r_u_c_t _g_e_t_a_r_g___s_t_r_i_n_g_s structure, which
+     [4marg_strings[24m        the argument can be given multiple times, and the val-
+                        ues are collected in an array; [4mvalue[24m should be a
+                        pointer to a [4mstruct[24m [4mgetarg_strings[24m structure, which
                         holds a length and a string pointer.
 
-     _a_r_g___d_o_u_b_l_e         argument is a double precision floating point value,
-                        and _v_a_l_u_e should point to a _d_o_u_b_l_e.
+     [4marg_double[24m         argument is a double precision floating point value,
+                        and [4mvalue[24m should point to a [4mdouble[24m.
 
-     _a_r_g___c_o_l_l_e_c_t        allows more fine-grained control of the option parsing
-                        process.  _v_a_l_u_e should be a pointer to a
-                        _g_e_t_a_r_g___c_o_l_l_e_c_t___i_n_f_o structure:
+     [4marg_collect[24m        allows more fine-grained control of the option parsing
+                        process.  [4mvalue[24m should be a pointer to a
+                        [4mgetarg_collect_info[24m structure:
 
                         typedef int (*getarg_collect_func)(int short_opt,
                                                            int argc,
@@ -101,31 +100,31 @@ DDEESSCCRRIIPPTTIIOONN
                             void *data;
                         } getarg_collect_info;
 
-                        With the _f_u_n_c member set to a function to call, and
-                        _d_a_t_a to some application specific data. The parameters
+                        With the [4mfunc[24m member set to a function to call, and
+                        [4mdata[24m to some application specific data. The parameters
                         to the collect function are:
 
-                        _s_h_o_r_t___f_l_a_g non-zero if this call is via a short option
+                        [4mshort_flag[24m non-zero if this call is via a short option
                         flag, zero otherwise
 
-                        _a_r_g_c, _a_r_g_v the whole argument list
+                        [4margc[24m, [4margv[24m the whole argument list
 
-                        _o_p_t_i_n_d pointer to the index in argv where the flag is
+                        [4moptind[24m pointer to the index in argv where the flag is
 
-                        _o_p_t_a_r_g pointer to the index in argv[*optind] where the
+                        [4moptarg[24m pointer to the index in argv[*optind] where the
                         flag name starts
 
-                        _d_a_t_a application specific data
+                        [4mdata[24m application specific data
 
-                        You can modify _*_o_p_t_i_n_d, and _*_o_p_t_a_r_g, but to do this
-                        correct you (more or less) have to know about the
-                        inner workings of getarg.
+                        You can modify [4m*optind[24m, and [4m*optarg[24m, but to do this
+                        correct you (more or less) have to know about the in-
+                        ner workings of getarg.
 
-                        You can skip parts of arguments by increasing _*_o_p_t_a_r_g
-                        (you could implement the --zz_3 set of flags from ggzziipp
+                        You can skip parts of arguments by increasing [4m*optarg[0m
+                        (you could implement the [1m-z[4m[22m3[24m set of flags from [1mgzip[0m
                         with this), or whole argument strings by increasing
-                        _*_o_p_t_i_n_d (let's say you want a flag --cc _x _y _z to specify
-                        a coordinate); if you also have to set _*_o_p_t_a_r_g to a
+                        [4m*optind[24m (let's say you want a flag [1m-c [4m[22mx[24m [4my[24m [4mz[24m to specify
+                        a coordinate); if you also have to set [4m*optarg[24m to a
                         sane value.
 
                         The collect function should return one of
@@ -133,26 +132,26 @@ DDEESSCCRRIIPPTTIIOONN
                         ENOMEM on error, zero otherwise.
 
                         For your convenience there is a function,
-                        ggeettaarrgg__ooppttaarrgg(), that returns the traditional argument
+                        [1mgetarg_optarg[22m(), that returns the traditional argument
                         string, and you pass it all arguments, sans data, that
                         where given to the collection function.
 
                         Don't use this more this unless you absolutely have
                         to.
 
-     Option parsing is similar to what getopt uses. Short options without
-     arguments can be compressed (--xxyyzz is the same as --xx --yy --zz), and short
-     options with arguments take these as either the rest of the argv-string
-     or as the next option (--oo_f_o_o, or --oo _f_o_o).
+     Option parsing is similar to what getopt uses. Short options without ar-
+     guments can be compressed ([1m-xyz [22mis the same as [1m-x -y -z[22m), and short op-
+     tions with arguments take these as either the rest of the argv-string or
+     as the next option ([1m-o[4m[22mfoo[24m, or [1m-o [4m[22mfoo[24m).
 
      Long option names are prefixed with -- (double dash), and the value with
-     a = (equal), ----ffoooo==_b_a_r.  Long option flags can either be specified as
-     they are (----hheellpp), or with an (boolean parsable) option (----hheellpp==_y_e_s,
-     ----hheellpp==_t_r_u_e, or similar), or they can also be negated (----nnoo--hheellpp is the
-     same as ----hheellpp==no), and if you're really confused you can do it multiple
-     times (----nnoo--nnoo--hheellpp==_f_a_l_s_e, or even ----nnoo--nnoo--hheellpp==_m_a_y_b_e).
+     a = (equal), [1m--foo=[4m[22mbar[24m.  Long option flags can either be specified as
+     they are ([1m--help[22m), or with an (boolean parsable) option ([1m--help=[4m[22myes[24m,
+     [1m--help=[4m[22mtrue[24m, or similar), or they can also be negated ([1m--no-help [22mis the
+     same as [1m--help=[22mno), and if you're really confused you can do it multiple
+     times ([1m--no-no-help=[4m[22mfalse[24m, or even [1m--no-no-help=[4m[22mmaybe[24m).
 
-EEXXAAMMPPLLEE
+[1mEXAMPLE[0m
      #include <stdio.h>
      #include <string.h>
      #include <getarg.h>
@@ -213,7 +212,7 @@ EEXXAAMMPPLLEE
      -w tons, --weight=tons      weight of shippment
      -c, --no-catalog            include product catalog
 
-BBUUGGSS
+[1mBUGS[0m
      It should be more flexible, so it would be possible to use other more
      complicated option syntaxes, such as what ps(1), and tar(1), uses, or the
      AFS model where you can skip the flag names as long as the options come
@@ -225,7 +224,7 @@ BBUUGGSS
 
      It's very confusing that the struct you pass in is called getargS.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      getopt(3)
 
 ROKEN                         September 24, 1999                         ROKEN

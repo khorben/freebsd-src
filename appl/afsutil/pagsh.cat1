@@ -1,33 +1,32 @@
-
 PAGSH(1)                  BSD General Commands Manual                 PAGSH(1)
 
-NNAAMMEE
-     ppaaggsshh -- creates a new credential cache sandbox
+[1mNAME[0m
+     [1mpagsh [22m-- creates a new credential cache sandbox
 
-SSYYNNOOPPSSIISS
-     ppaaggsshh [--cc _c_o_m_m_a_n_d_-_s_t_r_i_n_g] [--hh | ----hheellpp] [----vveerrssiioonn] [----ccaacchhee--ttyyppee==_s_t_r_i_n_g]
-           _c_o_m_m_a_n_d _[_a_r_g_s_._._._]
+[1mSYNOPSIS[0m
+     [1mpagsh [22m[[1m-c [4m[22mcommand-string[24m] [[1m-h [22m| [1m--help[22m] [[1m--version[22m] [[1m--cache-type=[4m[22mstring[24m]
+           [4mcommand[24m [4m[args...][0m
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      Supported options:
 
-     --cc _c_o_m_m_a_n_d_-_s_t_r_i_n_g Executes command(s) contained in _c_o_m_m_a_n_d_-_s_t_r_i_n_g.
+     [1m-c [4m[22mcommand-string[24m Executes command(s) contained in [4mcommand-string[24m.
 
-     ----ccaacchhee--ttyyppee==_s_t_r_i_n_g
+     [1m--cache-type=[4m[22mstring[0m
 
-     --hh, ----hheellpp
+     [1m-h[22m, [1m--help[0m
 
-     ----vveerrssiioonn
+     [1m--version[0m
 
-     ppaaggsshh creates a new credential cache sandbox for the user to live in.  If
+     [1mpagsh [22mcreates a new credential cache sandbox for the user to live in.  If
      AFS is installed on the computer, the user is put in a newly created
      Process Authentication Group (PAG).
 
      For Kerberos 5, the credential cache type that is used is the same as the
-     credential cache type that was used at the time of ppaaggsshh invocation.  The
-     credential cache type can be controlled by the option ----ccaacchhee--ttyyppee.
+     credential cache type that was used at the time of [1mpagsh [22minvocation.  The
+     credential cache type can be controlled by the option [1m--cache-type[22m.
 
-EEXXAAMMPPLLEESS
+[1mEXAMPLES[0m
      Create a new sandbox where new credentials can be used, while the old
      credentials can be used by other processes.
 
@@ -41,7 +40,7 @@ EEXXAAMMPPLLEESS
            $ klist
            klist: No ticket file: /tmp/krb5cc_03014a
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      afslog(1), kinit(1)
 
 BSD                            February 12, 2005                           BSD

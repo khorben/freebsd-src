@@ -321,10 +321,15 @@ kadm5_log_get_version_fd (
 	uint32_t */*ver*/,
 	uint32_t */*tstamp*/);
 
-krb5_storage *
+kadm5_ret_t
 kadm5_log_goto_end (
 	kadm5_server_context */*server_context*/,
-	int /*fd*/);
+	krb5_storage */*sp*/);
+
+kadm5_ret_t
+kadm5_log_goto_first (
+	kadm5_server_context */*server_context*/,
+	krb5_storage */*sp*/);
 
 kadm5_ret_t
 kadm5_log_init (kadm5_server_context */*server_context*/);
@@ -345,6 +350,15 @@ kadm5_log_modify (
 	kadm5_server_context */*context*/,
 	hdb_entry */*entry*/,
 	uint32_t /*mask*/);
+
+kadm5_ret_t
+kadm5_log_next (
+	krb5_context /*context*/,
+	krb5_storage */*sp*/,
+	uint32_t */*verp*/,
+	time_t */*tstampp*/,
+	enum kadm_ops */*opp*/,
+	uint32_t */*lenp*/);
 
 kadm5_ret_t
 kadm5_log_nop (

@@ -420,7 +420,7 @@ get_cred_kdc(krb5_context context,
     TGS_REQ req;
     krb5_data enc;
     krb5_data resp;
-    krb5_kdc_rep rep;
+    krb5_kdc_rep rep = {0};
     KRB_ERROR error;
     krb5_error_code ret;
     unsigned nonce;
@@ -540,7 +540,6 @@ get_cred_kdc(krb5_context context,
     if(ret)
 	goto out;
 
-    memset(&rep, 0, sizeof(rep));
     if(decode_TGS_REP(resp.data, resp.length, &rep.kdc_rep, &len) == 0) {
 	unsigned eflags = 0;
 
@@ -684,15 +683,16 @@ static int
 not_found(krb5_context context, krb5_const_principal p, krb5_error_code code)
 {
     krb5_error_code ret;
+    const char *err;
     char *str;
 
+    err = krb5_get_error_message(context, code);
     ret = krb5_unparse_name(context, p, &str);
     if(ret) {
 	krb5_clear_error_message(context);
 	return code;
     }
-    krb5_set_error_message(context, code,
-			   N_("Matching credential (%s) not found", ""), str);
+    krb5_set_error_message(context, code, N_("%s (%s)", ""), err, str);
     free(str);
     return code;
 }

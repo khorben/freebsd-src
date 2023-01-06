@@ -1,94 +1,93 @@
-
 KIMPERSONATE(8)           BSD System Manager's Manual          KIMPERSONATE(8)
 
-NNAAMMEE
-     kkiimmppeerrssoonnaattee -- impersonate a user when there exist a keyfile or KeyFile
+[1mNAME[0m
+     [1mkimpersonate [22m-- impersonate a user when there exist a keyfile or KeyFile
 
-SSYYNNOOPPSSIISS
-     kkiimmppeerrssoonnaattee [--ss _s_t_r_i_n_g | ----ccccaacchhee==_s_t_r_i_n_g] [--ss _s_t_r_i_n_g | ----sseerrvveerr==_s_t_r_i_n_g]
-                  [--cc _s_t_r_i_n_g | ----cclliieenntt==_s_t_r_i_n_g] [--kk _s_t_r_i_n_g | ----kkeeyyttaabb==_s_t_r_i_n_g]
-                  [--55 | ----kkrrbb55] [--AA | ----aadddd] [--RR | ----rreeffeerrrraall]
-                  [--ee _i_n_t_e_g_e_r | ----eexxppiirree--ttiimmee==_i_n_t_e_g_e_r]
-                  [--aa _s_t_r_i_n_g | ----cclliieenntt--aaddddrreessss==_s_t_r_i_n_g]
-                  [--tt _s_t_r_i_n_g | ----eenncc--ttyyppee==_s_t_r_i_n_g] [----sseessssiioonn--eenncc--ttyyppee==_s_t_r_i_n_g]
-                  [--ff _s_t_r_i_n_g | ----ttiicckkeett--ffllaaggss==_s_t_r_i_n_g] [----vveerrbboossee] [----vveerrssiioonn]
-                  [----hheellpp]
+[1mSYNOPSIS[0m
+     [1mkimpersonate [22m[[1m-s [4m[22mstring[24m | [1m--ccache=[4m[22mstring[24m] [[1m-s [4m[22mstring[24m | [1m--server=[4m[22mstring[24m]
+                  [[1m-c [4m[22mstring[24m | [1m--client=[4m[22mstring[24m] [[1m-k [4m[22mstring[24m | [1m--keytab=[4m[22mstring[24m]
+                  [[1m-5 [22m| [1m--krb5[22m] [[1m-A [22m| [1m--add[22m] [[1m-R [22m| [1m--referral[22m]
+                  [[1m-e [4m[22minteger[24m | [1m--expire-time=[4m[22minteger[24m]
+                  [[1m-a [4m[22mstring[24m | [1m--client-address=[4m[22mstring[24m]
+                  [[1m-t [4m[22mstring[24m | [1m--enc-type=[4m[22mstring[24m] [[1m--session-enc-type=[4m[22mstring[24m]
+                  [[1m-f [4m[22mstring[24m | [1m--ticket-flags=[4m[22mstring[24m] [[1m--verbose[22m] [[1m--version[22m]
+                  [[1m--help[22m]
 
-DDEESSCCRRIIPPTTIIOONN
-     The kkiimmppeerrssoonnaattee program creates a "fake" ticket using the service-key of
+[1mDESCRIPTION[0m
+     The [1mkimpersonate [22mprogram creates a "fake" ticket using the service-key of
      the service and stores it in the given (or default) ccache.  This is use-
      ful for testing.  The service key can be read from a Kerberos 5 keytab or
      AFS KeyFile.  Supported options:
 
-     ----ccccaacchhee==_s_t_r_i_n_g
+     [1m--ccache=[4m[22mstring[0m
              ccache into which to store the ticket
 
-     --ss _s_t_r_i_n_g, ----sseerrvveerr==_s_t_r_i_n_g
+     [1m-s [4m[22mstring[24m, [1m--server=[4m[22mstring[0m
              name of server principal
 
-     --cc _s_t_r_i_n_g, ----cclliieenntt==_s_t_r_i_n_g
+     [1m-c [4m[22mstring[24m, [1m--client=[4m[22mstring[0m
              name of client principal
 
-     --kk _s_t_r_i_n_g, ----kkeeyyttaabb==_s_t_r_i_n_g
+     [1m-k [4m[22mstring[24m, [1m--keytab=[4m[22mstring[0m
              name of keytab file
 
-     --55, ----kkrrbb55
+     [1m-5[22m, [1m--krb5[0m
              create a Kerberos 5 ticket
 
-     --AA, ----aadddd
-             don't re-initialize the ccache, instead add the ticket to an
-             existing ccache.
+     [1m-A[22m, [1m--add[0m
+             don't re-initialize the ccache, instead add the ticket to an ex-
+             isting ccache.
 
-     --RR, ----rreeffeerrrraall
+     [1m-R[22m, [1m--referral[0m
              simulate a referrals-based KDC client by storing two entries, one
              with the empty realm for the service principal name.
 
-     --ee _i_n_t_e_g_e_r, ----eexxppiirree--ttiimmee==_i_n_t_e_g_e_r
+     [1m-e [4m[22minteger[24m, [1m--expire-time=[4m[22minteger[0m
              lifetime of ticket in seconds
 
-     --aa _s_t_r_i_n_g, ----cclliieenntt--aaddddrreessss==_s_t_r_i_n_g
+     [1m-a [4m[22mstring[24m, [1m--client-address=[4m[22mstring[0m
              address of client
 
-     --tt _s_t_r_i_n_g, ----eenncc--ttyyppee==_s_t_r_i_n_g
+     [1m-t [4m[22mstring[24m, [1m--enc-type=[4m[22mstring[0m
              encryption type (defaults to "aes256-cts-hmac-sha1-96")
 
-     ----sseessssiioonn--eenncc--ttyyppee==_s_t_r_i_n_g
+     [1m--session-enc-type=[4m[22mstring[0m
              session encryption type (defaults to enc-type or "des-cbc-crc"
              for afs service tickets)
 
-     --ff _s_t_r_i_n_g, ----ttiicckkeett--ffllaaggss==_s_t_r_i_n_g
+     [1m-f [4m[22mstring[24m, [1m--ticket-flags=[4m[22mstring[0m
              ticket flags for krb5 ticket
 
-     ----vveerrbboossee
+     [1m--verbose[0m
              Verbose output
 
-     ----vveerrssiioonn
+     [1m--version[0m
              Print version
 
-     ----hheellpp
+     [1m--help[0m
 
-FFIILLEESS
-     Uses _/_e_t_c_/_k_r_b_5_._k_e_y_t_a_b_, and _/_u_s_r_/_a_f_s_/_e_t_c_/_K_e_y_F_i_l_e when available and the --kk
+[1mFILES[0m
+     Uses [4m/etc/krb5.keytab,[24m and [4m/usr/afs/etc/KeyFile[24m when available and the [1m-k[0m
      option is used with an appropriate prefix.
 
-EEXXAAMMPPLLEESS
-     kkiimmppeerrssoonnaattee can be used in ssaammbbaa root preexec option or for debugging.
-     kkiimmppeerrssoonnaattee -s host/hummel.e.kth.se@E.KTH.SE -c lha@E.KTH.SE -5 will
+[1mEXAMPLES[0m
+     [1mkimpersonate [22mcan be used in [1msamba [22mroot preexec option or for debugging.
+     [1mkimpersonate [22m-s host/hummel.e.kth.se@E.KTH.SE -c lha@E.KTH.SE -5 will
      create a Kerberos 5 ticket for lha@E.KTH.SE for the host hummel.e.kth.se
-     if there exists a keytab entry for it in _/_e_t_c_/_k_r_b_5_._k_e_y_t_a_b.
+     if there exists a keytab entry for it in [4m/etc/krb5.keytab[24m.
 
-     In combination with the kkttuuttiill command, this is useful for testing.  For
+     In combination with the [1mktutil [22mcommand, this is useful for testing.  For
      example,
 
-     kkttuuttiill -k tkt add -p host/foo.test@TEST -V2 -e aes256-cts-hmac-sha1-96 -r
+     [1mktutil [22m-k tkt add -p host/foo.test@TEST -V2 -e aes256-cts-hmac-sha1-96 -r
 
-     kkiimmppeerrssoonnaattee --cache=tcc -s host/foo.test@TEST -c jdoe@TEST -k tkt
-     --referral
+     [1mkimpersonate [22m--cache=tcc -s host/foo.test@TEST -c jdoe@TEST -k tkt --re-
+     ferral
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      kinit(1), klist(1)
 
-AAUUTTHHOORRSS
+[1mAUTHORS[0m
      Love Hornquist Astrand <lha@kth.se>
 
 BSD                           September 18, 2006                           BSD

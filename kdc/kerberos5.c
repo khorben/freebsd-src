@@ -116,11 +116,28 @@ is_default_salt_p(const krb5_salt *default_salt, const Key *key)
     return TRUE;
 }
 
+/*
+ * Detect if `key' is the using the the precomputed `default_salt'
+ * (for des-cbc-crc) or any salt otherwise.
+ *
+ * This is for avoiding Kerberos v4 (yes really) keys in AS-REQ as
+ * that salt is strange, and a buggy client will try to use the
+ * principal as the salt and not the returned value.
+ */
 
 static krb5_boolean
-is_anon_as_request_p(kdc_request_t r)
+is_good_salt_p(const krb5_salt *default_salt, const Key *key)
 {
-    KDC_REQ_BODY *b = &r->req.req_body;
+    if (key->key.keytype == KRB5_ENCTYPE_DES_CBC_CRC)
+	return is_default_salt_p(default_salt, key);
+
+    return TRUE;
+}
+
+krb5_boolean
+_kdc_is_anon_request(const KDC_REQ *req)
+{
+    const KDC_REQ_BODY *b = &req->req_body;
 
     /*
      * Versions of Heimdal from 0.9rc1 through 1.50 use bit 14 instead
@@ -198,7 +215,7 @@ _kdc_find_etype(krb5_context context, krb5_boolean use_strongest_session_key,
 		    enctype = p[i];
 		    ret = 0;
 		    if (is_preauth && ret_key != NULL &&
-			!is_default_salt_p(&def_salt, key))
+			!is_good_salt_p(&def_salt, key))
 			continue;
 		}
 	    }
@@ -230,7 +247,7 @@ _kdc_find_etype(krb5_context context, krb5_boolean use_strongest_session_key,
                 enctype = etypes[i];
 		ret = 0;
 		if (is_preauth && ret_key != NULL &&
-		    !is_default_salt_p(&def_salt, key))
+		    !is_good_salt_p(&def_salt, key))
 		    continue;
 	    }
 	}
@@ -461,7 +478,7 @@ pa_enc_chal_validate(kdc_request_t r, const PA_DATA *pa)
 
     heim_assert(r->armor_crypto != NULL, "ENC-CHAL called for non FAST");
     
-    if (is_anon_as_request_p(r)) {
+    if (_kdc_is_anon_request(&r->req)) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	kdc_log(r->context, r->config, 0, "ENC-CHALL doesn't support anon");
 	return ret;
@@ -1730,7 +1747,7 @@ _kdc_as_rep(kdc_request_t r,
      */
 
     if (_kdc_is_anonymous(context, r->client_princ) &&
-	!is_anon_as_request_p(r)) {
+	!_kdc_is_anon_request(&r->req)) {
 	kdc_log(context, config, 0, "Anonymous client w/o anonymous flag");
 	ret = KRB5KDC_ERR_BADOPTION;
 	goto out;
@@ -1903,7 +1920,7 @@ _kdc_as_rep(kdc_request_t r,
 	 * send requre preauth is its required or anon is requested,
 	 * anon is today only allowed via preauth mechanisms.
 	 */
-	if (require_preauth_p(r) || is_anon_as_request_p(r)) {
+	if (require_preauth_p(r) || _kdc_is_anon_request(&r->req)) {
 	    ret = KRB5KDC_ERR_PREAUTH_REQUIRED;
 	    _kdc_set_e_text(r, "Need to use PA-ENC-TIMESTAMP/PA-PK-AS-REQ");
 	    goto out;
@@ -1936,7 +1953,7 @@ _kdc_as_rep(kdc_request_t r,
     if(ret)
 	goto out;
 
-    if (is_anon_as_request_p(r)) {
+    if (_kdc_is_anon_request(&r->req)) {
 	ret = _kdc_check_anon_policy(context, config, r->client, r->server);
 	if (ret) {
 	    _kdc_set_e_text(r, "Anonymous ticket requests are disabled");
@@ -1970,7 +1987,8 @@ _kdc_as_rep(kdc_request_t r,
     rep.pvno = 5;
     rep.msg_type = krb_as_rep;
 
-    if (_kdc_is_anonymous(context, r->client_princ)) {
+    if (!config->historical_anon_realm &&
+        _kdc_is_anonymous(context, r->client_princ)) {
 	Realm anon_realm = KRB5_ANON_REALM;
 	ret = copy_Realm(&anon_realm, &rep.crealm);
     } else

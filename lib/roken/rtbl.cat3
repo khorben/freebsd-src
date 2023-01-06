@@ -1,110 +1,109 @@
-
 RTBL(3)                  BSD Library Functions Manual                  RTBL(3)
 
-NNAAMMEE
-     rrttbbll__ccrreeaattee, rrttbbll__ddeessttrrooyy, rrttbbll__sseett__ffllaaggss, rrttbbll__ggeett__ffllaaggss,
-     rrttbbll__sseett__pprreeffiixx, rrttbbll__sseett__sseeppaarraattoorr, rrttbbll__sseett__ccoolluummnn__pprreeffiixx,
-     rrttbbll__sseett__ccoolluummnn__aaffffiixx__bbyy__iidd, rrttbbll__aadddd__ccoolluummnn, rrttbbll__aadddd__ccoolluummnn__bbyy__iidd,
-     rrttbbll__aadddd__ccoolluummnn__eennttrryy, rrttbbll__aadddd__ccoolluummnn__eennttrryy__bbyy__iidd, rrttbbll__nneeww__rrooww,
-     rrttbbll__ffoorrmmaatt -- format data in simple tables
+[1mNAME[0m
+     [1mrtbl_create[22m, [1mrtbl_destroy[22m, [1mrtbl_set_flags[22m, [1mrtbl_get_flags[22m,
+     [1mrtbl_set_prefix[22m, [1mrtbl_set_separator[22m, [1mrtbl_set_column_prefix[22m,
+     [1mrtbl_set_column_affix_by_id[22m, [1mrtbl_add_column[22m, [1mrtbl_add_column_by_id[22m,
+     [1mrtbl_add_column_entry[22m, [1mrtbl_add_column_entry_by_id[22m, [1mrtbl_new_row[22m,
+     [1mrtbl_format [22m-- format data in simple tables
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      The roken library (libroken, -lroken)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<rrttbbll..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <rtbl.h>[0m
 
-     _i_n_t
-     rrttbbll__aadddd__ccoolluummnn(_r_t_b_l___t _t_a_b_l_e, _c_o_n_s_t _c_h_a_r _*_c_o_l_u_m_n___n_a_m_e,
-         _u_n_s_i_g_n_e_d _i_n_t _f_l_a_g_s);
+     [4mint[0m
+     [1mrtbl_add_column[22m([4mrtbl_t[24m [4mtable[24m, [4mconst[24m [4mchar[24m [4m*column_name[24m,
+         [4munsigned[24m [4mint[24m [4mflags[24m);
 
-     _i_n_t
-     rrttbbll__aadddd__ccoolluummnn__bbyy__iidd(_r_t_b_l___t _t_a_b_l_e, _u_n_s_i_g_n_e_d _i_n_t _c_o_l_u_m_n___i_d,
-         _c_o_n_s_t _c_h_a_r _*_c_o_l_u_m_n___h_e_a_d_e_r, _u_n_s_i_g_n_e_d _i_n_t _f_l_a_g_s);
+     [4mint[0m
+     [1mrtbl_add_column_by_id[22m([4mrtbl_t[24m [4mtable[24m, [4munsigned[24m [4mint[24m [4mcolumn_id[24m,
+         [4mconst[24m [4mchar[24m [4m*column_header[24m, [4munsigned[24m [4mint[24m [4mflags[24m);
 
-     _i_n_t
-     rrttbbll__aadddd__ccoolluummnn__eennttrryy(_r_t_b_l___t _t_a_b_l_e, _c_o_n_s_t _c_h_a_r _*_c_o_l_u_m_n___n_a_m_e,
-         _c_o_n_s_t _c_h_a_r _*_c_e_l_l___e_n_t_r_y);
+     [4mint[0m
+     [1mrtbl_add_column_entry[22m([4mrtbl_t[24m [4mtable[24m, [4mconst[24m [4mchar[24m [4m*column_name[24m,
+         [4mconst[24m [4mchar[24m [4m*cell_entry[24m);
 
-     _i_n_t
-     rrttbbll__aadddd__ccoolluummnn__eennttrryy__bbyy__iidd(_r_t_b_l___t _t_a_b_l_e, _u_n_s_i_g_n_e_d _i_n_t _c_o_l_u_m_n___i_d,
-         _c_o_n_s_t _c_h_a_r _*_c_e_l_l___e_n_t_r_y);
+     [4mint[0m
+     [1mrtbl_add_column_entry_by_id[22m([4mrtbl_t[24m [4mtable[24m, [4munsigned[24m [4mint[24m [4mcolumn_id[24m,
+         [4mconst[24m [4mchar[24m [4m*cell_entry[24m);
 
-     _r_t_b_l___t
-     rrttbbll__ccrreeaattee(_v_o_i_d);
+     [4mrtbl_t[0m
+     [1mrtbl_create[22m([4mvoid[24m);
 
-     _v_o_i_d
-     rrttbbll__ddeessttrrooyy(_r_t_b_l___t _t_a_b_l_e);
+     [4mvoid[0m
+     [1mrtbl_destroy[22m([4mrtbl_t[24m [4mtable[24m);
 
-     _i_n_t
-     rrttbbll__nneeww__rrooww(_r_t_b_l___t _t_a_b_l_e);
+     [4mint[0m
+     [1mrtbl_new_row[22m([4mrtbl_t[24m [4mtable[24m);
 
-     _i_n_t
-     rrttbbll__sseett__ccoolluummnn__aaffffiixx__bbyy__iidd(_r_t_b_l___t _t_a_b_l_e, _u_n_s_i_g_n_e_d _i_n_t _c_o_l_u_m_n___i_d, _c_o_n_s_t,
-         _c_h_a_r, _*_p_r_e_f_i_x_", _c_o_n_s_t _c_h_a_r _*_s_u_f_f_i_x);
+     [4mint[0m
+     [1mrtbl_set_column_affix_by_id[22m([4mrtbl_t[24m [4mtable[24m, [4munsigned[24m [4mint[24m [4mcolumn_id[24m, [4mconst[24m,
+         [4mchar[24m, [4m*prefix"[24m, [4mconst[24m [4mchar[24m [4m*suffix[24m);
 
-     _i_n_t
-     rrttbbll__sseett__ccoolluummnn__pprreeffiixx(_r_t_b_l___t _t_a_b_l_e, _c_o_n_s_t _c_h_a_r _*_c_o_l_u_m_n___n_a_m_e,
-         _c_o_n_s_t _c_h_a_r _*_p_r_e_f_i_x);
+     [4mint[0m
+     [1mrtbl_set_column_prefix[22m([4mrtbl_t[24m [4mtable[24m, [4mconst[24m [4mchar[24m [4m*column_name[24m,
+         [4mconst[24m [4mchar[24m [4m*prefix[24m);
 
-     _u_n_s_i_g_n_e_d _i_n_t
-     rrttbbll__ggeett__ffllaaggss(_r_t_b_l___t _t_a_b_l_e);
+     [4munsigned[24m [4mint[0m
+     [1mrtbl_get_flags[22m([4mrtbl_t[24m [4mtable[24m);
 
-     _v_o_i_d
-     rrttbbll__sseett__ffllaaggss(_r_t_b_l___t _t_a_b_l_e, _u_n_s_i_g_n_e_d _i_n_t _f_l_a_g_s);
+     [4mvoid[0m
+     [1mrtbl_set_flags[22m([4mrtbl_t[24m [4mtable[24m, [4munsigned[24m [4mint[24m [4mflags[24m);
 
-     _i_n_t
-     rrttbbll__sseett__pprreeffiixx(_r_t_b_l___t _t_a_b_l_e, _c_o_n_s_t _c_h_a_r _*_p_r_e_f_i_x);
+     [4mint[0m
+     [1mrtbl_set_prefix[22m([4mrtbl_t[24m [4mtable[24m, [4mconst[24m [4mchar[24m [4m*prefix[24m);
 
-     _i_n_t
-     rrttbbll__sseett__sseeppaarraattoorr(_r_t_b_l___t _t_a_b_l_e, _c_o_n_s_t _c_h_a_r _*_s_e_p_a_r_a_t_o_r);
+     [4mint[0m
+     [1mrtbl_set_separator[22m([4mrtbl_t[24m [4mtable[24m, [4mconst[24m [4mchar[24m [4m*separator[24m);
 
-     _i_n_t
-     rrttbbll__ffoorrmmaatt(_r_t_b_l___t _t_a_b_l_e, _F_I_L_E, _*_f_i_l_e_");
+     [4mint[0m
+     [1mrtbl_format[22m([4mrtbl_t[24m [4mtable[24m, [4mFILE[24m, [4m*file"[24m);
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      This set of functions assemble a simple table consisting of rows and col-
      umns, allowing it to be printed with certain options. Typical use would
      be output from tools such as ls(1) or netstat(1), where you have a fixed
      number of columns, but don't know the column widths before hand.
 
-     A table is created with rrttbbll__ccrreeaattee() and destroyed with rrttbbll__ddeessttrrooyy().
+     A table is created with [1mrtbl_create[22m() and destroyed with [1mrtbl_destroy[22m().
 
-     Global flags on the table are set with _r_t_b_l___s_e_t___f_l_a_g_s and retrieved with
-     _r_t_b_l___g_e_t___f_l_a_g_s.  At present the only defined flag is
+     Global flags on the table are set with [4mrtbl_set_flags[24m and retrieved with
+     [4mrtbl_get_flags[24m.  At present the only defined flag is
      RTBL_HEADER_STYLE_NONE which suppresses printing the header.
 
      Before adding data to the table, one or more columns need to be created.
-     This would normally be done with rrttbbll__aadddd__ccoolluummnn__bbyy__iidd(), _c_o_l_u_m_n___i_d is
+     This would normally be done with [1mrtbl_add_column_by_id[22m(), [4mcolumn_id[24m is
      any number of your choice (it's used only to identify columns),
-     _c_o_l_u_m_n___h_e_a_d_e_r is the header to print at the top of the column, and _f_l_a_g_s
+     [4mcolumn_header[24m is the header to print at the top of the column, and [4mflags[0m
      are flags specific to this column. Currently the only defined flag is
      RTBL_ALIGN_RIGHT, aligning column entries to the right. Columns are
      printed in the order they are added.
 
-     There's also a way to add columns by column name with rrttbbll__aadddd__ccoolluummnn(),
+     There's also a way to add columns by column name with [1mrtbl_add_column[22m(),
      but this is less flexible (you need unique header names), and is consid-
      ered deprecated.
 
-     To add data to a column you use rrttbbll__aadddd__ccoolluummnn__eennttrryy__bbyy__iidd(), where the
-     _c_o_l_u_m_n___i_d is the same as when the column was added (adding data to a non-
-     existent column is undefined), and _c_e_l_l___e_n_t_r_y is whatever string you wish
+     To add data to a column you use [1mrtbl_add_column_entry_by_id[22m(), where the
+     [4mcolumn_id[24m is the same as when the column was added (adding data to a non-
+     existent column is undefined), and [4mcell_entry[24m is whatever string you wish
      to include in that cell. It should not include newlines.  For columns
-     added with rrttbbll__aadddd__ccoolluummnn() you must use rrttbbll__aadddd__ccoolluummnn__eennttrryy()
-     instead.
+     added with [1mrtbl_add_column[22m() you must use [1mrtbl_add_column_entry[22m() in-
+     stead.
 
-     rrttbbll__nneeww__rrooww() fills all columns with blank entries until they all have
+     [1mrtbl_new_row[22m() fills all columns with blank entries until they all have
      the same number of rows.
 
      Each column can have a separate prefix and suffix, set with
-     _r_t_b_l___s_e_t___c_o_l_u_m_n___a_f_f_i_x___b_y___i_d; _r_t_b_l___s_e_t___c_o_l_u_m_n___p_r_e_f_i_x allows setting the
+     [4mrtbl_set_column_affix_by_id[24m; [4mrtbl_set_column_prefix[24m allows setting the
      prefix only by column name. In addition to this, columns may be separated
-     by a string set with _r_t_b_l___s_e_t___s_e_p_a_r_a_t_o_r (by default columns are not
+     by a string set with [4mrtbl_set_separator[24m (by default columns are not
      seprated by anything).
 
-     The finished table is printed to _f_i_l_e with _r_t_b_l___f_o_r_m_a_t.
+     The finished table is printed to [4mfile[24m with [4mrtbl_format[24m.
 
-EEXXAAMMPPLLEESS
+[1mEXAMPLES[0m
      This program:
 
          #include <stdio.h>

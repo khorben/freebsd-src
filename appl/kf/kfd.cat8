@@ -1,31 +1,30 @@
-
 KFD(8)                    BSD System Manager's Manual                   KFD(8)
 
-NNAAMMEE
-     kkffdd -- receive forwarded tickets
+[1mNAME[0m
+     [1mkfd [22m-- receive forwarded tickets
 
-SSYYNNOOPPSSIISS
-     kkffdd [--pp _p_o_r_t | ----ppoorrtt=_p_o_r_t] [--ii | ----iinneettdd] [--RR _r_e_g_p_a_g | ----rreeggppaagg=_r_e_g_p_a_g]
-         [--hh | ----hheellpp] [----vveerrssiioonn]
+[1mSYNOPSIS[0m
+     [1mkfd [22m[[1m-p [4m[22mport[24m | [1m--port[22m=[4mport[24m] [[1m-i [22m| [1m--inetd[22m] [[1m-R [4m[22mregpag[24m | [1m--regpag[22m=[4mregpag[24m]
+         [[1m-h [22m| [1m--help[22m] [[1m--version[22m]
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      This is the daemon for kf(1).  Supported options:
 
-     --pp _p_o_r_t, ----ppoorrtt=_p_o_r_t
+     [1m-p [4m[22mport[24m, [1m--port[22m=[4mport[0m
              port to listen to
 
-     --ii, ----iinneettdd
+     [1m-i[22m, [1m--inetd[0m
              not started from inetd
 
-     --RR _r_e_g_p_a_g, ----rreeggppaagg==_r_e_g_p_a_g
+     [1m-R [4m[22mregpag[24m, [1m--regpag=[4m[22mregpag[0m
              path to regpag binary
 
-EEXXAAMMPPLLEESS
-     Put the following in _/_e_t_c_/_i_n_e_t_d_._c_o_n_f:
+[1mEXAMPLES[0m
+     Put the following in [4m/etc/inetd.conf[24m:
 
      kf      stream  tcp     nowait  root    /usr/heimdal/libexec/kfd        kfd
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      kf(1)
 
 BSD                              July 2, 2000                              BSD

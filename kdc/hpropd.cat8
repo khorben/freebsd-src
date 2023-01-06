@@ -1,44 +1,43 @@
-
 HPROPD(8)                 BSD System Manager's Manual                HPROPD(8)
 
-NNAAMMEE
-     hhpprrooppdd -- receive a propagated database
+[1mNAME[0m
+     [1mhpropd [22m-- receive a propagated database
 
-SSYYNNOOPPSSIISS
-     hhpprrooppdd [--dd _f_i_l_e | ----ddaattaabbaassee==_f_i_l_e] [--nn | ----ssttddiinn] [----pprriinntt]
-            [--ii | ----nnoo--iinneettdd] [--kk _k_e_y_t_a_b | ----kkeeyyttaabb==_k_e_y_t_a_b] [--44 | ----vv44dduummpp]
+[1mSYNOPSIS[0m
+     [1mhpropd [22m[[1m-d [4m[22mfile[24m | [1m--database=[4m[22mfile[24m] [[1m-n [22m| [1m--stdin[22m] [[1m--print[22m]
+            [[1m-i [22m| [1m--no-inetd[22m] [[1m-k [4m[22mkeytab[24m | [1m--keytab=[4m[22mkeytab[24m] [[1m-4 [22m| [1m--v4dump[22m]
 
-DDEESSCCRRIIPPTTIIOONN
-     hhpprrooppdd receives a database sent by hhpprroopp.  and writes it as a local data-
+[1mDESCRIPTION[0m
+     [1mhpropd [22mreceives a database sent by [1mhprop[22m.  and writes it as a local data-
      base.
 
-     By default, hhpprrooppdd expects to be started from iinneettdd if stdin is a socket
+     By default, [1mhpropd [22mexpects to be started from [1minetd [22mif stdin is a socket
      and expects to receive the dumped database over stdin otherwise.  If the
      database is sent over the network, it is authenticated and encrypted.
-     Only connections authenticated with the principal kkaaddmmiinn/hhpprroopp are
-     accepted.
+     Only connections authenticated with the principal [1mkadmin[22m/[1mhprop [22mare ac-
+     cepted.
 
      Options supported:
 
-     --dd _f_i_l_e, ----ddaattaabbaassee==_f_i_l_e
+     [1m-d [4m[22mfile[24m, [1m--database=[4m[22mfile[0m
              database
 
-     --nn, ----ssttddiinn
+     [1m-n[22m, [1m--stdin[0m
              read from stdin
 
-     ----pprriinntt
+     [1m--print[0m
              print dump to stdout
 
-     --ii, ----nnoo--iinneettdd
+     [1m-i[22m, [1m--no-inetd[0m
              not started from inetd
 
-     --kk _k_e_y_t_a_b, ----kkeeyyttaabb==_k_e_y_t_a_b
+     [1m-k [4m[22mkeytab[24m, [1m--keytab=[4m[22mkeytab[0m
              keytab to use for authentication
 
-     --44, ----vv44dduummpp
+     [1m-4[22m, [1m--v4dump[0m
              create v4 type DB
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      hprop(8)
 
 HEIMDAL                         August 27, 1997                        HEIMDAL

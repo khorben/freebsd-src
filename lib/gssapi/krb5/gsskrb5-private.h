@@ -42,7 +42,8 @@ _gk_verify_buffers (
 	const gsskrb5_ctx /*ctx*/,
 	const gss_iov_buffer_desc */*header*/,
 	const gss_iov_buffer_desc */*padding*/,
-	const gss_iov_buffer_desc */*trailer*/);
+	const gss_iov_buffer_desc */*trailer*/,
+	int /*block_cipher*/);
 
 OM_uint32 GSSAPI_CALLCONV
 _gk_wrap_iov (

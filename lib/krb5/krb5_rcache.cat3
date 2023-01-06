@@ -1,84 +1,83 @@
-
 KRB5_RCACHE(3)           BSD Library Functions Manual           KRB5_RCACHE(3)
 
-NNAAMMEE
-     kkrrbb55__rrccaacchhee, kkrrbb55__rrcc__cclloossee, kkrrbb55__rrcc__ddeeffaauulltt, kkrrbb55__rrcc__ddeeffaauulltt__nnaammee,
-     kkrrbb55__rrcc__ddeeffaauulltt__ttyyppee, kkrrbb55__rrcc__ddeessttrrooyy, kkrrbb55__rrcc__eexxppuunnggee,
-     kkrrbb55__rrcc__ggeett__lliiffeessppaann, kkrrbb55__rrcc__ggeett__nnaammee, kkrrbb55__rrcc__ggeett__ttyyppee,
-     kkrrbb55__rrcc__iinniittiiaalliizzee, kkrrbb55__rrcc__rreeccoovveerr, kkrrbb55__rrcc__rreessoollvvee,
-     kkrrbb55__rrcc__rreessoollvvee__ffuullll, kkrrbb55__rrcc__rreessoollvvee__ttyyppee, kkrrbb55__rrcc__ssttoorree,
-     kkrrbb55__ggeett__sseerrvveerr__rrccaacchhee -- Kerberos 5 replay cache
+[1mNAME[0m
+     [1mkrb5_rcache[22m, [1mkrb5_rc_close[22m, [1mkrb5_rc_default[22m, [1mkrb5_rc_default_name[22m,
+     [1mkrb5_rc_default_type[22m, [1mkrb5_rc_destroy[22m, [1mkrb5_rc_expunge[22m,
+     [1mkrb5_rc_get_lifespan[22m, [1mkrb5_rc_get_name[22m, [1mkrb5_rc_get_type[22m,
+     [1mkrb5_rc_initialize[22m, [1mkrb5_rc_recover[22m, [1mkrb5_rc_resolve[22m,
+     [1mkrb5_rc_resolve_full[22m, [1mkrb5_rc_resolve_type[22m, [1mkrb5_rc_store[22m,
+     [1mkrb5_get_server_rcache [22m-- Kerberos 5 replay cache
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkrb5, -lkrb5)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkrrbb55..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <krb5.h>[0m
 
      struct krb5_rcache;
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__cclloossee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_close[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__ddeeffaauulltt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _*_i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_default[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4m*id[24m);
 
-     _c_o_n_s_t _c_h_a_r _*
-     kkrrbb55__rrcc__ddeeffaauulltt__nnaammee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t);
+     [4mconst[24m [4mchar[24m [4m*[0m
+     [1mkrb5_rc_default_name[22m([4mkrb5_context[24m [4mcontext[24m);
 
-     _c_o_n_s_t _c_h_a_r _*
-     kkrrbb55__rrcc__ddeeffaauulltt__ttyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t);
+     [4mconst[24m [4mchar[24m [4m*[0m
+     [1mkrb5_rc_default_type[22m([4mkrb5_context[24m [4mcontext[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__ddeessttrrooyy(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_destroy[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__eexxppuunnggee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_expunge[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__ggeett__lliiffeessppaann(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d,
-         _k_r_b_5___d_e_l_t_a_t _*_a_u_t_h___l_i_f_e_s_p_a_n);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_get_lifespan[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m,
+         [4mkrb5_deltat[24m [4m*auth_lifespan[24m);
 
-     _c_o_n_s_t _c_h_a_r_*
-     kkrrbb55__rrcc__ggeett__nnaammee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mconst[24m [4mchar*[0m
+     [1mkrb5_rc_get_name[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _c_o_n_s_t _c_h_a_r_*
-     kkrrbb55__rrcc__ggeett__ttyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mconst[24m [4mchar*[0m
+     [1mkrb5_rc_get_type[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__iinniittiiaalliizzee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d,
-         _k_r_b_5___d_e_l_t_a_t _a_u_t_h___l_i_f_e_s_p_a_n);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_initialize[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m,
+         [4mkrb5_deltat[24m [4mauth_lifespan[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__rreeccoovveerr(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_recover[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__rreessoollvvee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d, _c_o_n_s_t _c_h_a_r _*_n_a_m_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_resolve[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m, [4mconst[24m [4mchar[24m [4m*name[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__rreessoollvvee__ffuullll(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _*_i_d,
-         _c_o_n_s_t _c_h_a_r _*_s_t_r_i_n_g___n_a_m_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_resolve_full[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4m*id[24m,
+         [4mconst[24m [4mchar[24m [4m*string_name[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__rreessoollvvee__ttyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _*_i_d,
-         _c_o_n_s_t _c_h_a_r _*_t_y_p_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_resolve_type[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4m*id[24m,
+         [4mconst[24m [4mchar[24m [4m*type[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__rrcc__ssttoorree(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___r_c_a_c_h_e _i_d,
-         _k_r_b_5___d_o_n_o_t___r_e_p_l_a_y _*_r_e_p);
+     [4mkrb5_error_code[0m
+     [1mkrb5_rc_store[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_rcache[24m [4mid[24m,
+         [4mkrb5_donot_replay[24m [4m*rep[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ggeett__sseerrvveerr__rrccaacchhee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _k_r_b_5___d_a_t_a _*_p_i_e_c_e,
-         _k_r_b_5___r_c_a_c_h_e _*_i_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_get_server_rcache[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mkrb5_data[24m [4m*piece[24m,
+         [4mkrb5_rcache[24m [4m*id[24m);
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      The krb5_rcache structure holds a storage element that is used for data
      manipulation.  The structure contains no public accessible elements.
 
-     kkrrbb55__rrcc__iinniittiiaalliizzee() Creates the reply cache _i_d and sets it lifespan to
-     _a_u_t_h___l_i_f_e_s_p_a_n.  If the cache already exists, the content is destroyed.
+     [1mkrb5_rc_initialize[22m() Creates the reply cache [4mid[24m and sets it lifespan to
+     [4mauth_lifespan[24m.  If the cache already exists, the content is destroyed.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      krb5(3), krb5_data(3), kerberos(8)
 
 HEIMDAL                           May 1, 2006                          HEIMDAL

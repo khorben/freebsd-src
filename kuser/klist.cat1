@@ -1,34 +1,33 @@
-
 KLIST(1)                  BSD General Commands Manual                 KLIST(1)
 
-NNAAMMEE
-     kklliisstt -- list Kerberos credentials
+[1mNAME[0m
+     [1mklist [22m-- list Kerberos credentials
 
-SSYYNNOOPPSSIISS
-     kklliisstt [--cc _c_a_c_h_e | ----ccaacchhee==_c_a_c_h_e] [--ss | --tt | ----tteesstt] [--TT | ----ttookkeennss]
-           [--55 | ----vv55] [--vv | ----vveerrbboossee] [--ll | ----lliisstt--ccaacchheess] [--ff] [----vveerrssiioonn]
-           [----hheellpp]
+[1mSYNOPSIS[0m
+     [1mklist [22m[[1m-c [4m[22mcache[24m | [1m--cache=[4m[22mcache[24m] [[1m-s [22m| [1m-t [22m| [1m--test[22m] [[1m-T [22m| [1m--tokens[22m]
+           [[1m-5 [22m| [1m--v5[22m] [[1m-v [22m| [1m--verbose[22m] [[1m-l [22m| [1m--list-caches[22m] [[1m-f[22m] [[1m--version[22m]
+           [[1m--help[22m]
 
-DDEESSCCRRIIPPTTIIOONN
-     kklliisstt reads and displays the current tickets in the credential cache
+[1mDESCRIPTION[0m
+     [1mklist [22mreads and displays the current tickets in the credential cache
      (also known as the ticket file).
 
      Options supported:
 
-     --cc _c_a_c_h_e, ----ccaacchhee==_c_a_c_h_e
+     [1m-c [4m[22mcache[24m, [1m--cache=[4m[22mcache[0m
              credential cache to list
 
-     --ss, --tt, ----tteesstt
+     [1m-s[22m, [1m-t[22m, [1m--test[0m
              Test for there being an active and valid TGT for the local realm
              of the user in the credential cache.
 
-     --TT, ----ttookkeennss
+     [1m-T[22m, [1m--tokens[0m
              display AFS tokens
 
-     --55, ----vv55
+     [1m-5[22m, [1m--v5[0m
              display v5 cred cache (this is the default)
 
-     --ff      Include ticket flags in short form, each character stands for a
+     [1m-f      [22mInclude ticket flags in short form, each character stands for a
              specific flag, as follows:
                    F    forwardable
                    f    forwarded
@@ -42,10 +41,10 @@ DDEESSCCRRIIPPTTIIOONN
                    A    pre-authenticated
                    H    hardware authenticated
 
-             This information is also output with the ----vveerrbboossee option, but in
+             This information is also output with the [1m--verbose [22moption, but in
              a more verbose way.
 
-     --vv, ----vveerrbboossee
+     [1m-v[22m, [1m--verbose[0m
              Verbose output. Include all possible information:
 
                    Server
@@ -80,11 +79,11 @@ DDEESSCCRRIIPPTTIIOONN
                    Addresses
                          the set of addresses from which this ticket is valid
 
-     --ll, ----lliisstt--ccaacchheess
+     [1m-l[22m, [1m--list-caches[0m
              List the credential caches for the current users, not all cache
              types supports listing multiple caches.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      kdestroy(1), kinit(1)
 
 HEIMDAL                         October 6, 2005                        HEIMDAL

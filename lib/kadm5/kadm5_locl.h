@@ -67,6 +67,12 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
@@ -74,6 +80,7 @@
 #include <netdb.h>
 #endif
 #include <fnmatch.h>
+#include <krb5_locl.h>
 #include "admin.h"
 #include "kadm5_err.h"
 #include <hdb.h>

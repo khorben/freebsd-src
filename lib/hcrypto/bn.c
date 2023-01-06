@@ -142,7 +142,8 @@ BN_bin2bn(const void *s, int len, BIGNUM *bn)
 	return NULL;
     }
     hi->length = len;
-    memcpy(hi->data, s, len);
+    if (len)
+        memcpy(hi->data, s, len);
     return (BIGNUM *)hi;
 }
 
@@ -237,7 +238,7 @@ BN_is_bit_set(const BIGNUM *bn, int bit)
     heim_integer *hi = (heim_integer *)bn;
     unsigned char *p = hi->data;
 
-    if ((bit / 8) > hi->length || hi->length == 0)
+    if ((bit / 8) >= hi->length || hi->length == 0)
 	return 0;
 
     return p[hi->length - 1 - (bit / 8)] & is_set[bit % 8];
@@ -250,7 +251,7 @@ BN_set_bit(BIGNUM *bn, int bit)
     unsigned char *p;
 
     if ((bit / 8) > hi->length || hi->length == 0) {
-	size_t len = (bit + 7) / 8;
+	size_t len = bit == 0 ? 1 : (bit + 7) / 8;
 	void *d = realloc(hi->data, len);
 	if (d == NULL)
 	    return 0;

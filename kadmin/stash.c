@@ -99,13 +99,17 @@ stash(struct stash_options *opt, int argc, char **argv)
 	    random_password (buf, sizeof(buf));
 	    printf("Using random master stash password: %s\n", buf);
 	} else {
-	    if(UI_UTIL_read_pw_string(buf, sizeof(buf), "Master key: ", 1)) {
+	    if(UI_UTIL_read_pw_string(buf, sizeof(buf), "Master key: ",
+				      UI_UTIL_FLAG_VERIFY)) {
 		hdb_free_master_key(context, mkey);
 		return 0;
 	    }
 	}
 	ret = krb5_string_to_key_salt(context, enctype, buf, salt, &key);
-	ret = hdb_add_master_key(context, &key, &mkey);
+        if (ret == 0)
+            ret = hdb_add_master_key(context, &key, &mkey);
+        if (ret)
+            krb5_warn(context, errno, "setting master key");
 	krb5_free_keyblock_contents(context, &key);
     }
 

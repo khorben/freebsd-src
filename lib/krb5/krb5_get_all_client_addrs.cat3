@@ -1,24 +1,23 @@
-
 KRB5_GET_ADDRS(3)        BSD Library Functions Manual        KRB5_GET_ADDRS(3)
 
-NNAAMMEE
-     kkrrbb55__ggeett__aallll__cclliieenntt__aaddddrrss, kkrrbb55__ggeett__aallll__sseerrvveerr__aaddddrrss -- return local
-     addresses
+[1mNAME[0m
+     [1mkrb5_get_all_client_addrs[22m, [1mkrb5_get_all_server_addrs [22m-- return local ad-
+     dresses
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkrb5, -lkrb5)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkrrbb55..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <krb5.h>[0m
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ggeett__aallll__cclliieenntt__aaddddrrss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___a_d_d_r_e_s_s_e_s _*_a_d_d_r_s);
+     [4mkrb5_error_code[0m
+     [1mkrb5_get_all_client_addrs[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_addresses[24m [4m*addrs[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ggeett__aallll__sseerrvveerr__aaddddrrss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___a_d_d_r_e_s_s_e_s _*_a_d_d_r_s);
+     [4mkrb5_error_code[0m
+     [1mkrb5_get_all_server_addrs[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_addresses[24m [4m*addrs[24m);
 
-DDEESSCCRRIIPPTTIIOONN
-     These functions return in _a_d_d_r_s a list of addresses associated with the
+[1mDESCRIPTION[0m
+     These functions return in [4maddrs[24m a list of addresses associated with the
      local host.
 
      The server variant returns all configured interface addresses (if possi-
@@ -26,14 +25,14 @@ DDEESSCCRRIIPPTTIIOONN
      sockets to listen to.
 
      The client version will also scan local interfaces (can be turned off by
-     setting libdefaults/scan_interfaces to false in _k_r_b_5_._c_o_n_f), but will not
+     setting libdefaults/scan_interfaces to false in [4mkrb5.conf[24m), but will not
      include loop-back addresses, unless there are no other addresses found.
      It will remove all addresses included in libdefaults/ignore_addresses but
      will unconditionally include addresses in libdefaults/extra_addresses.
 
-     The returned addresses should be freed by calling kkrrbb55__ffrreeee__aaddddrreesssseess().
+     The returned addresses should be freed by calling [1mkrb5_free_addresses[22m().
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      krb5_free_addresses(3)
 
 HEIMDAL                          July 1, 2001                          HEIMDAL

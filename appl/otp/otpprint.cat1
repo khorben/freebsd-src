@@ -1,17 +1,16 @@
-
 OTP(1)                    BSD General Commands Manual                   OTP(1)
 
-NNAAMMEE
-     oottpppprriinntt -- print lists of one-time passwords
+[1mNAME[0m
+     [1motpprint [22m-- print lists of one-time passwords
 
-SSYYNNOOPPSSIISS
-     oottpp [--nn _c_o_u_n_t] [--ee] [--hh] [--ff _a_l_g_o_r_i_t_h_m] _s_e_q_u_e_n_c_e_-_n_u_m_b_e_r _s_e_e_d
+[1mSYNOPSIS[0m
+     [1motp [22m[[1m-n [4m[22mcount[24m] [[1m-e[22m] [[1m-h[22m] [[1m-f [4m[22malgorithm[24m] [4msequence-number[24m [4mseed[0m
 
-DDEESSCCRRIIPPTTIIOONN
-     The oottpppprriinntt program prints lists of OTPs.
+[1mDESCRIPTION[0m
+     The [1motpprint [22mprogram prints lists of OTPs.
 
      Use this to print out a series of one-time passwords.  You will have to
-     supply the _s_e_q_u_e_n_c_e _n_u_m_b_e_r and the _s_e_e_d as arguments and then the program
+     supply the [4msequence[24m [4mnumber[24m and the [4mseed[24m as arguments and then the program
      will prompt you for your pass-phrase.
 
      There are several different print formats.  The default is to print each
@@ -19,18 +18,18 @@ DDEESSCCRRIIPPTTIIOONN
 
      Options are:
 
-     --ee      Print the passwords in ``extended'' format.  In this format a
+     [1m-e      [22mPrint the passwords in ``extended'' format.  In this format a
              prefix that says ``hex:'' or ``word:'' is included.
 
-     --ff      To choose a different _a_l_g_o_r_i_t_h_m from the default md5.  Pick any
+     [1m-f      [22mTo choose a different [4malgorithm[24m from the default md5.  Pick any
              of: md4, md5, and sha.
 
-     --hh      Print the passwords in hex.
+     [1m-h      [22mPrint the passwords in hex.
 
-     --nn      Print _c_o_u_n_t one-time passwords, starting at _s_e_q_u_e_n_c_e_-_n_u_m_b_e_r and
+     [1m-n      [22mPrint [4mcount[24m one-time passwords, starting at [4msequence-number[24m and
              going backwards. The default is 10.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      otp(1)
 
 KTH-KRB                        November 17, 1996                       KTH-KRB

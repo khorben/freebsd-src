@@ -1,74 +1,73 @@
-
 KRB5_STRING_TO_KEY(3)    BSD Library Functions Manual    KRB5_STRING_TO_KEY(3)
 
-NNAAMMEE
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy, kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa,
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt, kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt__ooppaaqquuee,
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ssaalltt, kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ssaalltt__ooppaaqquuee,
-     kkrrbb55__ggeett__ppww__ssaalltt, kkrrbb55__ffrreeee__ssaalltt -- turns a string to a Kerberos key
+[1mNAME[0m
+     [1mkrb5_string_to_key[22m, [1mkrb5_string_to_key_data[22m,
+     [1mkrb5_string_to_key_data_salt[22m, [1mkrb5_string_to_key_data_salt_opaque[22m,
+     [1mkrb5_string_to_key_salt[22m, [1mkrb5_string_to_key_salt_opaque[22m,
+     [1mkrb5_get_pw_salt[22m, [1mkrb5_free_salt [22m-- turns a string to a Kerberos key
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkrb5, -lkrb5)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkrrbb55..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <krb5.h>[0m
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e,
-         _c_o_n_s_t _c_h_a_r _*_p_a_s_s_w_o_r_d, _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_enctype[24m [4menctype[24m,
+         [4mconst[24m [4mchar[24m [4m*password[24m, [4mkrb5_principal[24m [4mprincipal[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e,
-         _k_r_b_5___d_a_t_a _p_a_s_s_w_o_r_d, _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key_data[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_enctype[24m [4menctype[24m,
+         [4mkrb5_data[24m [4mpassword[24m, [4mkrb5_principal[24m [4mprincipal[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e,
-         _k_r_b_5___d_a_t_a _p_a_s_s_w_o_r_d, _k_r_b_5___s_a_l_t _s_a_l_t, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key_data_salt[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_enctype[24m [4menctype[24m,
+         [4mkrb5_data[24m [4mpassword[24m, [4mkrb5_salt[24m [4msalt[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt__ooppaaqquuee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e, _k_r_b_5___d_a_t_a _p_a_s_s_w_o_r_d, _k_r_b_5___s_a_l_t _s_a_l_t,
-         _k_r_b_5___d_a_t_a _o_p_a_q_u_e, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key_data_salt_opaque[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_enctype[24m [4menctype[24m, [4mkrb5_data[24m [4mpassword[24m, [4mkrb5_salt[24m [4msalt[24m,
+         [4mkrb5_data[24m [4mopaque[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ssaalltt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e,
-         _c_o_n_s_t _c_h_a_r _*_p_a_s_s_w_o_r_d, _k_r_b_5___s_a_l_t _s_a_l_t, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key_salt[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_enctype[24m [4menctype[24m,
+         [4mconst[24m [4mchar[24m [4m*password[24m, [4mkrb5_salt[24m [4msalt[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ssaalltt__ooppaaqquuee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___e_n_c_t_y_p_e _e_n_c_t_y_p_e, _c_o_n_s_t _c_h_a_r _*_p_a_s_s_w_o_r_d, _k_r_b_5___s_a_l_t _s_a_l_t,
-         _k_r_b_5___d_a_t_a _o_p_a_q_u_e, _k_r_b_5___k_e_y_b_l_o_c_k _*_k_e_y);
+     [4mkrb5_error_code[0m
+     [1mkrb5_string_to_key_salt_opaque[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_enctype[24m [4menctype[24m, [4mconst[24m [4mchar[24m [4m*password[24m, [4mkrb5_salt[24m [4msalt[24m,
+         [4mkrb5_data[24m [4mopaque[24m, [4mkrb5_keyblock[24m [4m*key[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ggeett__ppww__ssaalltt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l,
-         _k_r_b_5___s_a_l_t _*_s_a_l_t);
+     [4mkrb5_error_code[0m
+     [1mkrb5_get_pw_salt[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_const_principal[24m [4mprincipal[24m,
+         [4mkrb5_salt[24m [4m*salt[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ffrreeee__ssaalltt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___s_a_l_t _s_a_l_t);
+     [4mkrb5_error_code[0m
+     [1mkrb5_free_salt[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_salt[24m [4msalt[24m);
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      The string to key functions convert a string to a kerberos key.
 
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt__ooppaaqquuee() is the function that does all the
+     [1mkrb5_string_to_key_data_salt_opaque[22m() is the function that does all the
      work, the rest of the functions are just wrappers around
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt__ooppaaqquuee() that calls it with default values.
+     [1mkrb5_string_to_key_data_salt_opaque[22m() that calls it with default values.
 
-     kkrrbb55__ssttrriinngg__ttoo__kkeeyy__ddaattaa__ssaalltt__ooppaaqquuee() transforms the _p_a_s_s_w_o_r_d with the
-     given salt-string _s_a_l_t and the opaque, encryption type specific parameter
-     _o_p_a_q_u_e to a encryption key _k_e_y according to the string to key function
-     associated with _e_n_c_t_y_p_e.
+     [1mkrb5_string_to_key_data_salt_opaque[22m() transforms the [4mpassword[24m with the
+     given salt-string [4msalt[24m and the opaque, encryption type specific parameter
+     [4mopaque[24m to a encryption key [4mkey[24m according to the string to key function
+     associated with [4menctype[24m.
 
-     The _k_e_y should be freed with kkrrbb55__ffrreeee__kkeeyybblloocckk__ccoonntteennttss().
+     The [4mkey[24m should be freed with [1mkrb5_free_keyblock_contents[22m().
 
      If one of the functions that doesn't take a krb5_salt as it argument
-     kkrrbb55__ggeett__ppww__ssaalltt() is used to get the salt value.
+     [1mkrb5_get_pw_salt[22m() is used to get the salt value.
 
-     kkrrbb55__ggeett__ppww__ssaalltt() get the default password salt for a principal, use
-     kkrrbb55__ffrreeee__ssaalltt() to free the salt when done.
+     [1mkrb5_get_pw_salt[22m() get the default password salt for a principal, use
+     [1mkrb5_free_salt[22m() to free the salt when done.
 
-     kkrrbb55__ffrreeee__ssaalltt() frees the content of _s_a_l_t.
+     [1mkrb5_free_salt[22m() frees the content of [4msalt[24m.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      krb5(3), krb5_data(3), krb5_keyblock(3), kerberos(8)
 
 HEIMDAL                          July 10, 2006                         HEIMDAL

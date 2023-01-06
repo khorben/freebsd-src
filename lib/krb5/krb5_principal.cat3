@@ -1,140 +1,139 @@
-
 KRB5_PRINCIPAL(3)        BSD Library Functions Manual        KRB5_PRINCIPAL(3)
 
-NNAAMMEE
-     kkrrbb55__ggeett__ddeeffaauulltt__pprriinncciippaall, kkrrbb55__pprriinncciippaall, kkrrbb55__bbuuiilldd__pprriinncciippaall,
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__eexxtt, kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa,
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa__eexxtt, kkrrbb55__ccooppyy__pprriinncciippaall, kkrrbb55__ffrreeee__pprriinncciippaall,
-     kkrrbb55__mmaakkee__pprriinncciippaall, kkrrbb55__ppaarrssee__nnaammee, kkrrbb55__ppaarrssee__nnaammee__ffllaaggss,
-     kkrrbb55__ppaarrssee__nnaammeettyyppee, kkrrbb55__pprriinncc__sseett__rreeaallmm, kkrrbb55__pprriinncciippaall__ccoommppaarree,
-     kkrrbb55__pprriinncciippaall__ccoommppaarree__aannyy__rreeaallmm, kkrrbb55__pprriinncciippaall__ggeett__ccoommpp__ssttrriinngg,
-     kkrrbb55__pprriinncciippaall__ggeett__rreeaallmm, kkrrbb55__pprriinncciippaall__ggeett__ttyyppee, kkrrbb55__pprriinncciippaall__mmaattcchh,
-     kkrrbb55__pprriinncciippaall__sseett__ttyyppee, kkrrbb55__rreeaallmm__ccoommppaarree, kkrrbb55__ssnnaammee__ttoo__pprriinncciippaall,
-     kkrrbb55__ssoocckk__ttoo__pprriinncciippaall, kkrrbb55__uunnppaarrssee__nnaammee, kkrrbb55__uunnppaarrssee__nnaammee__ffllaaggss,
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd, kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__ffllaaggss,
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__sshhoorrtt, kkrrbb55__uunnppaarrssee__nnaammee__sshhoorrtt -- Kerberos 5
+[1mNAME[0m
+     [1mkrb5_get_default_principal[22m, [1mkrb5_principal[22m, [1mkrb5_build_principal[22m,
+     [1mkrb5_build_principal_ext[22m, [1mkrb5_build_principal_va[22m,
+     [1mkrb5_build_principal_va_ext[22m, [1mkrb5_copy_principal[22m, [1mkrb5_free_principal[22m,
+     [1mkrb5_make_principal[22m, [1mkrb5_parse_name[22m, [1mkrb5_parse_name_flags[22m,
+     [1mkrb5_parse_nametype[22m, [1mkrb5_princ_set_realm[22m, [1mkrb5_principal_compare[22m,
+     [1mkrb5_principal_compare_any_realm[22m, [1mkrb5_principal_get_comp_string[22m,
+     [1mkrb5_principal_get_realm[22m, [1mkrb5_principal_get_type[22m, [1mkrb5_principal_match[22m,
+     [1mkrb5_principal_set_type[22m, [1mkrb5_realm_compare[22m, [1mkrb5_sname_to_principal[22m,
+     [1mkrb5_sock_to_principal[22m, [1mkrb5_unparse_name[22m, [1mkrb5_unparse_name_flags[22m,
+     [1mkrb5_unparse_name_fixed[22m, [1mkrb5_unparse_name_fixed_flags[22m,
+     [1mkrb5_unparse_name_fixed_short[22m, [1mkrb5_unparse_name_short [22m-- Kerberos 5
      principal handling functions
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkrb5, -lkrb5)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkrrbb55..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <krb5.h>[0m
 
      krb5_principal;
 
-     _v_o_i_d
-     kkrrbb55__ffrreeee__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l);
+     [4mvoid[0m
+     [1mkrb5_free_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4mprincipal[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ppaarrssee__nnaammee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _c_h_a_r _*_n_a_m_e,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l);
+     [4mkrb5_error_code[0m
+     [1mkrb5_parse_name[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mchar[24m [4m*name[24m,
+         [4mkrb5_principal[24m [4m*principal[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ppaarrssee__nnaammee__ffllaaggss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _c_h_a_r _*_n_a_m_e, _i_n_t _f_l_a_g_s,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l);
+     [4mkrb5_error_code[0m
+     [1mkrb5_parse_name_flags[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mchar[24m [4m*name[24m, [4mint[24m [4mflags[24m,
+         [4mkrb5_principal[24m [4m*principal[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l,
-         _c_h_a_r _*_*_n_a_m_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_const_principal[24m [4mprincipal[24m,
+         [4mchar[24m [4m**name[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee__ffllaaggss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _i_n_t _f_l_a_g_s, _c_h_a_r _*_*_n_a_m_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name_flags[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mint[24m [4mflags[24m, [4mchar[24m [4m**name[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _c_h_a_r _*_n_a_m_e, _s_i_z_e___t _l_e_n);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name_fixed[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mchar[24m [4m*name[24m, [4msize_t[24m [4mlen[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__ffllaaggss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _i_n_t _f_l_a_g_s, _c_h_a_r _*_n_a_m_e, _s_i_z_e___t _l_e_n);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name_fixed_flags[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mint[24m [4mflags[24m, [4mchar[24m [4m*name[24m, [4msize_t[24m [4mlen[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee__sshhoorrtt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _c_h_a_r _*_*_n_a_m_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name_short[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mchar[24m [4m**name[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__sshhoorrtt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _c_h_a_r _*_n_a_m_e, _s_i_z_e___t _l_e_n);
+     [4mkrb5_error_code[0m
+     [1mkrb5_unparse_name_fixed_short[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mchar[24m [4m*name[24m, [4msize_t[24m [4mlen[24m);
 
-     _v_o_i_d
-     kkrrbb55__pprriinncc__sseett__rreeaallmm(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l,
-         _k_r_b_5___r_e_a_l_m _*_r_e_a_l_m);
+     [4mvoid[0m
+     [1mkrb5_princ_set_realm[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4mprincipal[24m,
+         [4mkrb5_realm[24m [4m*realm[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__bbuuiilldd__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l,
-         _i_n_t _r_l_e_n, _k_r_b_5___c_o_n_s_t___r_e_a_l_m _r_e_a_l_m, _._._.);
+     [4mkrb5_error_code[0m
+     [1mkrb5_build_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4m*principal[24m,
+         [4mint[24m [4mrlen[24m, [4mkrb5_const_realm[24m [4mrealm[24m, [4m...[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l,
-         _i_n_t _r_l_e_n, _k_r_b_5___c_o_n_s_t___r_e_a_l_m _r_e_a_l_m, _v_a___l_i_s_t _a_p);
+     [4mkrb5_error_code[0m
+     [1mkrb5_build_principal_va[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4m*principal[24m,
+         [4mint[24m [4mrlen[24m, [4mkrb5_const_realm[24m [4mrealm[24m, [4mva_list[24m [4map[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__eexxtt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l,
-         _i_n_t _r_l_e_n, _k_r_b_5___c_o_n_s_t___r_e_a_l_m _r_e_a_l_m, _._._.);
+     [4mkrb5_error_code[0m
+     [1mkrb5_build_principal_ext[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4m*principal[24m,
+         [4mint[24m [4mrlen[24m, [4mkrb5_const_realm[24m [4mrealm[24m, [4m...[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa__eexxtt(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l, _i_n_t _r_l_e_n, _k_r_b_5___c_o_n_s_t___r_e_a_l_m _r_e_a_l_m,
-         _v_a___l_i_s_t _a_p);
+     [4mkrb5_error_code[0m
+     [1mkrb5_build_principal_va_ext[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_principal[24m [4m*principal[24m, [4mint[24m [4mrlen[24m, [4mkrb5_const_realm[24m [4mrealm[24m,
+         [4mva_list[24m [4map[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__mmaakkee__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l,
-         _k_r_b_5___c_o_n_s_t___r_e_a_l_m _r_e_a_l_m, _._._.);
+     [4mkrb5_error_code[0m
+     [1mkrb5_make_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4m*principal[24m,
+         [4mkrb5_const_realm[24m [4mrealm[24m, [4m...[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ccooppyy__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _i_n_p_r_i_n_c,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _*_o_u_t_p_r_i_n_c);
+     [4mkrb5_error_code[0m
+     [1mkrb5_copy_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_const_principal[24m [4minprinc[24m,
+         [4mkrb5_principal[24m [4m*outprinc[24m);
 
-     _k_r_b_5___b_o_o_l_e_a_n
-     kkrrbb55__pprriinncciippaall__ccoommppaarree(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_1,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_2);
+     [4mkrb5_boolean[0m
+     [1mkrb5_principal_compare[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_const_principal[24m [4mprinc1[24m,
+         [4mkrb5_const_principal[24m [4mprinc2[24m);
 
-     _k_r_b_5___b_o_o_l_e_a_n
-     kkrrbb55__pprriinncciippaall__ccoommppaarree__aannyy__rreeaallmm(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_1, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_2);
+     [4mkrb5_boolean[0m
+     [1mkrb5_principal_compare_any_realm[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprinc1[24m, [4mkrb5_const_principal[24m [4mprinc2[24m);
 
-     _c_o_n_s_t _c_h_a_r _*
-     kkrrbb55__pprriinncciippaall__ggeett__ccoommpp__ssttrriinngg(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _u_n_s_i_g_n_e_d _i_n_t _c_o_m_p_o_n_e_n_t);
+     [4mconst[24m [4mchar[24m [4m*[0m
+     [1mkrb5_principal_get_comp_string[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4munsigned[24m [4mint[24m [4mcomponent[24m);
 
-     _c_o_n_s_t _c_h_a_r _*
-     kkrrbb55__pprriinncciippaall__ggeett__rreeaallmm(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l);
+     [4mconst[24m [4mchar[24m [4m*[0m
+     [1mkrb5_principal_get_realm[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m);
 
-     _i_n_t
-     kkrrbb55__pprriinncciippaall__ggeett__ttyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l);
+     [4mint[0m
+     [1mkrb5_principal_get_type[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m);
 
-     _k_r_b_5___b_o_o_l_e_a_n
-     kkrrbb55__pprriinncciippaall__mmaattcchh(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_a_t_t_e_r_n);
+     [4mkrb5_boolean[0m
+     [1mkrb5_principal_match[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_const_principal[24m [4mprincipal[24m, [4mkrb5_const_principal[24m [4mpattern[24m);
 
-     _v_o_i_d
-     kkrrbb55__pprriinncciippaall__sseett__ttyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l,
-         _i_n_t _t_y_p_e);
+     [4mvoid[0m
+     [1mkrb5_principal_set_type[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4mprincipal[24m,
+         [4mint[24m [4mtype[24m);
 
-     _k_r_b_5___b_o_o_l_e_a_n
-     kkrrbb55__rreeaallmm__ccoommppaarree(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_1,
-         _k_r_b_5___c_o_n_s_t___p_r_i_n_c_i_p_a_l _p_r_i_n_c_2);
+     [4mkrb5_boolean[0m
+     [1mkrb5_realm_compare[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_const_principal[24m [4mprinc1[24m,
+         [4mkrb5_const_principal[24m [4mprinc2[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssnnaammee__ttoo__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _c_h_a_r _*_h_o_s_t_n_a_m_e,
-         _c_o_n_s_t _c_h_a_r _*_s_n_a_m_e, _i_n_t_3_2___t _t_y_p_e, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_r_e_t___p_r_i_n_c);
+     [4mkrb5_error_code[0m
+     [1mkrb5_sname_to_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mchar[24m [4m*hostname[24m,
+         [4mconst[24m [4mchar[24m [4m*sname[24m, [4mint32_t[24m [4mtype[24m, [4mkrb5_principal[24m [4m*ret_princ[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ssoocckk__ttoo__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _i_n_t _s_o_c_k_e_t,
-         _c_o_n_s_t _c_h_a_r _*_s_n_a_m_e, _i_n_t_3_2___t _t_y_p_e, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c_i_p_a_l);
+     [4mkrb5_error_code[0m
+     [1mkrb5_sock_to_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mint[24m [4msocket[24m,
+         [4mconst[24m [4mchar[24m [4m*sname[24m, [4mint32_t[24m [4mtype[24m, [4mkrb5_principal[24m [4m*principal[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ggeett__ddeeffaauulltt__pprriinncciippaall(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___p_r_i_n_c_i_p_a_l _*_p_r_i_n_c);
+     [4mkrb5_error_code[0m
+     [1mkrb5_get_default_principal[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_principal[24m [4m*princ[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ppaarrssee__nnaammeettyyppee(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _c_h_a_r _*_s_t_r,
-         _i_n_t_3_2___t _*_t_y_p_e);
+     [4mkrb5_error_code[0m
+     [1mkrb5_parse_nametype[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mchar[24m [4m*str[24m,
+         [4mint32_t[24m [4m*type[24m);
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      krb5_principal holds the name of a user or service in Kerberos.
 
      A principal has two parts, a PrincipalName and a realm.  The Principal-
@@ -142,21 +141,21 @@ DDEESSCCRRIIPPTTIIOONN
      are separated by /.  The PrincipalName also has a name-type.
 
      Examples of a principal are nisse/root@EXAMPLE.COM and
-     host/datan.kth.se@KTH.SE.  kkrrbb55__ppaarrssee__nnaammee() and kkrrbb55__ppaarrssee__nnaammee__ffllaaggss()
-     passes a principal name in _n_a_m_e to the kerberos principal structure.
-     kkrrbb55__ppaarrssee__nnaammee__ffllaaggss() takes an extra _f_l_a_g_s argument the following flags
+     host/datan.kth.se@KTH.SE.  [1mkrb5_parse_name[22m() and [1mkrb5_parse_name_flags[22m()
+     passes a principal name in [4mname[24m to the kerberos principal structure.
+     [1mkrb5_parse_name_flags[22m() takes an extra [4mflags[24m argument the following flags
      can be passed in
 
      KRB5_PRINCIPAL_PARSE_NO_REALM
              requires the input string to be without a realm, and no realm is
-             stored in the _p_r_i_n_c_i_p_a_l return argument.
+             stored in the [4mprincipal[24m return argument.
 
      KRB5_PRINCIPAL_PARSE_REQUIRE_REALM
              requires the input string to with a realm.
 
-     kkrrbb55__uunnppaarrssee__nnaammee() and kkrrbb55__uunnppaarrssee__nnaammee__ffllaaggss() prints the principal
-     _p_r_i_n_c to the string _n_a_m_e.  _n_a_m_e should be freed with free(3).  To the
-     _f_l_a_g_s argument the following flags can be passed in
+     [1mkrb5_unparse_name[22m() and [1mkrb5_unparse_name_flags[22m() prints the principal
+     [4mprinc[24m to the string [4mname[24m.  [4mname[24m should be freed with free(3).  To the
+     [4mflags[24m argument the following flags can be passed in
 
      KRB5_PRINCIPAL_UNPARSE_SHORT
              no realm if the realm is one of the local realms.
@@ -166,55 +165,55 @@ DDEESSCCRRIIPPTTIIOONN
 
      KRB5_PRINCIPAL_UNPARSE_DISPLAY
              don't quote
-     On failure _n_a_m_e is set to NULL.  kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd() and
-     kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__ffllaaggss() behaves just like kkrrbb55__uunnppaarrssee(), but
-     instead unparses the principal into a fixed size buffer.
+     On failure [4mname[24m is set to NULL.  [1mkrb5_unparse_name_fixed[22m() and
+     [1mkrb5_unparse_name_fixed_flags[22m() behaves just like [1mkrb5_unparse[22m(), but in-
+     stead unparses the principal into a fixed size buffer.
 
-     kkrrbb55__uunnppaarrssee__nnaammee__sshhoorrtt() just returns the principal without the realm if
+     [1mkrb5_unparse_name_short[22m() just returns the principal without the realm if
      the principal is in the default realm. If the principal isn't, the full
-     name is returned.  kkrrbb55__uunnppaarrssee__nnaammee__ffiixxeedd__sshhoorrtt() works just like
-     kkrrbb55__uunnppaarrssee__nnaammee__sshhoorrtt() but on a fixed size buffer.
+     name is returned.  [1mkrb5_unparse_name_fixed_short[22m() works just like
+     [1mkrb5_unparse_name_short[22m() but on a fixed size buffer.
 
-     kkrrbb55__bbuuiilldd__pprriinncciippaall() builds a principal from the realm _r_e_a_l_m that has
-     the length _r_l_e_n.  The following arguments form the components of the
+     [1mkrb5_build_principal[22m() builds a principal from the realm [4mrealm[24m that has
+     the length [4mrlen[24m.  The following arguments form the components of the
      principal.  The list of components is terminated with NULL.
 
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa() works like kkrrbb55__bbuuiilldd__pprriinncciippaall() using vargs.
+     [1mkrb5_build_principal_va[22m() works like [1mkrb5_build_principal[22m() using vargs.
 
-     kkrrbb55__bbuuiilldd__pprriinncciippaall__eexxtt() and kkrrbb55__bbuuiilldd__pprriinncciippaall__vvaa__eexxtt() take a list
+     [1mkrb5_build_principal_ext[22m() and [1mkrb5_build_principal_va_ext[22m() take a list
      of length-value pairs, the list is terminated with a zero length.
 
-     kkrrbb55__mmaakkee__pprriinncciippaall() works the same way as kkrrbb55__bbuuiilldd__pprriinncciippaall(),
-     except it figures out the length of the realm itself.
+     [1mkrb5_make_principal[22m() works the same way as [1mkrb5_build_principal[22m(), ex-
+     cept it figures out the length of the realm itself.
 
-     kkrrbb55__ccooppyy__pprriinncciippaall() makes a copy of a principal.  The copy needs to be
-     freed with kkrrbb55__ffrreeee__pprriinncciippaall().
+     [1mkrb5_copy_principal[22m() makes a copy of a principal.  The copy needs to be
+     freed with [1mkrb5_free_principal[22m().
 
-     kkrrbb55__pprriinncciippaall__ccoommppaarree() compares the two principals, including realm of
+     [1mkrb5_principal_compare[22m() compares the two principals, including realm of
      the principals and returns TRUE if they are the same and FALSE if not.
 
-     kkrrbb55__pprriinncciippaall__ccoommppaarree__aannyy__rreeaallmm() works the same way as
-     kkrrbb55__pprriinncciippaall__ccoommppaarree() but doesn't compare the realm component of the
+     [1mkrb5_principal_compare_any_realm[22m() works the same way as
+     [1mkrb5_principal_compare[22m() but doesn't compare the realm component of the
      principal.
 
-     kkrrbb55__rreeaallmm__ccoommppaarree() compares the realms of the two principals and
-     returns TRUE is they are the same, and FALSE if not.
+     [1mkrb5_realm_compare[22m() compares the realms of the two principals and re-
+     turns TRUE is they are the same, and FALSE if not.
 
-     kkrrbb55__pprriinncciippaall__mmaattcchh() matches a _p_r_i_n_c_i_p_a_l against a _p_a_t_t_e_r_n.  The pat-
+     [1mkrb5_principal_match[22m() matches a [4mprincipal[24m against a [4mpattern[24m.  The pat-
      tern is a globbing expression, where each component (separated by /) is
      matched against the corresponding component of the principal.
 
-     The kkrrbb55__pprriinncciippaall__ggeett__rreeaallmm() and kkrrbb55__pprriinncciippaall__ggeett__ccoommpp__ssttrriinngg() func-
-     tions return parts of the _p_r_i_n_c_i_p_a_l, either the realm or a specific com-
+     The [1mkrb5_principal_get_realm[22m() and [1mkrb5_principal_get_comp_string[22m() func-
+     tions return parts of the [4mprincipal[24m, either the realm or a specific com-
      ponent.  Both functions return string pointers to data inside the princi-
      pal, so they are valid only as long as the principal exists.
 
-     The _c_o_m_p_o_n_e_n_t argument to kkrrbb55__pprriinncciippaall__ggeett__ccoommpp__ssttrriinngg() is the index
+     The [4mcomponent[24m argument to [1mkrb5_principal_get_comp_string[22m() is the index
      of the component to return, from zero to the total number of components
      minus one. If the index is out of range NULL is returned.
 
-     kkrrbb55__pprriinncciippaall__ggeett__rreeaallmm() and kkrrbb55__pprriinncciippaall__ggeett__ccoommpp__ssttrriinngg() are
-     replacements for kkrrbb55__pprriinncc__ccoommppoonneenntt() and related macros, described as
+     [1mkrb5_principal_get_realm[22m() and [1mkrb5_principal_get_comp_string[22m() are re-
+     placements for [1mkrb5_princ_component[22m() and related macros, described as
      internal in the MIT API specification.  Unlike the macros, these func-
      tions return strings, not krb5_data.  A reason to return krb5_data was
      that it was believed that principal components could contain binary data,
@@ -223,36 +222,36 @@ DDEESSCCRRIIPPTTIIOONN
 
      It's generally not necessary to look at the components of a principal.
 
-     kkrrbb55__pprriinncciippaall__ggeett__ttyyppee() and kkrrbb55__pprriinncciippaall__sseett__ttyyppee() get and sets the
+     [1mkrb5_principal_get_type[22m() and [1mkrb5_principal_set_type[22m() get and sets the
      name type for a principal.  Name type handling is tricky and not often
      needed, don't use this unless you know what you do.
 
-     kkrrbb55__ssnnaammee__ttoo__pprriinncciippaall() and kkrrbb55__ssoocckk__ttoo__pprriinncciippaall() are for easy cre-
-     ation of ``service'' principals that can, for instance, be used to lookup
-     a key in a keytab.  For both functions the _s_n_a_m_e parameter will be used
-     for the first component of the created principal.  If _s_n_a_m_e is NULL,
-     ``host'' will be used instead.
+     [1mkrb5_sname_to_principal[22m() and [1mkrb5_sock_to_principal[22m() are for easy cre-
+     ation of "service" principals that can, for instance, be used to lookup a
+     key in a keytab.  For both functions the [4msname[24m parameter will be used for
+     the first component of the created principal.  If [4msname[24m is NULL, "host"
+     will be used instead.
 
-     kkrrbb55__ssnnaammee__ttoo__pprriinncciippaall() will use the passed _h_o_s_t_n_a_m_e for the second
-     component.  If _t_y_p_e is KRB5_NT_SRV_HST this name will be looked up with
-     ggeetthhoossttbbyynnaammee().  If _h_o_s_t_n_a_m_e is NULL, the local hostname will be used.
+     [1mkrb5_sname_to_principal[22m() will use the passed [4mhostname[24m for the second
+     component.  If [4mtype[24m is KRB5_NT_SRV_HST this name will be looked up with
+     [1mgethostbyname[22m().  If [4mhostname[24m is NULL, the local hostname will be used.
 
-     kkrrbb55__ssoocckk__ttoo__pprriinncciippaall() will use the ``sockname'' of the passed _s_o_c_k_e_t,
+     [1mkrb5_sock_to_principal[22m() will use the "sockname" of the passed [4msocket[24m,
      which should be a bound AF_INET or AF_INET6 socket.  There must be a map-
-     ping between the address and ``sockname''.  The function may try to
-     resolve the name in DNS.
+     ping between the address and "sockname".  The function may try to resolve
+     the name in DNS.
 
-     kkrrbb55__ggeett__ddeeffaauulltt__pprriinncciippaall() tries to find out what's a reasonable
-     default principal by looking at the environment it is running in.
+     [1mkrb5_get_default_principal[22m() tries to find out what's a reasonable de-
+     fault principal by looking at the environment it is running in.
 
-     kkrrbb55__ppaarrssee__nnaammeettyyppee() parses and returns the name type integer value in
-     _t_y_p_e.  On failure the function returns an error code and set the error
+     [1mkrb5_parse_nametype[22m() parses and returns the name type integer value in
+     [4mtype[24m.  On failure the function returns an error code and set the error
      string.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      krb5_config(3), krb5.conf(5)
 
-BBUUGGSS
+[1mBUGS[0m
      You can not have a NUL in a component in some of the variable argument
      functions above.  Until someone can give a good example of where it would
      be a good idea to have NUL's in a component, this will not be fixed.

@@ -1,32 +1,31 @@
-
 KRB5_CREDS(3)            BSD Library Functions Manual            KRB5_CREDS(3)
 
-NNAAMMEE
-     kkrrbb55__ccrreeddss, kkrrbb55__ccooppyy__ccrreeddss, kkrrbb55__ccooppyy__ccrreeddss__ccoonntteennttss, kkrrbb55__ffrreeee__ccrreeddss,
-     kkrrbb55__ffrreeee__ccrreedd__ccoonntteennttss -- Kerberos 5 credential handling functions
+[1mNAME[0m
+     [1mkrb5_creds[22m, [1mkrb5_copy_creds[22m, [1mkrb5_copy_creds_contents[22m, [1mkrb5_free_creds[22m,
+     [1mkrb5_free_cred_contents [22m-- Kerberos 5 credential handling functions
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkrb5, -lkrb5)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkrrbb55..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <krb5.h>[0m
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ccooppyy__ccrreeddss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _k_r_b_5___c_r_e_d_s _*_i_n_c_r_e_d,
-         _k_r_b_5___c_r_e_d_s _*_*_o_u_t_c_r_e_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_copy_creds[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mkrb5_creds[24m [4m*incred[24m,
+         [4mkrb5_creds[24m [4m**outcred[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ccooppyy__ccrreeddss__ccoonntteennttss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _c_o_n_s_t _k_r_b_5___c_r_e_d_s _*_i_n_c_r_e_d,
-         _k_r_b_5___c_r_e_d_s _*_o_u_t_c_r_e_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_copy_creds_contents[22m([4mkrb5_context[24m [4mcontext[24m, [4mconst[24m [4mkrb5_creds[24m [4m*incred[24m,
+         [4mkrb5_creds[24m [4m*outcred[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ffrreeee__ccrreeddss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_r_e_d_s _*_o_u_t_c_r_e_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_free_creds[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_creds[24m [4m*outcred[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkrrbb55__ffrreeee__ccrreedd__ccoonntteennttss(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t, _k_r_b_5___c_r_e_d_s _*_c_r_e_d);
+     [4mkrb5_error_code[0m
+     [1mkrb5_free_cred_contents[22m([4mkrb5_context[24m [4mcontext[24m, [4mkrb5_creds[24m [4m*cred[24m);
 
-DDEESSCCRRIIPPTTIIOONN
-     _k_r_b_5___c_r_e_d_s holds Kerberos credentials:
+[1mDESCRIPTION[0m
+     [4mkrb5_creds[24m holds Kerberos credentials:
 
      typedef struct krb5_creds {
          krb5_principal      client;
@@ -40,19 +39,19 @@ DDEESSCCRRIIPPTTIIOONN
          krb5_ticket_flags   flags;
      } krb5_creds;
 
-     kkrrbb55__ccooppyy__ccrreeddss() makes a copy of _i_n_c_r_e_d to _o_u_t_c_r_e_d.  _o_u_t_c_r_e_d should be
-     freed with kkrrbb55__ffrreeee__ccrreeddss() by the caller.
+     [1mkrb5_copy_creds[22m() makes a copy of [4mincred[24m to [4moutcred[24m.  [4moutcred[24m should be
+     freed with [1mkrb5_free_creds[22m() by the caller.
 
-     kkrrbb55__ccooppyy__ccrreeddss__ccoonntteennttss() makes a copy of the content of _i_n_c_r_e_d to
-     _o_u_t_c_r_e_d_s.  _o_u_t_c_r_e_d_s should be freed by the called with
-     kkrrbb55__ffrreeee__ccrreeddss__ccoonntteennttss().
+     [1mkrb5_copy_creds_contents[22m() makes a copy of the content of [4mincred[24m to
+     [4moutcreds[24m.  [4moutcreds[24m should be freed by the called with
+     [1mkrb5_free_creds_contents[22m().
 
-     kkrrbb55__ffrreeee__ccrreeddss() frees the content of the _c_r_e_d structure and the struc-
+     [1mkrb5_free_creds[22m() frees the content of the [4mcred[24m structure and the struc-
      ture itself.
 
-     kkrrbb55__ffrreeee__ccrreedd__ccoonntteennttss() frees the content of the _c_r_e_d structure.
+     [1mkrb5_free_cred_contents[22m() frees the content of the [4mcred[24m structure.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      krb5(3), krb5_compare_creds(3), krb5_get_init_creds(3), kerberos(8)
 
 HEIMDAL                           May 1, 2006                          HEIMDAL

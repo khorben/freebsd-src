@@ -1,5 +1,5 @@
 /* ./bidi_table.c */
-/* Automatically generated at 2019-06-07T02:26:41.397837 */
+/* Automatically generated at 2022-11-15T13:59:51.646346 */
 
 
 #include "bidi_table.h"

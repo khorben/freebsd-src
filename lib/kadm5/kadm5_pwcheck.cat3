@@ -1,38 +1,37 @@
-
 KADM5_PWCHECK(3)         BSD Library Functions Manual         KADM5_PWCHECK(3)
 
-NNAAMMEE
-     kkrrbb55__ppwwcchheecckk, kkaaddmm55__sseettuupp__ppaasssswwdd__qquuaalliittyy__cchheecckk,
-     kkaaddmm55__aadddd__ppaasssswwdd__qquuaalliittyy__vveerriiffiieerr, kkaaddmm55__cchheecckk__ppaasssswwoorrdd__qquuaalliittyy -- Heim-
+[1mNAME[0m
+     [1mkrb5_pwcheck[22m, [1mkadm5_setup_passwd_quality_check[22m,
+     [1mkadm5_add_passwd_quality_verifier[22m, [1mkadm5_check_password_quality [22m-- Heim-
      dal warning and error functions
 
-LLIIBBRRAARRYY
+[1mLIBRARY[0m
      Kerberos 5 Library (libkadm5srv, -lkadm5srv)
 
-SSYYNNOOPPSSIISS
-     ##iinncclluuddee <<kkaaddmm55--pprroottooss..hh>>
-     ##iinncclluuddee <<kkaaddmm55--ppwwcchheecckk..hh>>
+[1mSYNOPSIS[0m
+     [1m#include <kadm5-protos.h>[0m
+     [1m#include <kadm5-pwcheck.h>[0m
 
-     _v_o_i_d
-     kkaaddmm55__sseettuupp__ppaasssswwdd__qquuaalliittyy__cchheecckk(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _c_o_n_s_t _c_h_a_r _*_c_h_e_c_k___l_i_b_r_a_r_y, _c_o_n_s_t _c_h_a_r _*_c_h_e_c_k___f_u_n_c_t_i_o_n);
+     [4mvoid[0m
+     [1mkadm5_setup_passwd_quality_check[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mconst[24m [4mchar[24m [4m*check_library[24m, [4mconst[24m [4mchar[24m [4m*check_function[24m);
 
-     _k_r_b_5___e_r_r_o_r___c_o_d_e
-     kkaaddmm55__aadddd__ppaasssswwdd__qquuaalliittyy__vveerriiffiieerr(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _c_o_n_s_t _c_h_a_r _*_c_h_e_c_k___l_i_b_r_a_r_y);
+     [4mkrb5_error_code[0m
+     [1mkadm5_add_passwd_quality_verifier[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mconst[24m [4mchar[24m [4m*check_library[24m);
 
-     _c_o_n_s_t _c_h_a_r _*
-     kkaaddmm55__cchheecckk__ppaasssswwoorrdd__qquuaalliittyy(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _k_r_b_5___d_a_t_a _*_p_w_d___d_a_t_a);
+     [4mconst[24m [4mchar[24m [4m*[0m
+     [1mkadm5_check_password_quality[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_principal[24m [4mprincipal[24m, [4mkrb5_data[24m [4m*pwd_data[24m);
 
-     _i_n_t
-     ((**kkaaddmm55__ppaasssswwdd__qquuaalliittyy__cchheecckk__ffuunncc))(_k_r_b_5___c_o_n_t_e_x_t _c_o_n_t_e_x_t,
-         _k_r_b_5___p_r_i_n_c_i_p_a_l _p_r_i_n_c_i_p_a_l, _k_r_b_5___d_a_t_a _*_p_a_s_s_w_o_r_d, _c_o_n_s_t _c_h_a_r _*_t_u_n_i_n_g,
-         _c_h_a_r _*_m_e_s_s_a_g_e, _s_i_z_e___t _l_e_n_g_t_h);
+     [4mint[0m
+     [1m(*kadm5_passwd_quality_check_func)[22m([4mkrb5_context[24m [4mcontext[24m,
+         [4mkrb5_principal[24m [4mprincipal[24m, [4mkrb5_data[24m [4m*password[24m, [4mconst[24m [4mchar[24m [4m*tuning[24m,
+         [4mchar[24m [4m*message[24m, [4msize_t[24m [4mlength[24m);
 
-DDEESSCCRRIIPPTTIIOONN
-     These functions perform the quality check for the heimdal database
-     library.
+[1mDESCRIPTION[0m
+     These functions perform the quality check for the heimdal database li-
+     brary.
 
      There are two versions of the shared object API; the old version (0) is
      deprecated, but still supported.  The new version (1) supports multiple
@@ -40,29 +39,29 @@ DDEESSCCRRIIPPTTIIOONN
      for details.
 
      The password quality checker will run all policies that are configured by
-     the user.  If any policy rejects the password, the password will be
-     rejected.
+     the user.  If any policy rejects the password, the password will be re-
+     jected.
 
      Policy names are of the form `module-name:policy-name' or, if the the
      policy name is unique enough, just `policy-name'.
 
-IIMMPPLLEEMMEENNTTIINNGG AA PPAASSSSWWOORRDD QQUUAALLIITTYY CCHHEECCKKIINNGG SSHHAARREEDD OOBBJJEECCTT
+[1mIMPLEMENTING A PASSWORD QUALITY CHECKING SHARED OBJECT[0m
      (This refers to the version 1 API only.)
 
      Module shared objects may conveniently be compiled and linked with
      libtool(1).  An object needs to export a symbol called
-     `kadm5_password_verifier' of the type _s_t_r_u_c_t _k_a_d_m_5___p_w___p_o_l_i_c_y___v_e_r_i_f_i_e_r.
+     `kadm5_password_verifier' of the type [4mstruct[24m [4mkadm5_pw_policy_verifier[24m.
 
-     Its _n_a_m_e and _v_e_n_d_o_r fields should contain the obvious information.  _n_a_m_e
+     Its [4mname[24m and [4mvendor[24m fields should contain the obvious information.  [4mname[0m
      must match the `module-name' portion of the policy name (the part before
      the colon), if the policy name contains a colon, or the policy will not
-     be run.  _v_e_r_s_i_o_n should be KADM5_PASSWD_VERSION_V1.
+     be run.  [4mversion[24m should be KADM5_PASSWD_VERSION_V1.
 
-     _f_u_n_c_s contains an array of _s_t_r_u_c_t _k_a_d_m_5___p_w___p_o_l_i_c_y___c_h_e_c_k___f_u_n_c structures
-     that is terminated with an entry whose _n_a_m_e component is NULL.  The _n_a_m_e
+     [4mfuncs[24m contains an array of [4mstruct[24m [4mkadm5_pw_policy_check_func[24m structures
+     that is terminated with an entry whose [4mname[24m component is NULL.  The [4mname[0m
      field of the array must match the `policy-name' portion of a policy name
      (the part after the colon, or the complete policy name if there is no
-     colon) specified by the user or the policy will not be run.  The _f_u_n_c
+     colon) specified by the user or the policy will not be run.  The [4mfunc[0m
      fields of the array elements are functions that are exported by the mod-
      ule to be called to check the password.  They get the following argu-
      ments:  the Kerberos context, principal, password, a tuning parameter,
@@ -71,18 +70,18 @@ IIMMPPLLEEMMEENNTTIINNGG AA PPAASSSSWWOORRDD QQUUAALLI
      is acceptable, the function returns zero.  Otherwise it returns non-zero
      and fills in the message buffer with an appropriate explanation.
 
-RRUUNNNNIINNGG TTHHEE CCHHEECCKKSS
-     kkaaddmm55__sseettuupp__ppaasssswwdd__qquuaalliittyy__cchheecckk sets up type 0 checks.  It sets up all
+[1mRUNNING THE CHECKS[0m
+     [1mkadm5_setup_passwd_quality_check [22msets up type 0 checks.  It sets up all
      type 0 checks defined in krb5.conf(5) if called with the last two argu-
      ments null.
 
-     kkaaddmm55__aadddd__ppaasssswwdd__qquuaalliittyy__vveerriiffiieerr sets up type 1 checks.  It sets up all
+     [1mkadm5_add_passwd_quality_verifier [22msets up type 1 checks.  It sets up all
      type 1 tests defined in krb5.conf(5) if called with a null second argu-
-     ment.  kkaaddmm55__cchheecckk__ppaasssswwoorrdd__qquuaalliittyy runs the checks in the order in which
+     ment.  [1mkadm5_check_password_quality [22mruns the checks in the order in which
      they are defined in krb5.conf(5) and the order in which they occur in a
-     module's _f_u_n_c_s array until one returns non-zero.
+     module's [4mfuncs[24m array until one returns non-zero.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      libtool(1), krb5(3), krb5.conf(5)
 
 HEIMDAL                        February 29, 2004                       HEIMDAL

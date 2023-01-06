@@ -1,96 +1,95 @@
-
 IPROP-LOG(8)              BSD System Manager's Manual             IPROP-LOG(8)
 
-NNAAMMEE
-     iipprroopp--lloogg -- examine and maintain the iprop log file
+[1mNAME[0m
+     [1miprop-log [22m-- examine and maintain the iprop log file
 
-SSYYNNOOPPSSIISS
-     iipprroopp--lloogg [----vveerrssiioonn] [--hh | ----hheellpp] _c_o_m_m_a_n_d
+[1mSYNOPSIS[0m
+     [1miprop-log [22m[[1m--version[22m] [[1m-h [22m| [1m--help[22m] [4mcommand[0m
 
-     iipprroopp--lloogg ttrruunnccaattee [--cc _f_i_l_e | ----ccoonnffiigg--ffiillee==_f_i_l_e] [--rr _s_t_r_i_n_g |
-               ----rreeaallmm==_s_t_r_i_n_g] [--KK _i_n_t_e_g_e_r | ----kkeeeepp--eennttrriieess==_i_n_t_e_g_e_r] [--BB
-               _i_n_t_e_g_e_r | ----mmaaxx--bbyytteess==_i_n_t_e_g_e_r] [--RR | ----rreesseett] [--hh | ----hheellpp]
-               [_l_o_g_-_f_i_l_e]
+     [1miprop-log truncate [22m[[1m-c [4m[22mfile[24m | [1m--config-file=[4m[22mfile[24m] [[1m-r [4m[22mstring[24m |
+               [1m--realm=[4m[22mstring[24m] [[1m-K [4m[22minteger[24m | [1m--keep-entries=[4m[22minteger[24m] [[1m-B[0m
+               [4minteger[24m | [1m--max-bytes=[4m[22minteger[24m] [[1m-R [22m| [1m--reset[22m] [[1m-h [22m| [1m--help[22m]
+               [[4mlog-file[24m]
 
-     iipprroopp--lloogg dduummpp [--cc _f_i_l_e | ----ccoonnffiigg--ffiillee==_f_i_l_e] [--rr _s_t_r_i_n_g |
-               ----rreeaallmm==_s_t_r_i_n_g] [--nn | ----nnoo--lloocckk] [--RR | ----rreevveerrssee] [--hh | ----hheellpp]
-               [_l_o_g_-_f_i_l_e]
+     [1miprop-log dump [22m[[1m-c [4m[22mfile[24m | [1m--config-file=[4m[22mfile[24m] [[1m-r [4m[22mstring[24m |
+               [1m--realm=[4m[22mstring[24m] [[1m-n [22m| [1m--no-lock[22m] [[1m-R [22m| [1m--reverse[22m] [[1m-h [22m| [1m--help[22m]
+               [[4mlog-file[24m]
 
-     iipprroopp--lloogg rreeppllaayy [----ssttaarrtt--vveerrssiioonn==_v_e_r_s_i_o_n_-_n_u_m_b_e_r]
-               [----eenndd--vveerrssiioonn==_v_e_r_s_i_o_n_-_n_u_m_b_e_r] [--cc _f_i_l_e | ----ccoonnffiigg--ffiillee==_f_i_l_e]
-               [--rr _s_t_r_i_n_g | ----rreeaallmm==_s_t_r_i_n_g] [--hh | ----hheellpp] [_l_o_g_-_f_i_l_e]
+     [1miprop-log replay [22m[[1m--start-version=[4m[22mversion-number[24m]
+               [[1m--end-version=[4m[22mversion-number[24m] [[1m-c [4m[22mfile[24m | [1m--config-file=[4m[22mfile[24m]
+               [[1m-r [4m[22mstring[24m | [1m--realm=[4m[22mstring[24m] [[1m-h [22m| [1m--help[22m] [[4mlog-file[24m]
 
-     iipprroopp--lloogg llaasstt--vveerrssiioonn [--cc _f_i_l_e | ----ccoonnffiigg--ffiillee==_f_i_l_e] [--rr _s_t_r_i_n_g |
-               ----rreeaallmm==_s_t_r_i_n_g] [--nn | ----nnoo--lloocckk] [--hh | ----hheellpp] [_l_o_g_-_f_i_l_e_s]
+     [1miprop-log last-version [22m[[1m-c [4m[22mfile[24m | [1m--config-file=[4m[22mfile[24m] [[1m-r [4m[22mstring[24m |
+               [1m--realm=[4m[22mstring[24m] [[1m-n [22m| [1m--no-lock[22m] [[1m-h [22m| [1m--help[22m] [[4mlog-files[24m]
 
-     iipprroopp--lloogg ssiiggnnaall [--cc _f_i_l_e | ----ccoonnffiigg--ffiillee==_f_i_l_e] [--rr _s_t_r_i_n_g |
-               ----rreeaallmm==_s_t_r_i_n_g] [--hh | ----hheellpp]
+     [1miprop-log signal [22m[[1m-c [4m[22mfile[24m | [1m--config-file=[4m[22mfile[24m] [[1m-r [4m[22mstring[24m |
+               [1m--realm=[4m[22mstring[24m] [[1m-h [22m| [1m--help[22m]
 
-DDEESSCCRRIIPPTTIIOONN
+[1mDESCRIPTION[0m
      Supported options:
 
-     ----vveerrssiioonn
+     [1m--version[0m
 
-     --hh, ----hheellpp
+     [1m-h[22m, [1m--help[0m
 
      command can be one of the following:
 
      truncate
 
-               --cc _f_i_l_e, ----ccoonnffiigg--ffiillee==_f_i_l_e
+               [1m-c [4m[22mfile[24m, [1m--config-file=[4m[22mfile[0m
                        configuration file
 
-               --rr _s_t_r_i_n_g, ----rreeaallmm==_s_t_r_i_n_g
+               [1m-r [4m[22mstring[24m, [1m--realm=[4m[22mstring[0m
                        realm
 
-               --KK _i_n_t_e_g_e_r, ----kkeeeepp--eennttrriieess==_i_n_t_e_g_e_r
+               [1m-K [4m[22minteger[24m, [1m--keep-entries=[4m[22minteger[0m
 
-               --BB _i_n_t_e_g_e_r, ----mmaaxx--bbyytteess==_i_n_t_e_g_e_r
+               [1m-B [4m[22minteger[24m, [1m--max-bytes=[4m[22minteger[0m
 
-               --RR, ----rreesseett
+               [1m-R[22m, [1m--reset[0m
 
-               If ----rreesseett is given, then the given, configured, or default log
+               If [1m--reset [22mis given, then the given, configured, or default log
                file will be truncated and will start at version 1.  This
                forces full propagations to all slave KDCs.
 
                Otherwise the log will be truncated but some entries will be
-               preserved, as specified by the ----kkeeeepp--eennttrriieess and/or
-               ----mmaaxx--bbyytteess options.  The largest number of ----kkeeeepp--eennttrriieess
-               entries that are available and fit in the given ----mmaaxx--bbyytteess
-               option will be used.  The ----kkeeeepp--eennttrriieess --ooppttiioonn --ddeeffaauullttss --ttoo
-               --110000,, --aanndd --tthhee ----mmaaxx--bbyytteess option defaults to the _l_o_g_-_m_a_x_-_s_i_z_e
+               preserved, as specified by the [1m--keep-entries [22mand/or
+               [1m--max-bytes [22moptions.  The largest number of [1m--keep-entries [22men-
+               tries that are available and fit in the given [1m--max-bytes [22mop-
+               tion will be used.  The [1m--keep-entries -option -defaults -to[0m
+               [1m-100, -and -the --max-bytes [22moption defaults to the [4mlog-max-size[0m
                parameter in the configuration.
 
      dump
 
-               --cc _f_i_l_e, ----ccoonnffiigg--ffiillee==_f_i_l_e
+               [1m-c [4m[22mfile[24m, [1m--config-file=[4m[22mfile[0m
                        configuration file
 
-               --rr _s_t_r_i_n_g, ----rreeaallmm==_s_t_r_i_n_g
+               [1m-r [4m[22mstring[24m, [1m--realm=[4m[22mstring[0m
                        realm
 
-               --nn _s_t_r_i_n_g, ----nnoo--lloocckk
+               [1m-n [4m[22mstring[24m, [1m--no-lock[0m
 
-               --RR _s_t_r_i_n_g, ----rreevveerrssee
+               [1m-R [4m[22mstring[24m, [1m--reverse[0m
 
                Print out all entries in the given, configured, or default log
-               file to standard output.  If the --nn option is used then don't
-               lock the iprop log file.  If the --RR option is used, then print
+               file to standard output.  If the [1m-n [22moption is used then don't
+               lock the iprop log file.  If the [1m-R [22moption is used, then print
                the entries in reverse order (this can be useful when the log
                is very large).
 
      replay
 
-               ----ssttaarrtt--vveerrssiioonn==_v_e_r_s_i_o_n_-_n_u_m_b_e_r
+               [1m--start-version=[4m[22mversion-number[0m
                        start replay with this version
 
-               ----eenndd--vveerrssiioonn==_v_e_r_s_i_o_n_-_n_u_m_b_e_r
+               [1m--end-version=[4m[22mversion-number[0m
                        end replay with this version
 
-               --cc _f_i_l_e, ----ccoonnffiigg--ffiillee==_f_i_l_e
+               [1m-c [4m[22mfile[24m, [1m--config-file=[4m[22mfile[0m
                        configuration file
 
-               --rr _s_t_r_i_n_g, ----rreeaallmm==_s_t_r_i_n_g
+               [1m-r [4m[22mstring[24m, [1m--realm=[4m[22mstring[0m
                        realm
 
                Replay the changes from specified entries (or all if none is
@@ -99,13 +98,13 @@ DDEESSCCRRIIPPTTIIOONN
 
      last-version
 
-               --cc _f_i_l_e, ----ccoonnffiigg--ffiillee==_f_i_l_e
+               [1m-c [4m[22mfile[24m, [1m--config-file=[4m[22mfile[0m
                        configuration file
 
-               --rr _s_t_r_i_n_g, ----rreeaallmm==_s_t_r_i_n_g
+               [1m-r [4m[22mstring[24m, [1m--realm=[4m[22mstring[0m
                        realm
 
-               --nn _s_t_r_i_n_g, ----nnoo--lloocckk
+               [1m-n [4m[22mstring[24m, [1m--no-lock[0m
 
                prints the version of the last record in each of the given log
                files, or the configured, or the default log file if none is
@@ -113,17 +112,17 @@ DDEESSCCRRIIPPTTIIOONN
 
      signal
 
-               --cc _f_i_l_e, ----ccoonnffiigg--ffiillee==_f_i_l_e
+               [1m-c [4m[22mfile[24m, [1m--config-file=[4m[22mfile[0m
                        configuration file
 
-               --rr _s_t_r_i_n_g, ----rreeaallmm==_s_t_r_i_n_g
+               [1m-r [4m[22mstring[24m, [1m--realm=[4m[22mstring[0m
                        realm
 
                Signals the ipropd-master daemon to send updates to slaves.
                Normally kadmin does this every time it writes to the database,
                so this should rarely be needed.
 
-SSEEEE AALLSSOO
+[1mSEE ALSO[0m
      iprop(8)
 
 BSD                            February 18, 2007                           BSD
