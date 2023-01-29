@@ -78,6 +78,7 @@ typedef unsigned long intptr_t;
 #if defined(KANJI) && defined(WIDE_STRINGS) && defined(HAVE_NL_LANGINFO) && defined(CODESET)
 #define AUTOSET_KANJI
 #endif
+
 /*
  * Sanity
  */
@@ -92,13 +93,14 @@ typedef unsigned long intptr_t;
 #define TMP_TEMPLATE ".XXXXXX"
 
 #ifdef SHORT_STRINGS
+# define TCSH_S "S"
 # ifdef WIDE_STRINGS
 #include <wchar.h>
 #  ifdef UTF16_STRINGS
 typedef wint_t Char;
 #  else
 typedef wchar_t Char;
-#endif
+#  endif
 typedef unsigned long uChar;
 typedef wint_t eChar; /* Can contain any Char value or CHAR_ERR */
 #define CHAR_ERR WEOF /* Pretty please, use bit 31... */
@@ -114,6 +116,7 @@ typedef int eChar;
 # endif
 # define SAVE(a) (Strsave(str2short(a)))
 #else
+#define TCSH_S "s"
 typedef char Char;
 typedef unsigned char uChar;
 typedef int eChar;
@@ -122,6 +125,7 @@ typedef int eChar;
 #define reset_mbtowc() ((void)0)
 # define SAVE(a) (strsave(a))
 #endif
+#define CHAR_EOF (-2)
 
 #if !defined(__inline) && !defined(__GNUC__) && !defined(_MSC_VER)
 #define __inline
@@ -319,7 +323,7 @@ typedef long tcsh_number_t;
  * redefines malloc(), so we define the following
  * to avoid it.
  */
-# if defined(SYSMALLOC) || defined(__linux__) || defined(__GNU__) || defined(__GLIBC__) || defined(sgi) || defined(_OSD_POSIX)
+# if defined(SYSMALLOC) || defined(__linux__) || defined(__GNU__) || defined(__GLIBC__) || defined(sgi) || defined(_OSD_POSIX) || defined(__OpenBSD__)
 #  define NO_FIX_MALLOC
 #  include <stdlib.h>
 # else /* glibc */
@@ -1010,6 +1014,7 @@ EXTERN struct varent {
 #define VAR_READONLY	1
 #define VAR_READWRITE	2
 #define VAR_NOGLOB	4
+#define VAR_NOERROR	8
 #define VAR_FIRST       32
 #define VAR_LAST        64
     struct varent *v_link[3];	/* The links, see below */
@@ -1027,6 +1032,7 @@ EXTERN struct varent {
  * The following are for interfacing redo substitution in
  * aliases to the lexical routines.
  */
+#define HIST_PURGE	-500000
 EXTERN struct wordent *alhistp IZERO_STRUCT;/* Argument list (first) */
 EXTERN struct wordent *alhistt IZERO_STRUCT;/* Node after last in arg list */
 EXTERN Char  **alvec IZERO_STRUCT,
@@ -1121,7 +1127,7 @@ EXTERN Char    PRCHROOT;	/* Prompt symbol for root */
 #define Strend(a)		strend(a)
 #define Strstr(a, b)		strstr(a, b)
 
-#define str2short(a) 		(a)
+#define str2short(a) 		((void *)(intptr_t)(a))
 #define blk2short(a) 		saveblk(a)
 #define short2blk(a) 		saveblk(a)
 #define short2str(a) 		caching_strip(a)
@@ -1295,5 +1301,9 @@ extern int    filec;
 \nSee the tcsh(1) manual page for detailed information.\n"
 
 #include "tc.nls.h"
+
+#define TEXP_IGNORE 1	/* in ignore, it means to ignore value, just parse */
+#define TEXP_NOGLOB 2	/* in ignore, it means not to globone */
+
 
 #endif /* _h_sh */

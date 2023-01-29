@@ -93,7 +93,7 @@ const struct biltins bfunc[] = {
 #ifdef apollo
     { "inlib", 		doinlib,	1,	INF	},
 #endif /* apollo */
-    { "jobs",		dojobs,		0,	1	},
+    { "jobs",		dojobs,		0,	2	},
     { "kill",		dokill,		1,	INF	},
 #ifndef HAVENOLIMIT
     { "limit",		dolimit,	0,	3	},
@@ -690,7 +690,7 @@ mesginit(void)
 #ifdef SIGPOLL
     if (mesg[SIGPOLL].pname == NULL) {
 	mesg[SIGPOLL].iname = "POLL";
-	mesg[SIGPOLL].pname = CSAVS(2, 63, "Pollable event occured");
+	mesg[SIGPOLL].pname = CSAVS(2, 63, "Pollable event occurred");
     }
 #endif /* SIGPOLL */
 

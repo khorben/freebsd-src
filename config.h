@@ -1,286 +1,287 @@
+/* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to the type of elements in the array set by `getgroups'. Usually
    this is either `int' or `gid_t'. */
-#undef GETGROUPS_T
+#define GETGROUPS_T gid_t
 
 /* Define to 1 if the `getpgrp' function requires zero arguments. */
-#undef GETPGRP_VOID
+#define GETPGRP_VOID 1
 
 /* Define to 1 if you have the <auth.h> header file. */
-#undef HAVE_AUTH_H
+/* #undef HAVE_AUTH_H */
 
 /* Define to 1 if you have the <crypt.h> header file. */
-#undef HAVE_CRYPT_H
+/* #undef HAVE_CRYPT_H */
 
 /* Define to 1 if you have the declaration of `crypt', and to 0 if you don't.
    */
-#undef HAVE_DECL_CRYPT
+#define HAVE_DECL_CRYPT 1
 
 /* Define to 1 if you have the declaration of `environ', and to 0 if you
    don't. */
-#undef HAVE_DECL_ENVIRON
+#define HAVE_DECL_ENVIRON 0
 
 /* Define to 1 if you have the declaration of `gethostname', and to 0 if you
    don't. */
-#undef HAVE_DECL_GETHOSTNAME
+#define HAVE_DECL_GETHOSTNAME 1
 
 /* Define to 1 if you have the declaration of `getpgrp', and to 0 if you
    don't. */
-#undef HAVE_DECL_GETPGRP
+#define HAVE_DECL_GETPGRP 1
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
-#undef HAVE_DIRENT_H
+#define HAVE_DIRENT_H 1
 
 /* Define to 1 if you have the `dup2' function. */
-#undef HAVE_DUP2
+#define HAVE_DUP2 1
 
 /* Define to 1 if you have the <features.h> header file. */
-#undef HAVE_FEATURES_H
+/* #undef HAVE_FEATURES_H */
 
 /* Define to 1 if you have the `getauthid' function. */
-#undef HAVE_GETAUTHID
+/* #undef HAVE_GETAUTHID */
 
 /* Define to 1 if you have the `getcwd' function. */
-#undef HAVE_GETCWD
+#define HAVE_GETCWD 1
 
 /* Define to 1 if you have the `gethostname' function. */
-#undef HAVE_GETHOSTNAME
+#define HAVE_GETHOSTNAME 1
 
 /* Define to 1 if you have the `getpwent' function. */
-#undef HAVE_GETPWENT
+#define HAVE_GETPWENT 1
 
 /* Define to 1 if you have the `getutent' function. */
-#undef HAVE_GETUTENT
+/* #undef HAVE_GETUTENT */
 
 /* Define to 1 if you have the `getutxent' function. */
-#undef HAVE_GETUTXENT
+#define HAVE_GETUTXENT 1
 
 /* Define if you have the iconv() function and it works. */
-#undef HAVE_ICONV
+#define HAVE_ICONV 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
+#define HAVE_INTTYPES_H 1
 
 /* Define to 1 if the system has the type `long long'. */
-#undef HAVE_LONG_LONG
+#define HAVE_LONG_LONG 1
 
 /* Define to 1 if you have the `mallinfo' function. */
-#undef HAVE_MALLINFO
+/* #undef HAVE_MALLINFO */
 
 /* Define to 1 if you have the `mallinfo2' function. */
-#undef HAVE_MALLINFO2
+/* #undef HAVE_MALLINFO2 */
 
 /* Define to 1 if you have the `mblen' function. */
-#undef HAVE_MBLEN
+#define HAVE_MBLEN 1
 
 /* Define to 1 if mbrtowc and mbstate_t are properly declared. */
-#undef HAVE_MBRTOWC
+#define HAVE_MBRTOWC 1
 
 /* Define to 1 if you have the `memmove' function. */
-#undef HAVE_MEMMOVE
+#define HAVE_MEMMOVE 1
 
 /* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
+#define HAVE_MEMSET 1
 
 /* Define to 1 if you have the `mkstemp' function. */
-#undef HAVE_MKSTEMP
+#define HAVE_MKSTEMP 1
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#undef HAVE_NDIR_H
+/* #undef HAVE_NDIR_H */
 
 /* Define to 1 if you have the `nice' function. */
-#undef HAVE_NICE
+#define HAVE_NICE 1
 
 /* Define to 1 if you have the `nl_langinfo' function. */
-#undef HAVE_NL_LANGINFO
+#define HAVE_NL_LANGINFO 1
 
 /* Define to 1 if you have the <paths.h> header file. */
-#undef HAVE_PATHS_H
+#define HAVE_PATHS_H 1
 
 /* Define to 1 if you have the `sbrk' function. */
-#undef HAVE_SBRK
+#define HAVE_SBRK 1
 
 /* Define to 1 if you have the `setpgid' function. */
-#undef HAVE_SETPGID
+#define HAVE_SETPGID 1
 
 /* Define to 1 if you have the `setpriority' function. */
-#undef HAVE_SETPRIORITY
+#define HAVE_SETPRIORITY 1
 
 /* Define to 1 if you have the `setproctitle' function. */
-#undef HAVE_SETPROCTITLE
+#define HAVE_SETPROCTITLE 1
 
 /* Define to 1 if you have the <shadow.h> header file. */
-#undef HAVE_SHADOW_H
+/* #undef HAVE_SHADOW_H */
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+#define HAVE_STDINT_H 1
 
 /* Define to 1 if you have the <stdio.h> header file. */
-#undef HAVE_STDIO_H
+#define HAVE_STDIO_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
+#define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strcoll' function and it is properly defined.
    */
-#undef HAVE_STRCOLL
+#define HAVE_STRCOLL 1
 
 /* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
+#define HAVE_STRERROR 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+#define HAVE_STRINGS_H 1
 
 /* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
+#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strstr' function. */
-#undef HAVE_STRSTR
+#define HAVE_STRSTR 1
 
 /* Define to 1 if `d_ino' is a member of `struct dirent'. */
-#undef HAVE_STRUCT_DIRENT_D_INO
+#define HAVE_STRUCT_DIRENT_D_INO 1
 
 /* Define to 1 if `ss_family' is a member of `struct sockaddr_storage'. */
-#undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
+#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
 
 /* Define to 1 if `ut_host' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_HOST
+#define HAVE_STRUCT_UTMPX_UT_HOST 1
 
 /* Define to 1 if `ut_tv' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_TV
+#define HAVE_STRUCT_UTMPX_UT_TV 1
 
 /* Define to 1 if `ut_user' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_USER
+#define HAVE_STRUCT_UTMPX_UT_USER 1
 
 /* Define to 1 if `ut_xtime' is a member of `struct utmpx'. */
-#undef HAVE_STRUCT_UTMPX_UT_XTIME
+/* #undef HAVE_STRUCT_UTMPX_UT_XTIME */
 
 /* Define to 1 if `ut_host' is a member of `struct utmp'. */
-#undef HAVE_STRUCT_UTMP_UT_HOST
+#define HAVE_STRUCT_UTMP_UT_HOST 1
 
 /* Define to 1 if `ut_tv' is a member of `struct utmp'. */
-#undef HAVE_STRUCT_UTMP_UT_TV
+#define HAVE_STRUCT_UTMP_UT_TV 1
 
 /* Define to 1 if `ut_user' is a member of `struct utmp'. */
-#undef HAVE_STRUCT_UTMP_UT_USER
+#define HAVE_STRUCT_UTMP_UT_USER 1
 
 /* Define to 1 if `ut_xtime' is a member of `struct utmp'. */
-#undef HAVE_STRUCT_UTMP_UT_XTIME
+/* #undef HAVE_STRUCT_UTMP_UT_XTIME */
 
 /* Define to 1 if you have the `sysconf' function. */
-#undef HAVE_SYSCONF
+#define HAVE_SYSCONF 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
-#undef HAVE_SYS_DIR_H
+/* #undef HAVE_SYS_DIR_H */
 
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
-#undef HAVE_SYS_NDIR_H
+/* #undef HAVE_SYS_NDIR_H */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
+#define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
+#define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the <utmpx.h> header file. */
-#undef HAVE_UTMPX_H
+#define HAVE_UTMPX_H 1
 
 /* Define to 1 if you have the <utmp.h> header file. */
-#undef HAVE_UTMP_H
+/* #undef HAVE_UTMP_H */
 
 /* Define to 1 if you have the <wchar.h> header file. */
-#undef HAVE_WCHAR_H
+#define HAVE_WCHAR_H 1
 
 /* Define to 1 if you have the <wctype.h> header file. */
-#undef HAVE_WCTYPE_H
+#define HAVE_WCTYPE_H 1
 
 /* Define to 1 if you have the `wcwidth' function. */
-#undef HAVE_WCWIDTH
+#define HAVE_WCWIDTH 1
 
 /* Define to 1 if sbrk(N) works. */
-#undef HAVE_WORKING_SBRK
+#define HAVE_WORKING_SBRK 1
 
 /* Define as const if the declaration of iconv() needs const. */
-#undef ICONV_CONST
+#define ICONV_CONST 
 
 /* Support NLS. */
-#undef NLS
+#define NLS 1
 
 /* Support NLS catalogs. */
-#undef NLS_CATALOGS
+#define NLS_CATALOGS 1
 
 /* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+#define PACKAGE_BUGREPORT "https://bugs.astron.com/"
 
 /* Define to the full name of this package. */
-#undef PACKAGE_NAME
+#define PACKAGE_NAME "Tcsh"
 
 /* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
+#define PACKAGE_STRING "Tcsh 6.24.07"
 
 /* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
+#define PACKAGE_TARNAME "tcsh"
 
 /* Define to the home page for this package. */
-#undef PACKAGE_URL
+#define PACKAGE_URL "https://www.tcsh.org/"
 
 /* Define to the version of this package. */
-#undef PACKAGE_VERSION
+#define PACKAGE_VERSION "6.24.07"
 
 /* Define to 1 if the `setpgrp' function requires zero arguments. */
-#undef SETPGRP_VOID
+/* #undef SETPGRP_VOID */
 
 /* The size of `wchar_t', as computed by sizeof. */
-#undef SIZEOF_WCHAR_T
+#define SIZEOF_WCHAR_T 4
 
 /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
-#undef STAT_MACROS_BROKEN
+/* #undef STAT_MACROS_BROKEN */
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
-#undef STDC_HEADERS
+#define STDC_HEADERS 1
 
 /* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
    #define below would cause a syntax error. */
-#undef _UINT32_T
+/* #undef _UINT32_T */
 
 /* Define to empty if `const' does not conform to ANSI C. */
-#undef const
+/* #undef const */
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#undef gid_t
+/* #undef gid_t */
 
 /* Define to `int' if <sys/types.h> does not define. */
-#undef mode_t
+/* #undef mode_t */
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef size_t
+/* #undef size_t */
 
 /* Define to `int' if neither <sys/types.h> nor <sys/socket.h> define. */
-#undef socklen_t
+/* #undef socklen_t */
 
 /* Define to `int' not defined in <sys/types.h>. */
-#undef ssize_t
+/* #undef ssize_t */
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#undef uid_t
+/* #undef uid_t */
 
 /* Define to the type of an unsigned integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
-#undef uint32_t
+/* #undef uint32_t */
 
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
-#undef volatile
+/* #undef volatile */
 
 #include "config_p.h"
 #include "config_f.h"

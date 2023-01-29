@@ -153,8 +153,7 @@ lex(struct wordent *hp)
 
     if (!postcmd_active)
 	btell(&lineloc);
-    hp->next = hp->prev = hp;
-    hp->word = STRNULL;
+    initlex(hp);
     hadhist = 0;
     do
 	c = readc(0);
@@ -227,7 +226,7 @@ prlex(struct wordent *sp0)
     struct wordent *sp = sp0->next;
 
     for (;;) {
-	xprintf("%S", sp->word);
+	xprintf("%" TCSH_S, sp->word);
 	sp = sp->next;
 	if (sp == sp0)
 	    break;
@@ -512,6 +511,24 @@ getdol(void)
     }
     cleanup_push(&name, Strbuf_cleanup);
     Strbuf_append1(&name, '$');
+    if (c == '\'') {
+	for (;;) {
+	    Strbuf_append1(&name, c);
+	    c = getC(DOEXCL);
+	    if (c == '\'') break;
+	    if (c == '\\') {
+		Strbuf_append1(&name, c);
+		c = getC(DOEXCL);
+	    }
+	    if (c == '\n') {
+		ungetD(c);
+		seterror(ERR_MISSING, '\'');
+		goto end;
+	    }
+	}
+	Strbuf_append1(&name, c);
+	goto end;
+    }
     if (c == '{')
 	Strbuf_append1(&name, c), c = getC(DOEXCL);
     if (c == '#' || c == '?' || c == '%')
@@ -618,6 +635,7 @@ getdol(void)
 	    /* scan s// [eichin:19910926.0512EST] */
 	    if (c == 's') {
 		int delimcnt = 2;
+		int esc = 0;
 		eChar delim = getC(0);
 
 		Strbuf_append1(&name, delim);
@@ -627,9 +645,15 @@ getdol(void)
 		    break;
 		}
 		while ((c = getC(0)) != CHAR_ERR) {
+		    if (esc == 0 && c == '\\') {
+			esc = 1;
+			Strbuf_append1(&name, c);
+			continue;
+		    }
 		    Strbuf_append1(&name, c);
-		    if (c == delim) delimcnt--;
+		    if (!esc && c == delim) delimcnt--;
 		    if (!delimcnt) break;
+		    esc = 0;
 		}
 		if (delimcnt) {
 		    seterror(ERR_BADSUBST);
@@ -704,7 +728,7 @@ getexcl(Char sc)
 
     lastev = eventno;
     hp = gethent(sc);
-    if (hp == 0)
+    if (hp == NULL)
 	return;
     hadhist = 1;
     dol = 0;
@@ -894,7 +918,6 @@ getsub(struct wordent *en)
  * We raise the limit to 50000000
  */
 
-#define HIST_PURGE -50000000
 static struct wordent *
 dosub(Char sc, struct wordent *en, int global)
 {

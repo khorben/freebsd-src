@@ -565,7 +565,7 @@ main(int argc, char **argv)
 
     sigset_interrupting(SIGALRM, queue_alrmcatch);
 
-    setcopy(STRstatus, STR0, VAR_READWRITE);
+    setstatus(0);
 
     /*
      * get and set machine specific environment variables
@@ -886,11 +886,11 @@ main(int argc, char **argv)
     fix_version();		/* publish the shell version */
 
     if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-	xprintf("%S\n", varval(STRversion));
+	xprintf("%" TCSH_S "\n", varval(STRversion));
 	xexit(0);
     }
     if (argc > 1 && strcmp(argv[1], "--help") == 0) {
-	xprintf("%S\n\n", varval(STRversion));
+	xprintf("%" TCSH_S "\n\n", varval(STRversion));
 	xprintf("%s", CGETS(11, 8, HELP_STRING));
 	xexit(0);
     }
@@ -1830,7 +1830,7 @@ exitstat(void)
      */
     child = 1;
 
-    xexit(getn(varval(STRstatus)));
+    xexit(getstatus());
 }
 
 /*

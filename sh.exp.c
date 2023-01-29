@@ -36,9 +36,6 @@
  * C shell
  */
 
-#define TEXP_IGNORE 1	/* in ignore, it means to ignore value, just parse */
-#define TEXP_NOGLOB 2	/* in ignore, it means not to globone */
-
 #define	ADDOP	1
 #define	MULOP	2
 #define	EQOP	4
@@ -579,8 +576,8 @@ exp6(Char ***vp, int ignore)
 	}
 	pwait();
 	cleanup_until(&faket);
-	etraci("exp6 {} status", egetn(varval(STRstatus)), vp);
-	return (putn(egetn(varval(STRstatus)) == 0));
+	etraci("exp6 {} status", getstatus(), vp);
+	return putn(getstatus() == 0);
     }
     if (isa(**vp, ANYOP))
 	return (Strsave(STRNULL));
@@ -677,7 +674,11 @@ filetest(Char *cp, Char ***vp, int ignore)
     dp = *(*vp)++;
     if (ignore & TEXP_IGNORE)
 	return (Strsave(STRNULL));
-    ep = globone(dp, G_APPEND);
+    if ((ignore & TEXP_NOGLOB) == 0) {
+	ep = globone(dp, G_APPEND);
+    } else {
+	ep = Strsave(dp);
+    }
     cleanup_push(ep, xfree);
     ft = &cp[1];
     do
@@ -950,7 +951,7 @@ evalav(Char **v)
     struct command *t;
     struct wordent *wdp = hp;
 
-    setcopy(STRstatus, STR0, VAR_READWRITE);
+    setstatus(0);
     initlex(hp);
     while (*v) {
 	struct wordent *new = xcalloc(1, sizeof *wdp);

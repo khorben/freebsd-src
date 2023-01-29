@@ -576,7 +576,7 @@ pjwait(struct process *pp)
 	xprintf(CGETS(17, 2, "Exit %d\n"), reason);
     reason_str = putn((tcsh_number_t)reason);
     cleanup_push(reason_str, xfree);
-    setv(STRstatus, reason_str, VAR_READWRITE);
+    setstrstatus(reason_str);
     cleanup_ignore(reason_str);
     cleanup_until(reason_str);
     if (reason && exiterr)
@@ -1055,7 +1055,7 @@ pprint(struct process *pp, int flag)
 		    xprintf("       ");
 	    }
 	    if (flag & FANCY) {
-		xprintf("%5d ", pp->p_procid);
+		xprintf("%7d ", pp->p_procid);
 #ifdef TCF
 		xprintf("%11s ", sitename(pp->p_procid));
 #endif /* TCF */
@@ -1133,7 +1133,7 @@ pprint(struct process *pp, int flag)
 	}
 prcomd:
 	if (flag & NAME) {
-	    xprintf("%S", pp->p_command);
+	    xprintf("%" TCSH_S, pp->p_command);
 	    if (pp->p_flags & PPOU)
 		xprintf(" |");
 	    if (pp->p_flags & PDIAG)
@@ -1320,8 +1320,22 @@ dojobs(Char **v, struct command *c)
     if (chkstop)
 	chkstop = 2;
     if (*++v) {
-	if (v[1] || !eq(*v, STRml))
-	    stderror(ERR_JOBS);
+	if (v[1]) {
+	    if (eq(*v, STRml)) {
+		flag |= FANCY | JOBDIR;
+	    } else if (eq(*v, STRmZ)) {
+#ifdef HAVE_SETPROCTITLE
+		if (v[1] && v[1][0]) {
+		    setproctitle("%s", short2str(v[1]));
+		} else {
+		    setproctitle(NULL);
+		}
+#endif
+		return;
+	    } else {
+		stderror(ERR_JOBS);
+	    }
+	}
 	flag |= FANCY | JOBDIR;
     }
     for (i = 1; i <= pmaxindex; i++)
@@ -1526,9 +1540,11 @@ pkill(Char **v, int signum)
 	    case SIGTTOU:
 		if ((jobflags & PRUNNING) == 0) {
 # ifdef SUSPENDED
-		    xprintf(CGETS(17, 12, "%S: Already suspended\n"), cp);
+		    xprintf(CGETS(17, 12, "%" TCSH_S ": Already suspended\n"),
+			cp);
 # else /* !SUSPENDED */
-		    xprintf(CGETS(17, 13, "%S: Already stopped\n"), cp);
+		    xprintf(CGETS(17, 13, "%" TCSH_S ": Already stopped\n"),
+			cp);
 # endif /* !SUSPENDED */
 		    err1++;
 		    goto cont;
@@ -1550,7 +1566,7 @@ pkill(Char **v, int signum)
 	    }
 #endif /* BSDJOBS */
 	    if (killpg(pp->p_jobid, signum) < 0) {
-		xprintf("%S: %s\n", cp, strerror(errno));
+		xprintf("%" TCSH_S ": %s\n", cp, strerror(errno));
 		err1++;
 	    }
 #ifdef BSDJOBS
