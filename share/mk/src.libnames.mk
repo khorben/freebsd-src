@@ -290,7 +290,7 @@ _DP_crypto=	pthread
 # See comment by _DP_archive above
 .if ${.MAKE.OS} == "FreeBSD" || !defined(BOOTSTRAPPING)
 .if ${MK_OPENSSL} != "no"
-_DP_archive+=	crypto
+_DP_archive+=	ssl crypto
 .else
 _DP_archive+=	md
 .endif

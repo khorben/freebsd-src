@@ -10,7 +10,7 @@ CFLAGS+=	-DPLATFORM_CONFIG_H=\"${.CURDIR}/config_freebsd.h\"
 
 .if ${MK_OPENSSL} != "no"
 CFLAGS+=	-DWITH_OPENSSL
-LIBADD+=	crypto
+LIBADD+=	ssl crypto
 .else
 LIBADD+=	md
 .endif
