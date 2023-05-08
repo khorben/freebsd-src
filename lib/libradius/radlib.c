@@ -61,7 +61,7 @@ static void	 generr(struct rad_handle *, const char *, ...)
 		    __printflike(2, 3);
 static void	 insert_scrambled_password(struct rad_handle *, int);
 static void	 insert_request_authenticator(struct rad_handle *, int);
-static void	 insert_message_authenticator(struct rad_handle *, int);
+static int	 insert_message_authenticator(struct rad_handle *, int);
 static int	 is_valid_response(struct rad_handle *, int,
 		    const struct sockaddr_in *);
 static int	 put_password_attr(struct rad_handle *, int,
@@ -144,45 +144,49 @@ insert_request_authenticator(struct rad_handle *h, int resp)
 	MD5Final(&h->out[POS_AUTH], &ctx);
 }
 
-static void
+static int
 insert_message_authenticator(struct rad_handle *h, int resp)
 {
 #ifdef WITH_SSL
 	u_char md[EVP_MAX_MD_SIZE];
 	size_t md_len;
 	const struct rad_server *srvp;
-	EVP_MD_CTX *evpctx = NULL;
+	EVP_MD_CTX *hctx = NULL;
 	const EVP_MD *hmd = NULL;
 	EVP_PKEY *pkey = NULL;
 	srvp = &h->servers[h->srv];
 
 	if (h->authentic_pos != 0) {
-		evpctx = EVP_MD_CTX_create();
-		if (evpctx == NULL)
-			goto cleanup;
+		hctx = EVP_MD_CTX_create();
+		if (hctx == NULL)
+			goto error;
 		if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
-			goto cleanup;
+			goto error;
 		if ((pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
 						srvp->secret,
 						strlen(srvp->secret))) == NULL)
-			goto cleanup;
-		if (EVP_DigestSignInit(evpctx, NULL, hmd, NULL, pkey) != 1)
-			goto cleanup;
-		EVP_DigestSignUpdate(evpctx, &h->out[POS_CODE], POS_AUTH - POS_CODE);
+			goto error;
+		if (EVP_DigestSignInit(hctx, NULL, hmd, NULL, pkey) != 1)
+			goto error;
+		EVP_DigestSignUpdate(hctx, &h->out[POS_CODE], POS_AUTH - POS_CODE);
 		if (resp)
-		    EVP_DigestSignUpdate(evpctx, &h->in[POS_AUTH], LEN_AUTH);
+		    EVP_DigestSignUpdate(hctx, &h->in[POS_AUTH], LEN_AUTH);
 		else
-		    EVP_DigestSignUpdate(evpctx, &h->out[POS_AUTH], LEN_AUTH);
-		EVP_DigestSignUpdate(evpctx, &h->out[POS_ATTRS], h->out_len - POS_ATTRS);
-		if (!EVP_DigestSignFinal(evpctx, md, &md_len))
-			goto cleanup;
+		    EVP_DigestSignUpdate(hctx, &h->out[POS_AUTH], LEN_AUTH);
+		EVP_DigestSignUpdate(hctx, &h->out[POS_ATTRS], h->out_len - POS_ATTRS);
+		if (!EVP_DigestSignFinal(hctx, md, &md_len))
+			goto error;
 		memcpy(&h->out[h->authentic_pos + 2], md, md_len);
+		EVP_PKEY_free(pkey);
+		EVP_MD_CTX_free(hctx);
 	}
-cleanup:
+	return 0;
+error:
 	if(pkey != NULL)
 		EVP_PKEY_free(pkey);
-	if(evpctx != NULL)
-		EVP_MD_CTX_free(evpctx);
+	if(hctx != NULL)
+		EVP_MD_CTX_free(hctx);
+	return -1;
 #endif
 }
 
@@ -809,7 +813,10 @@ rad_continue_send_request(struct rad_handle *h, int selected, int *fd,
 		if (h->pass_pos != 0)
 			insert_scrambled_password(h, h->srv);
 	}
-	insert_message_authenticator(h, 0);
+	if (insert_message_authenticator(h, 0) != 0) {
+		generr(h, "Cannot insert message authenticator");
+		return -1;
+	}
 
 	if (h->out[POS_CODE] != RAD_ACCESS_REQUEST) {
 		/* Insert the request authenticator into the request */
@@ -882,8 +889,12 @@ rad_send_response(struct rad_handle *h)
 	h->out[POS_LENGTH] = h->out_len >> 8;
 	h->out[POS_LENGTH+1] = h->out_len;
 
-	insert_message_authenticator(h,
-	    (h->in[POS_CODE] == RAD_ACCESS_REQUEST) ? 1 : 0);
+	if (insert_message_authenticator(h,
+				(h->in[POS_CODE] == RAD_ACCESS_REQUEST)
+				? 1 : 0) != 0) {
+		generr(h, "Cannot insert message authenticator");
+		return (-1);
+	}
 	insert_request_authenticator(h, 1);
 
 	/* Send the request */
