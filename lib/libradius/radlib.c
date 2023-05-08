@@ -151,8 +151,8 @@ insert_message_authenticator(struct rad_handle *h, int resp)
 	u_char md[EVP_MAX_MD_SIZE];
 	size_t md_len;
 	const struct rad_server *srvp;
+	EVP_MD *hmd = NULL;
 	EVP_MD_CTX *hctx = NULL;
-	const EVP_MD *hmd = NULL;
 	EVP_PKEY *pkey = NULL;
 	srvp = &h->servers[h->srv];
 
@@ -160,7 +160,7 @@ insert_message_authenticator(struct rad_handle *h, int resp)
 		hctx = EVP_MD_CTX_create();
 		if (hctx == NULL)
 			goto error;
-		if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+		if ((hmd = EVP_MD_fetch(NULL, "MD5", NULL)) == NULL)
 			goto error;
 		if ((pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
 						srvp->secret,
@@ -168,22 +168,27 @@ insert_message_authenticator(struct rad_handle *h, int resp)
 			goto error;
 		if (EVP_DigestSignInit(hctx, NULL, hmd, NULL, pkey) != 1)
 			goto error;
-		EVP_DigestSignUpdate(hctx, &h->out[POS_CODE], POS_AUTH - POS_CODE);
+		EVP_DigestSignUpdate(hctx, &h->out[POS_CODE],
+			       	POS_AUTH - POS_CODE);
 		if (resp)
 		    EVP_DigestSignUpdate(hctx, &h->in[POS_AUTH], LEN_AUTH);
 		else
 		    EVP_DigestSignUpdate(hctx, &h->out[POS_AUTH], LEN_AUTH);
-		EVP_DigestSignUpdate(hctx, &h->out[POS_ATTRS], h->out_len - POS_ATTRS);
+		EVP_DigestSignUpdate(hctx, &h->out[POS_ATTRS],
+			       	h->out_len - POS_ATTRS);
 		if (!EVP_DigestSignFinal(hctx, md, &md_len))
 			goto error;
 		memcpy(&h->out[h->authentic_pos + 2], md, md_len);
 		EVP_PKEY_free(pkey);
+		EVP_MD_free(hmd);
 		EVP_MD_CTX_free(hctx);
 	}
 	return 0;
 error:
 	if(pkey != NULL)
 		EVP_PKEY_free(pkey);
+	if(hmd != NULL)
+		EVP_MD_free(hmd);
 	if(hctx != NULL)
 		EVP_MD_CTX_free(hctx);
 	return -1;
@@ -206,7 +211,7 @@ is_valid_response(struct rad_handle *h, int srv,
 #ifdef WITH_SSL
 	int alen;
 	EVP_MD_CTX *hctx;
-	const EVP_MD *hmd;
+	EVP_MD *hmd;
 	EVP_PKEY *pkey;
 	u_char resp[MSGSIZE], md[EVP_MAX_MD_SIZE];
 	size_t md_len;
@@ -248,17 +253,24 @@ is_valid_response(struct rad_handle *h, int srv,
 		memcpy(resp, h->in, MSGSIZE);
 		pos = POS_ATTRS;
 
-		/* Search and verify the Message-Authenticator */
-		if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+		/* Create a context for the digest operation */
+		if ((hctx = EVP_MD_CTX_create()) == NULL)
 			return 0;
-		hctx = EVP_MD_CTX_create();
+		if ((hmd = EVP_MD_fetch(NULL, "MD5", NULL)) == NULL) {
+			EVP_MD_CTX_free(hctx);
+			return 0;
+		}
+
+		/* Search and verify the Message-Authenticator */
 		while (pos < len - 2) {
 			if (h->in[pos] == RAD_MESSAGE_AUTHENTIC) {
 				if (h->in[pos + 1] != MD5_DIGEST_LENGTH + 2) {
+					EVP_MD_free(hmd);
 					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
 				if (len - pos < MD5_DIGEST_LENGTH + 2) {
+					EVP_MD_free(hmd);
 					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
@@ -269,26 +281,33 @@ is_valid_response(struct rad_handle *h, int srv,
 						srvp->secret,
 						strlen(srvp->secret));
 				if (pkey == NULL) {
+					EVP_MD_free(hmd);
 					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
 				if (EVP_DigestSignInit(hctx, NULL, hmd, NULL,
-							pkey) != 1) {
+						       pkey) != 1 ||
+				    EVP_DigestSignUpdate(hctx, &h->in[POS_CODE],
+							 POS_AUTH - POS_CODE)
+							 != 1 ||
+				    EVP_DigestSignUpdate(hctx,
+						       	 &h->out[POS_AUTH],
+							 LEN_AUTH) != 1 ||
+				    EVP_DigestSignUpdate(hctx, &resp[POS_ATTRS],
+							 h->in_len - POS_ATTRS)
+						         != 1 ||
+				    EVP_DigestSignFinal(hctx, md, &md_len)
+				    			!= 1) {
 					EVP_PKEY_free(pkey);
+					EVP_MD_free(hmd);
 					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
-				EVP_DigestSignUpdate(hctx, &h->in[POS_CODE],
-				    POS_AUTH - POS_CODE);
-				EVP_DigestSignUpdate(hctx, &h->out[POS_AUTH],
-				    LEN_AUTH);
-				EVP_DigestSignUpdate(hctx, &resp[POS_ATTRS],
-				    h->in_len - POS_ATTRS);
-				EVP_DigestSignFinal(hctx, md, &md_len);
 				EVP_MD_CTX_reset(hctx);
 				if (memcmp(md, &h->in[pos + 2],
 				    MD5_DIGEST_LENGTH) != 0) {
 					EVP_PKEY_free(pkey);
+					EVP_MD_free(hmd);
 					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
@@ -297,11 +316,13 @@ is_valid_response(struct rad_handle *h, int srv,
 			}
 			alen = h->in[pos + 1];
 			if (alen < 2) {
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return 0;
 			}
 			pos += alen;
 		}
+		EVP_MD_free(hmd);
 		EVP_MD_CTX_free(hctx);
 	}
 #endif
@@ -321,7 +342,7 @@ is_valid_request(struct rad_handle *h)
 #ifdef WITH_SSL
 	int alen;
 	EVP_MD_CTX *hctx;
-	const EVP_MD *hmd;
+	EVP_MD *hmd;
 	EVP_PKEY *pkey;
 	u_char resp[MSGSIZE], md[EVP_MAX_MD_SIZE];
 	size_t md_len;
@@ -353,19 +374,24 @@ is_valid_request(struct rad_handle *h)
 #ifdef WITH_SSL
 	/* Search and verify the Message-Authenticator */
 	pos = POS_ATTRS;
-	if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+	if ((hctx = EVP_MD_CTX_create()) == NULL)
 		return 0;
-	hctx = EVP_MD_CTX_create();
+	if ((hmd = EVP_MD_fetch(NULL, "MD5", NULL)) == NULL) {
+		EVP_MD_CTX_free(hctx);
+		return 0;
+	}
 	while (pos < len - 2) {
 		alen = h->in[pos + 1];
 		if (alen < 2)
 			return (0);
 		if (h->in[pos] == RAD_MESSAGE_AUTHENTIC) {
 			if (len - pos < MD5_DIGEST_LENGTH + 2) {
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
 			if (alen < MD5_DIGEST_LENGTH + 2) {
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
@@ -380,19 +406,23 @@ is_valid_request(struct rad_handle *h)
 					srvp->secret,
 					strlen(srvp->secret));
 			if (pkey == NULL) {
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
-			if (EVP_DigestSignInit(hctx, NULL, hmd, NULL, pkey) != 1) {
+			if (EVP_DigestSignInit(hctx, NULL, hmd, NULL,
+					       pkey) != 1 ||
+			    EVP_DigestSignUpdate(hctx, resp, h->in_len) != 1 ||
+			    EVP_DigestSignFinal(hctx, md, &md_len) != 1) {
 				EVP_PKEY_free(pkey);
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
-			EVP_DigestSignUpdate(hctx, resp, h->in_len);
-			EVP_DigestSignFinal(hctx, md, &md_len);
 			EVP_MD_CTX_reset(hctx);
 			if (memcmp(md, &h->in[pos + 2],
 			    MD5_DIGEST_LENGTH) != 0) {
+				EVP_MD_free(hmd);
 				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
@@ -400,6 +430,7 @@ is_valid_request(struct rad_handle *h)
 		}
 		pos += alen;
 	}
+	EVP_MD_free(hmd);
 	EVP_MD_CTX_free(hctx);
 #endif
 	return (1);
