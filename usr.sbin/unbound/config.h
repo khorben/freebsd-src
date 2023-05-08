@@ -33,9 +33,6 @@
 /* Deprecate RSA 1024 bit length, makes that an unsupported key */
 /* #undef DEPRECATE_RSA_1024 */
 
-/* Deprecate RSA 1024 bit length, makes that an unsupported key */
-/* #undef DEPRECATE_RSA_1024 */
-
 /* Define this to enable kernel based UDP source port randomization. */
 /* #undef DISABLE_EXPLICIT_PORT_RANDOMISATION */
 
@@ -75,13 +72,10 @@
 #define HAVE_ATTR_WEAK 1
 
 /* If we have be64toh */
-/* #undef HAVE_BE64TOH */
+#define HAVE_BE64TOH 1
 
 /* Define to 1 if you have the `BIO_set_callback_ex' function. */
-/* #undef HAVE_BIO_SET_CALLBACK_EX */
-
-/* Define to 1 if you have the `BIO_set_callback_ex' function. */
-/* #undef HAVE_BIO_SET_CALLBACK_EX */
+#define HAVE_BIO_SET_CALLBACK_EX 1
 
 /* Define to 1 if you have the <bsd/stdlib.h> header file. */
 /* #undef HAVE_BSD_STDLIB_H */
@@ -117,7 +111,7 @@
 
 /* Define to 1 if you have the declaration of `evsignal_assign', and to 0 if
    you don't. */
-/* #undef HAVE_DECL_EVSIGNAL_ASSIGN */
+#define HAVE_DECL_EVSIGNAL_ASSIGN 1
 
 /* Define to 1 if you have the declaration of `inet_ntop', and to 0 if you
    don't. */
@@ -129,7 +123,7 @@
 
 /* Define to 1 if you have the declaration of `nghttp2_session_server_new',
    and to 0 if you don't. */
-/* #undef HAVE_DECL_NGHTTP2_SESSION_SERVER_NEW */
+#define HAVE_DECL_NGHTTP2_SESSION_SERVER_NEW 1
 
 /* Define to 1 if you have the declaration of `NID_ED25519', and to 0 if you
    don't. */
@@ -186,7 +180,7 @@
 #define HAVE_DSA_SIG_SET0 1
 
 /* Define to 1 if you have the <endian.h> header file. */
-/* #undef HAVE_ENDIAN_H */
+#define HAVE_ENDIAN_H 1
 
 /* Define to 1 if you have the `endprotoent' function. */
 #define HAVE_ENDPROTOENT 1
@@ -232,12 +226,7 @@
 
 /* Define to 1 if you have the `EVP_default_properties_is_fips_enabled'
    function. */
-/* #undef HAVE_EVP_DEFAULT_PROPERTIES_IS_FIPS_ENABLED */
-
-
-/* Define to 1 if you have the `EVP_default_properties_is_fips_enabled'
-   function. */
-/* #undef HAVE_EVP_DEFAULT_PROPERTIES_IS_FIPS_ENABLED */
+#define HAVE_EVP_DEFAULT_PROPERTIES_IS_FIPS_ENABLED 1
 
 /* Define to 1 if you have the `EVP_DigestVerify' function. */
 #define HAVE_EVP_DIGESTVERIFY 1
@@ -249,7 +238,7 @@
 #define HAVE_EVP_ENCRYPTINIT_EX 1
 
 /* Define to 1 if you have the `EVP_MAC_CTX_set_params' function. */
-/* #undef HAVE_EVP_MAC_CTX_SET_PARAMS */
+#define HAVE_EVP_MAC_CTX_SET_PARAMS 1
 
 /* Define to 1 if you have the `EVP_MD_CTX_new' function. */
 #define HAVE_EVP_MD_CTX_NEW 1
@@ -279,7 +268,7 @@
 #define HAVE_FCNTL 1
 
 /* Define to 1 if you have the `FIPS_mode' function. */
-#define HAVE_FIPS_MODE 1
+/* #undef HAVE_FIPS_MODE */
 
 /* Define to 1 if you have the `fork' function. */
 #define HAVE_FORK 1
@@ -314,9 +303,6 @@
 /* Define to 1 if you have the `gettid' function. */
 /* #undef HAVE_GETTID */
 
-/* Define to 1 if you have the `gettid' function. */
-/* #undef HAVE_GETTID */
-
 /* Define to 1 if you have the `glob' function. */
 #define HAVE_GLOB 1
 
@@ -336,13 +322,10 @@
 #define HAVE_HMAC_INIT_EX 1
 
 /* If we have htobe64 */
-/* #undef HAVE_HTOBE64 */
+#define HAVE_HTOBE64 1
 
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #define HAVE_IFADDRS_H 1
-
-/* Define to 1 if you have the `if_nametoindex' function. */
-#define HAVE_IF_NAMETOINDEX 1
 
 /* Define to 1 if you have the `if_nametoindex' function. */
 #define HAVE_IF_NAMETOINDEX 1
@@ -444,7 +427,7 @@
 #define HAVE_OPENSSL_CONF_H 1
 
 /* Define to 1 if you have the <openssl/core_names.h> header file. */
-/* #undef HAVE_OPENSSL_CORE_NAMES_H */
+#define HAVE_OPENSSL_CORE_NAMES_H 1
 
 /* Define to 1 if you have the <openssl/dh.h> header file. */
 #define HAVE_OPENSSL_DH_H 1
@@ -465,7 +448,7 @@
 #define HAVE_OPENSSL_INIT_SSL 1
 
 /* Define to 1 if you have the <openssl/param_build.h> header file. */
-/* #undef HAVE_OPENSSL_PARAM_BUILD_H */
+#define HAVE_OPENSSL_PARAM_BUILD_H 1
 
 /* Define to 1 if you have the <openssl/rand.h> header file. */
 #define HAVE_OPENSSL_RAND_H 1
@@ -477,7 +460,7 @@
 #define HAVE_OPENSSL_SSL_H 1
 
 /* Define to 1 if you have the `OSSL_PARAM_BLD_new' function. */
-/* #undef HAVE_OSSL_PARAM_BLD_NEW */
+#define HAVE_OSSL_PARAM_BLD_NEW 1
 
 /* Define to 1 if you have the `poll' function. */
 #define HAVE_POLL 1
@@ -580,7 +563,7 @@
 
 /* Define to 1 if you have the `SSL_CTX_set_tlsext_ticket_key_evp_cb'
    function. */
-/* #undef HAVE_SSL_CTX_SET_TLSEXT_TICKET_KEY_EVP_CB */
+#define HAVE_SSL_CTX_SET_TLSEXT_TICKET_KEY_EVP_CB 1
 
 /* Define to 1 if you have the `SSL_get0_alpn_selected' function. */
 #define HAVE_SSL_GET0_ALPN_SELECTED 1
@@ -589,7 +572,7 @@
 #define HAVE_SSL_GET0_PEERNAME 1
 
 /* Define to 1 if you have the `SSL_get1_peer_certificate' function. */
-/* #undef HAVE_SSL_GET1_PEER_CERTIFICATE */
+#define HAVE_SSL_GET1_PEER_CERTIFICATE 1
 
 /* Define to 1 if you have the `SSL_set1_host' function. */
 #define HAVE_SSL_SET1_HOST 1
@@ -909,7 +892,7 @@
 /* #undef USE_DNSTAP */
 
 /* Define this to enable DSA support. */
-#define USE_DSA 1
+/* #undef USE_DSA */
 
 /* Define this to enable ECDSA support. */
 #define USE_ECDSA 1
