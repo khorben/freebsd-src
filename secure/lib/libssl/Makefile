@@ -3,7 +3,7 @@
 .include <src.opts.mk>
 
 LIB=		ssl
-SHLIB_MAJOR=	111
+SHLIB_MAJOR=	308
 VERSION_MAP=	${.CURDIR}/Version.map
 PACKAGE=	openssl
 
@@ -13,11 +13,11 @@ PCFILES=	libssl.pc openssl.pc
 
 .include "../libcrypto/Makefile.inc"
 
-SRCS=	bio_ssl.c d1_lib.c d1_msg.c d1_srtp.c methods.c packet.c pqueue.c
+SRCS=	bio_ssl.c d1_lib.c d1_msg.c d1_srtp.c methods.c pqueue.c
 SRCS+=	s3_cbc.c s3_enc.c s3_lib.c s3_msg.c ssl_asn1.c ssl_cert.c ssl_ciph.c
-SRCS+=	ssl_conf.c ssl_err.c ssl_init.c ssl_lib.c ssl_mcnf.c ssl_rsa.c
-SRCS+=	ssl_sess.c ssl_stat.c ssl_txt.c t1_enc.c t1_lib.c tls_srp.c
-SRCS+=	tls13_enc.c
+SRCS+=	ssl_conf.c ssl_err.c ssl_err_legacy.c ssl_init.c ssl_lib.c ssl_mcnf.c
+SRCS+=	ssl_rsa.c ssl_sess.c ssl_stat.c ssl_txt.c t1_enc.c t1_lib.c tls_depr.c
+SRCS+=	tls_srp.c tls13_enc.c
 
 # record
 SRCS+=	dtls1_bitmap.c rec_layer_d1.c rec_layer_s3.c ssl3_buffer.c

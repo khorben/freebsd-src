@@ -1,0 +1,183 @@
+diff --git a/contrib/ldns/dnssec_zone.c b/contrib/ldns/dnssec_zone.c
+index 7be6791e7f5d..0a745a0c75d9 100644
+--- a/contrib/ldns/dnssec_zone.c
++++ b/contrib/ldns/dnssec_zone.c
+@@ -5,6 +5,7 @@
+ #include <ldns/config.h>
+ 
+ #include <ldns/ldns.h>
++#include <ldns/internal.h>
+ 
+ ldns_dnssec_rrs *
+ ldns_dnssec_rrs_new(void)
+diff --git a/contrib/ldns/ldns/common.h b/contrib/ldns/ldns/common.h
+index 9abd9b9396e0..c63672a0cd21 100644
+--- a/contrib/ldns/ldns/common.h
++++ b/contrib/ldns/ldns/common.h
+@@ -27,6 +27,7 @@
+ #define LDNS_BUILD_CONFIG_USE_DANE         1
+ #define LDNS_BUILD_CONFIG_HAVE_B32_PTON    0
+ #define LDNS_BUILD_CONFIG_HAVE_B32_NTOP    0
++#define LDNS_BUILD_CONFIG_USE_DSA          1
+ 
+ /*
+  * HAVE_STDBOOL_H is not available when distributed as a library, but no build 
+diff --git a/contrib/ldns/ldns/internal.h b/contrib/ldns/ldns/internal.h
+new file mode 100644
+index 000000000000..dedf93edd42d
+--- /dev/null
++++ b/contrib/ldns/ldns/internal.h
+@@ -0,0 +1,48 @@
++#ifndef LDNS_INTERNAL_H
++#define LDNS_INTERNAL_H
++
++#include <ldns/dnssec_sign.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/* dnssec_zone.c */
++ldns_status
++dnssec_zone_equip_zonemd(ldns_dnssec_zone *zone,
++		ldns_rr_list *new_rrs, ldns_key_list *key_list, int signflags);
++
++/* net.c */
++int
++ldns_tcp_bgsend2(ldns_buffer *qbin,
++		const struct sockaddr_storage *to, socklen_t tolen, 
++		struct timeval timeout);
++int
++ldns_tcp_connect2(const struct sockaddr_storage *to, socklen_t tolen, 
++		struct timeval timeout);
++int
++ldns_udp_bgsend2(ldns_buffer *qbin,
++		const struct sockaddr_storage *to  , socklen_t tolen, 
++		struct timeval timeout);
++int
++ldns_udp_connect2(const struct sockaddr_storage *to, struct timeval ATTR_UNUSED(timeout));
++
++/* packet.c */
++ldns_edns_option_list*
++pkt_edns_data2edns_option_list(const ldns_rdf *edns_data);
++
++/* rr.c */
++ldns_status
++_ldns_rr_new_frm_fp_l_internal(ldns_rr **newrr, FILE *fp,
++		uint32_t *default_ttl, ldns_rdf **origin, ldns_rdf **prev,
++		int *line_nr, bool *explicit_ttl);
++
++/* util.c */
++struct tm *
++ldns_serial_arithmetics_gmtime_r(int32_t time, time_t now, struct tm *result);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* LDNS_INTERNAL_H */
+diff --git a/contrib/ldns/ldns/util.h b/contrib/ldns/ldns/util.h
+index be7f8241eaa9..1d8fa8836a33 100644
+--- a/contrib/ldns/ldns/util.h
++++ b/contrib/ldns/ldns/util.h
+@@ -27,8 +27,8 @@ extern "C" {
+ #define dprintf(X,Y) fprintf(stderr, (X), (Y))
+ /* #define	dprintf(X, Y)  */
+ 
+-#define LDNS_VERSION "1.7.0"
+-#define LDNS_REVISION ((1<<16)|(7<<8)|(0))
++#define LDNS_VERSION "1.8.3"
++#define LDNS_REVISION ((1<<16)|(8<<8)|(3))
+ 
+ /**
+  * splint static inline workaround
+@@ -274,19 +274,22 @@ time_t mktime_from_utc(const struct tm *tm);
+ 
+ /**
+  * The function interprets time as the number of seconds since epoch
+- * with respect to now using serial arithmitics (rfc1982).
++ * with respect to now using serial arithmetics (rfc1982).
+  * That number of seconds is then converted to broken-out time information.
+  * This is especially useful when converting the inception and expiration
+  * fields of RRSIG records.
+  *
+  * \param[in] time number of seconds since epoch (midnight, January 1st, 1970)
+- *            to be intepreted as a serial arithmitics number relative to now.
++ *            to be interpreted as a serial arithmetics number relative to now.
+  * \param[in] now number of seconds since epoch (midnight, January 1st, 1970)
+  *            to which the time value is compared to determine the final value.
+  * \param[out] result the struct with the broken-out time information
+  * \return result on success or NULL on error
+  */
+-struct tm * ldns_serial_arithmitics_gmtime_r(int32_t time, time_t now, struct tm *result);
++struct tm * ldns_serial_arithmetics_gmtime_r(int32_t time, time_t now, struct tm *result);
++
++/* previously used wrong spelling */
++#define ldns_serial_arithmitics_gmtime_r ldns_serial_arithmetics_gmtime_r
+  
+ /**
+  * Seed the random function.
+diff --git a/contrib/ldns/net.c b/contrib/ldns/net.c
+index 57d4dff24dbe..c9af28e9dc06 100644
+--- a/contrib/ldns/net.c
++++ b/contrib/ldns/net.c
+@@ -14,6 +14,7 @@
+ #include <ldns/config.h>
+ 
+ #include <ldns/ldns.h>
++#include <ldns/internal.h>
+ 
+ #ifdef HAVE_NETINET_IN_H
+ #include <netinet/in.h>
+diff --git a/contrib/ldns/packet.c b/contrib/ldns/packet.c
+index afa59005c3bd..3c10a96b4927 100644
+--- a/contrib/ldns/packet.c
++++ b/contrib/ldns/packet.c
+@@ -13,6 +13,7 @@
+ #include <ldns/config.h>
+ 
+ #include <ldns/ldns.h>
++#include <ldns/internal.h>
+ 
+ #include <strings.h>
+ #include <limits.h>
+diff --git a/contrib/ldns/rr.c b/contrib/ldns/rr.c
+index 95ab71d34946..cf565ba0b51d 100644
+--- a/contrib/ldns/rr.c
++++ b/contrib/ldns/rr.c
+@@ -10,6 +10,7 @@
+ #include <ldns/config.h>
+ 
+ #include <ldns/ldns.h>
++#include <ldns/internal.h>
+ 
+ #include <strings.h>
+ #include <limits.h>
+diff --git a/contrib/ldns/util.c b/contrib/ldns/util.c
+index 807a99e2308d..ec20bc4dee16 100644
+--- a/contrib/ldns/util.c
++++ b/contrib/ldns/util.c
+@@ -15,6 +15,7 @@
+ #include <ldns/rdata.h>
+ #include <ldns/rr.h>
+ #include <ldns/util.h>
++#include <ldns/internal.h>
+ #include <strings.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+@@ -312,6 +313,7 @@ ldns_serial_arithmetics_gmtime_r(int32_t time, time_t now, struct tm *result)
+ #endif
+ }
+ 
++#if 0
+ #ifdef ldns_serial_arithmitics_gmtime_r
+ #undef ldns_serial_arithmitics_gmtime_r
+ #endif
+@@ -321,6 +323,7 @@ ldns_serial_arithmitics_gmtime_r(int32_t time, time_t now, struct tm *result)
+ {
+ 	return ldns_serial_arithmetics_gmtime_r(time, now, result);
+ }
++#endif
+ 
+ /**
+  * Init the random source
