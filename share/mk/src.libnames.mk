@@ -342,7 +342,7 @@ _DP_ldns=	ssl crypto
 _DP_lua=	m
 _DP_lutok=	lua
 .if ${MK_OPENSSL} != "no"
-_DP_fetch=	ssl crypto
+_DP_fetch=	ssl crypto md
 .else
 _DP_fetch=	md
 .endif

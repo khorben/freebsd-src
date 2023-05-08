@@ -19,9 +19,8 @@ CFLAGS+=	-DINET6
 .if ${MK_OPENSSL} != "no"
 CFLAGS+=	-DWITH_SSL
 LIBADD+=	ssl crypto
-.else
-LIBADD+=	md
 .endif
+LIBADD+=	md
 
 CFLAGS+=	-DFTP_COMBINE_CWDS
 
