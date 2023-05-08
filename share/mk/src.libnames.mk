@@ -325,7 +325,7 @@ _DP_rt=	pthread
 .if ${MK_OPENSSL} == "no"
 _DP_radius=	md
 .else
-_DP_radius=	crypto
+_DP_radius=	md crypto
 .endif
 _DP_rtld_db=	elf procstat
 _DP_procstat=	kvm util elf

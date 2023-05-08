@@ -35,15 +35,10 @@ __FBSDID("$FreeBSD$");
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef WITH_SSL
-#include <openssl/hmac.h>
-#include <openssl/md5.h>
-#define MD5Init MD5_Init
-#define MD5Update MD5_Update
-#define MD5Final MD5_Final
-#else
+#include <openssl/evp.h>
+#endif
 #define MD5_DIGEST_LENGTH 16
 #include <md5.h>
-#endif
 
 #define	MAX_FIELDS	7
 
@@ -154,25 +149,40 @@ insert_message_authenticator(struct rad_handle *h, int resp)
 {
 #ifdef WITH_SSL
 	u_char md[EVP_MAX_MD_SIZE];
-	u_int md_len;
+	size_t md_len;
 	const struct rad_server *srvp;
-	HMAC_CTX *ctx;
+	EVP_MD_CTX *evpctx = NULL;
+	const EVP_MD *hmd = NULL;
+	EVP_PKEY *pkey = NULL;
 	srvp = &h->servers[h->srv];
 
 	if (h->authentic_pos != 0) {
-		ctx = HMAC_CTX_new();
-		HMAC_Init_ex(ctx, srvp->secret, strlen(srvp->secret), EVP_md5(), NULL);
-		HMAC_Update(ctx, &h->out[POS_CODE], POS_AUTH - POS_CODE);
+		evpctx = EVP_MD_CTX_create();
+		if (evpctx == NULL)
+			goto cleanup;
+		if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+			goto cleanup;
+		if ((pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
+						srvp->secret,
+						strlen(srvp->secret))) == NULL)
+			goto cleanup;
+		if (EVP_DigestSignInit(evpctx, NULL, hmd, NULL, pkey) != 1)
+			goto cleanup;
+		EVP_DigestSignUpdate(evpctx, &h->out[POS_CODE], POS_AUTH - POS_CODE);
 		if (resp)
-		    HMAC_Update(ctx, &h->in[POS_AUTH], LEN_AUTH);
+		    EVP_DigestSignUpdate(evpctx, &h->in[POS_AUTH], LEN_AUTH);
 		else
-		    HMAC_Update(ctx, &h->out[POS_AUTH], LEN_AUTH);
-		HMAC_Update(ctx, &h->out[POS_ATTRS],
-		    h->out_len - POS_ATTRS);
-		HMAC_Final(ctx, md, &md_len);
-		HMAC_CTX_free(ctx);
+		    EVP_DigestSignUpdate(evpctx, &h->out[POS_AUTH], LEN_AUTH);
+		EVP_DigestSignUpdate(evpctx, &h->out[POS_ATTRS], h->out_len - POS_ATTRS);
+		if (!EVP_DigestSignFinal(evpctx, md, &md_len))
+			goto cleanup;
 		memcpy(&h->out[h->authentic_pos + 2], md, md_len);
 	}
+cleanup:
+	if(pkey != NULL)
+		EVP_PKEY_free(pkey);
+	if(evpctx != NULL)
+		EVP_MD_CTX_free(evpctx);
 #endif
 }
 
@@ -191,9 +201,11 @@ is_valid_response(struct rad_handle *h, int srv,
 	int len;
 #ifdef WITH_SSL
 	int alen;
-	HMAC_CTX *hctx;
+	EVP_MD_CTX *hctx;
+	const EVP_MD *hmd;
+	EVP_PKEY *pkey;
 	u_char resp[MSGSIZE], md[EVP_MAX_MD_SIZE];
-	u_int md_len;
+	size_t md_len;
 	int pos;
 #endif
 
@@ -233,45 +245,60 @@ is_valid_response(struct rad_handle *h, int srv,
 		pos = POS_ATTRS;
 
 		/* Search and verify the Message-Authenticator */
-		hctx = HMAC_CTX_new();
+		if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+			return 0;
+		hctx = EVP_MD_CTX_create();
 		while (pos < len - 2) {
 			if (h->in[pos] == RAD_MESSAGE_AUTHENTIC) {
 				if (h->in[pos + 1] != MD5_DIGEST_LENGTH + 2) {
-					HMAC_CTX_free(hctx);
+					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
 				if (len - pos < MD5_DIGEST_LENGTH + 2) {
-					HMAC_CTX_free(hctx);
+					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
 
 				memset(&resp[pos + 2], 0, MD5_DIGEST_LENGTH);
 
-				HMAC_Init_ex(hctx, srvp->secret,
-				    strlen(srvp->secret), EVP_md5(), NULL);
-				HMAC_Update(hctx, &h->in[POS_CODE],
-				    POS_AUTH - POS_CODE);
-				HMAC_Update(hctx, &h->out[POS_AUTH],
-				    LEN_AUTH);
-				HMAC_Update(hctx, &resp[POS_ATTRS],
-				    h->in_len - POS_ATTRS);
-				HMAC_Final(hctx, md, &md_len);
-				HMAC_CTX_reset(hctx);
-				if (memcmp(md, &h->in[pos + 2],
-				    MD5_DIGEST_LENGTH) != 0) {
-					HMAC_CTX_free(hctx);
+				pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
+						srvp->secret,
+						strlen(srvp->secret));
+				if (pkey == NULL) {
+					EVP_MD_CTX_free(hctx);
 					return 0;
 				}
+				if (EVP_DigestSignInit(hctx, NULL, hmd, NULL,
+							pkey) != 1) {
+					EVP_PKEY_free(pkey);
+					EVP_MD_CTX_free(hctx);
+					return 0;
+				}
+				EVP_DigestSignUpdate(hctx, &h->in[POS_CODE],
+				    POS_AUTH - POS_CODE);
+				EVP_DigestSignUpdate(hctx, &h->out[POS_AUTH],
+				    LEN_AUTH);
+				EVP_DigestSignUpdate(hctx, &resp[POS_ATTRS],
+				    h->in_len - POS_ATTRS);
+				EVP_DigestSignFinal(hctx, md, &md_len);
+				EVP_MD_CTX_reset(hctx);
+				if (memcmp(md, &h->in[pos + 2],
+				    MD5_DIGEST_LENGTH) != 0) {
+					EVP_PKEY_free(pkey);
+					EVP_MD_CTX_free(hctx);
+					return 0;
+				}
+				EVP_PKEY_free(pkey);
 				break;
 			}
 			alen = h->in[pos + 1];
 			if (alen < 2) {
-				HMAC_CTX_free(hctx);
+				EVP_MD_CTX_free(hctx);
 				return 0;
 			}
 			pos += alen;
 		}
-		HMAC_CTX_free(hctx);
+		EVP_MD_CTX_free(hctx);
 	}
 #endif
 	return 1;
@@ -289,9 +316,11 @@ is_valid_request(struct rad_handle *h)
 	int len;
 #ifdef WITH_SSL
 	int alen;
-	HMAC_CTX *hctx;
+	EVP_MD_CTX *hctx;
+	const EVP_MD *hmd;
+	EVP_PKEY *pkey;
 	u_char resp[MSGSIZE], md[EVP_MAX_MD_SIZE];
-	u_int md_len;
+	size_t md_len;
 	int pos;
 #endif
 
@@ -320,18 +349,20 @@ is_valid_request(struct rad_handle *h)
 #ifdef WITH_SSL
 	/* Search and verify the Message-Authenticator */
 	pos = POS_ATTRS;
-	hctx = HMAC_CTX_new();
+	if ((hmd = EVP_get_digestbyname("MD5")) == NULL)
+		return 0;
+	hctx = EVP_MD_CTX_create();
 	while (pos < len - 2) {
 		alen = h->in[pos + 1];
 		if (alen < 2)
 			return (0);
 		if (h->in[pos] == RAD_MESSAGE_AUTHENTIC) {
 			if (len - pos < MD5_DIGEST_LENGTH + 2) {
-				HMAC_CTX_free(hctx);
+				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
 			if (alen < MD5_DIGEST_LENGTH + 2) {
-				HMAC_CTX_free(hctx);
+				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
 			memcpy(resp, h->in, MSGSIZE);
@@ -341,21 +372,31 @@ is_valid_request(struct rad_handle *h)
 			/* zero fill the Message-Authenticator */
 			memset(&resp[pos + 2], 0, MD5_DIGEST_LENGTH);
 
-			HMAC_Init_ex(hctx, srvp->secret,
-			    strlen(srvp->secret), EVP_md5(), NULL);
-			HMAC_Update(hctx, resp, h->in_len);
-			HMAC_Final(hctx, md, &md_len);
-			HMAC_CTX_reset(hctx);
+			pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
+					srvp->secret,
+					strlen(srvp->secret));
+			if (pkey == NULL) {
+				EVP_MD_CTX_free(hctx);
+				return (0);
+			}
+			if (EVP_DigestSignInit(hctx, NULL, hmd, NULL, pkey) != 1) {
+				EVP_PKEY_free(pkey);
+				EVP_MD_CTX_free(hctx);
+				return (0);
+			}
+			EVP_DigestSignUpdate(hctx, resp, h->in_len);
+			EVP_DigestSignFinal(hctx, md, &md_len);
+			EVP_MD_CTX_reset(hctx);
 			if (memcmp(md, &h->in[pos + 2],
 			    MD5_DIGEST_LENGTH) != 0) {
-				HMAC_CTX_free(hctx);
+				EVP_MD_CTX_free(hctx);
 				return (0);
 			}
 			break;
 		}
 		pos += alen;
 	}
-	HMAC_CTX_free(hctx);
+	EVP_MD_CTX_free(hctx);
 #endif
 	return (1);
 }

@@ -73,8 +73,7 @@ WARNS?=		3
 .if ${MK_OPENSSL} != "no"
 LIBADD+=	crypto
 CFLAGS+=	-DWITH_SSL
-.else
-LIBADD+=	md
 .endif
+LIBADD+=	md
 
 .include <bsd.lib.mk>
