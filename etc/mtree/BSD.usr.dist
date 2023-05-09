@@ -68,7 +68,7 @@
         ..
         dtrace
         ..
-        engines
+        engines-3
         ..
         flua
         ..
@@ -77,6 +77,7 @@
         libxo
             encoder
             ..
+        ossl-modules
         ..
     ..
     libdata

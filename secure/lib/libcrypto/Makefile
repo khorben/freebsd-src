@@ -1,14 +1,13 @@
 # $FreeBSD$
 
 SHLIBDIR?=	/lib
-SUBDIR=		engines
+SUBDIR=		engines modules
 
 .include <bsd.own.mk>
 .include <src.opts.mk>
 
 PACKAGE=	openssl
 LIB=		crypto
-SHLIB_MAJOR=	308
 VERSION_MAP=	${.CURDIR}/Version.map
 
 NO_LINT=
@@ -18,7 +17,7 @@ PCFILES=	libcrypto.pc
 .include "Makefile.inc"
 
 SRCS=	cpt_err.c cpuid.c cryptlib.c ctype.c cversion.c ex_data.c getenv.c
-SRCS+=	init.c mem.c mem_sec.c o_dir.c o_fopen.c o_init.c
+SRCS+=	info.c init.c mem.c mem_sec.c o_dir.c o_fopen.c o_init.c
 SRCS+=	o_str.c o_time.c threads_pthread.c uid.c
 .if defined(ASM_aarch64)
 SRCS+=	arm64cpuid.S armcap.c
@@ -92,10 +91,10 @@ SRCS+=	bss_acpt.c bss_bio.c bss_conn.c bss_dgram.c bss_fd.c bss_file.c
 SRCS+=	bss_log.c bss_mem.c bss_null.c bss_sock.c
 
 # bn
-SRCS+=	bn_add.c bn_blind.c bn_const.c bn_ctx.c bn_depr.c bn_dh.c bn_div.c
-SRCS+=	bn_err.c bn_exp.c bn_exp2.c bn_gcd.c bn_gf2m.c bn_intern.c bn_kron.c
-SRCS+=	bn_lib.c bn_mod.c bn_mont.c bn_mpi.c bn_mul.c bn_nist.c bn_prime.c
-SRCS+=	bn_print.c bn_rand.c bn_recp.c bn_shift.c bn_sqr.c bn_sqrt.c
+SRCS+=	bn_add.c bn_blind.c bn_const.c bn_conv.c bn_ctx.c bn_depr.c bn_dh.c
+SRCS+=	bn_div.c bn_err.c bn_exp.c bn_exp2.c bn_gcd.c bn_gf2m.c bn_intern.c
+SRCS+=	bn_kron.c bn_lib.c bn_mod.c bn_mont.c bn_mpi.c bn_mul.c bn_nist.c
+SRCS+=	bn_prime.c bn_print.c bn_rand.c bn_recp.c bn_shift.c bn_sqr.c bn_sqrt.c
 SRCS+=	bn_srp.c bn_word.c bn_x931p.c
 .if defined(ASM_aarch64)
 SRCS+=	armv8-mont.S bn_asm.c

@@ -6,6 +6,8 @@
 OPENSSL_VER=	3.0.8
 OPENSSL_DATE=	2023-02-07
 
+SHLIB_MAJOR=	3
+
 LCRYPTO_SRC=	${SRCTOP}/crypto/openssl
 LCRYPTO_DOC=	${LCRYPTO_SRC}/doc
 
@@ -109,7 +111,8 @@ CFLAGS+=	-DKECCAK1600_ASM
 
 .if defined(LIB)
 CFLAGS+=	-DOPENSSLDIR="\"/etc/ssl\""
-CFLAGS+=	-DENGINESDIR="\"${LIBDIR}/engines\""
+CFLAGS+=	-DENGINESDIR="\"${LIBDIR}/engines-${SHLIB_MAJOR}\""
+CFLAGS+=	-DMODULESDIR="\"${LIBDIR}/ossl-modules\""
 .endif
 
 CFLAGS+=	-DNDEBUG

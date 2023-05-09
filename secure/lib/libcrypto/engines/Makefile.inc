@@ -1,6 +1,6 @@
 # $FreeBSD$
 
-SHLIBDIR=	${LIBDIR}/engines
+SHLIBDIR=	${LIBDIR}/engines-${SHLIB_MAJOR}
 
 LCRYPTO_SRC=	${SRCTOP}/crypto/openssl
 
@@ -9,6 +9,7 @@ CFLAGS+=	-I${LCRYPTO_SRC}/include
 CFLAGS+=	-I${OBJTOP}/secure/lib/libcrypto
 
 .include <bsd.endian.mk>
+.include "../Makefile.inc"
 
 .if ${TARGET_ENDIANNESS} == 1234
 CFLAGS+=	-DL_ENDIAN
