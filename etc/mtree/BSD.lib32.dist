@@ -8,7 +8,7 @@
     lib32
         dtrace
         ..
-        engines
+        engines-3
         ..
         geom
         ..

@@ -77,7 +77,6 @@
         libxo
             encoder
             ..
-        ossl-modules
         ..
     ..
     libdata
