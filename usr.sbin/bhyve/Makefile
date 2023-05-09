@@ -110,6 +110,7 @@ LIBADD+=    netgraph
 .if ${MK_OPENSSL} == "no"
 CFLAGS+=-DNO_OPENSSL
 .else
+CFLAGS+=	-DOPENSSL_API_COMPAT=0x10100000L
 LIBADD+=	crypto
 .endif
 
