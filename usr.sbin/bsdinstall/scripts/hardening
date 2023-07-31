@@ -50,14 +50,9 @@ disable_syslogd=$([ -n "$disable_syslogd" -a "$disable_syslogd" = '"-ss"' ] && e
 secure_console=$([ -f $BSDINSTALL_TMPETC/ttys.hardening ] && grep -q 'unknown	off insecure' $BSDINSTALL_TMPETC/ttys.hardening && echo on)
 disable_ddtrace=$(grep -q '^security\.bsd\.allow_destructive_dtrace=0$' $BSDINSTALL_TMPBOOT/loader.conf.hardening && echo on)
 
-# reset the target files
-: > $BSDINSTALL_TMPETC/rc.conf.hardening
-: > $BSDINSTALL_TMPETC/sysctl.conf.hardening
-: > $BSDINSTALL_TMPBOOT/loader.conf.hardening
-
 exec 3>&1
 FEATURES=$( bsddialog --backtitle "$OSNAME Installer" \
-    --title "System Hardening" --nocancel --separate-output \
+    --title "System Hardening" --separate-output \
     --checklist "Choose system security hardening options:" \
     0 0 0 \
 	"0 hide_uids" "Hide processes running as other users" ${hide_uids:-off} \
@@ -77,6 +72,11 @@ exec 3>&-
 if [ $retval -ne $BSDDIALOG_OK ]; then
 	exit 1
 fi
+
+# reset the target files
+: > $BSDINSTALL_TMPETC/rc.conf.hardening
+: > $BSDINSTALL_TMPETC/sysctl.conf.hardening
+: > $BSDINSTALL_TMPBOOT/loader.conf.hardening
 
 for feature in $FEATURES; do
 	case "$feature" in
