@@ -30,13 +30,28 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 
 : ${BSDDIALOG_OK=0}
 
-echo -n > $BSDINSTALL_TMPETC/rc.conf.hardening
-echo -n > $BSDINSTALL_TMPETC/sysctl.conf.hardening
-echo -n > $BSDINSTALL_TMPBOOT/loader.conf.hardening
+# make sure the target files exist
+touch $BSDINSTALL_TMPETC/rc.conf.hardening
+touch $BSDINSTALL_TMPETC/sysctl.conf.hardening
+touch $BSDINSTALL_TMPBOOT/loader.conf.hardening
+
+# load the current settings
+hide_uids=$(grep -q '^security\.bsd\.see_other_uids=0$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+hide_gids=$(grep -q '^security\.bsd\.see_other_gids=0$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+hide_jail=$(grep -q '^security\.bsd\.see_jail_proc=0$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+read_msgbuf=$(grep -q '^security\.bsd\.unprivileged_read_msgbuf=0$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+proc_debug=$(grep -q '^security\.bsd\.unprivileged_proc_debug=0$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+random_pid=$(grep -q '^kern\.randompid=1$' $BSDINSTALL_TMPETC/sysctl.conf.hardening && echo on)
+clear_tmp=$(sysrc -ef $BSDINSTALL_TMPETC/rc.conf.hardening clear_tmp_enable | cut -d = -f 2)
+clear_tmp=$([ -n "$clear_tmp" -a "$clear_tmp" = '"YES"' ] && echo on)
+disable_syslogd=$(sysrc -ef $BSDINSTALL_TMPETC/rc.conf.hardening syslogd_flags | cut -d = -f 2)
+disable_syslogd=$([ -n "$disable_syslogd" -a "$disable_syslogd" = '"-ss"' ] && echo on)
+secure_console=$([ -f $BSDINSTALL_TMPETC/ttys.hardening ] && grep -q 'unknown	off insecure' $BSDINSTALL_TMPETC/ttys.hardening && echo on)
+disable_ddtrace=$(grep -q '^security\.bsd\.allow_destructive_dtrace=0$' $BSDINSTALL_TMPBOOT/loader.conf.hardening && echo on)
 
 exec 5>&1
 FEATURES=$( bsddialog --backtitle "$OSNAME Installer" \
-    --title "System Hardening" --nocancel --separate-output \
+    --title "System Hardening" --separate-output \
     --checklist "Choose system security hardening options:" \
     0 0 0 \
 	"0 hide_uids" "Hide processes running as other users" ${hide_uids:-off} \
@@ -56,6 +71,11 @@ exec 5>&-
 if [ $retval -ne $BSDDIALOG_OK ]; then
 	exit 1
 fi
+
+# reset the target files
+: > $BSDINSTALL_TMPETC/rc.conf.hardening
+: > $BSDINSTALL_TMPETC/sysctl.conf.hardening
+: > $BSDINSTALL_TMPBOOT/loader.conf.hardening
 
 for feature in $FEATURES; do
 	case "$feature" in
