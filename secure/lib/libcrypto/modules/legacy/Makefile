@@ -16,6 +16,9 @@ SRCS+=	cipher_rc4.c cipher_rc4_hw.c
 SRCS+=	cipher_rc4_hmac_md5.c cipher_rc4_hmac_md5_hw.c
 SRCS+=	cipher_seed.c cipher_seed_hw.c
 
+# crypto
+SRCS+=	md4_dgst.c md4_one.c
+
 # digests
 SRCS+=	digestcommon.c
 SRCS+=	md4_prov.c wp_prov.c ripemd_prov.c
@@ -28,7 +31,8 @@ SRCS+=	record/tls_pad.c
 
 .include <bsd.lib.mk>
 
-.PATH:	${LCRYPTO_SRC}/providers/implementations/ciphers \
+.PATH:	${LCRYPTO_SRC}/crypto/md4 \
+	${LCRYPTO_SRC}/providers/implementations/ciphers \
 	${LCRYPTO_SRC}/providers/implementations/digests \
 	${LCRYPTO_SRC}/providers/implementations/kdfs \
 	${LCRYPTO_SRC}/ssl
