@@ -13,7 +13,7 @@ SUBDIR.yes+=	mbr pmbr boot0 boot0sio boot2 cdboot gptboot \
 		isoboot
 
 SUBDIR.${MK_FORTH}+= loader_4th
-SUBDIR.${MK_LOADER_LUA}+= loader_lua
+SUBDIR.${MK_LOADER_LUA}+= loader_lua loader_lua_nozfs
 SUBDIR.yes+=	loader_simp
 
 # special boot programs, 'self-extracting boot2+loader'
@@ -21,6 +21,6 @@ SUBDIR.yes+=	pxeldr
 
 SUBDIR.${MK_LOADER_ZFS}+=	zfsboot gptzfsboot
 
-SUBDIR_DEPEND_pxeldr+=	loader_${LOADER_DEFAULT_INTERP}
+SUBDIR_DEPEND_pxeldr+=	loader_lua_nozfs
 
 .include <bsd.subdir.mk>

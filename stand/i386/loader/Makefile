@@ -106,7 +106,9 @@ LINKS+=		${BINDIR}/${LOADER} ${BINDIR}/zfsloader
 .if ${LOADER_INTERP} == ${LOADER_DEFAULT_INTERP}
 LINKS+=		${BINDIR}/${LOADER} ${BINDIR}/loader
 .endif
+.if ${INSTALL_LOADER_FILE:Uyes} == "yes"
 FILES+=	${LOADER}
+.endif
 FILESMODE_${LOADER}= ${BINMODE} -b
 
 # Note: crt0.o needs to be first for pxeboot(8) to work. It assumes that the
