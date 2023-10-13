@@ -59,11 +59,17 @@ if [ $? -eq $BSDDIALOG_OK ]; then
 		err=$( pkill -F /var/run/dhclient/dhclient.${INTERFACE}.pid; dhclient $INTERFACE 2>&1 )
 		if [ $? -ne 0 ]; then
 			f_dprintf "%s" "$err"
-			bsddialog --backtitle "$OSNAME Installer" --msgbox "DHCP lease acquisition failed." 0 0
+			bsddialog --backtitle "$OSNAME Installer" --title "Error" \
+				--msgbox "DHCP lease acquisition failed." 0 0
 			exec $0 ${INTERFACE} "${IFCONFIG_PREFIX}"
 		fi
 	fi
 	echo ifconfig_$INTERFACE=\"${IFCONFIG_PREFIX}DHCP\" >> $BSDINSTALL_TMPETC/._rc.conf.net
+	if [ $? -ne 0 ]; then
+		bsddialog --backtitle "$OSNAME Installer" --title "Error" \
+		       --msgbox "Could not save the network configuration." 0 0
+		exit 1
+	fi
 	exit 0
 fi
 
@@ -87,6 +93,12 @@ echo $INTERFACE $IF_CONFIG |
     }' >> $BSDINSTALL_TMPETC/._rc.conf.net
 retval=$?
 
+if [ $retval -ne 0 ]; then
+	bsddialog --backtitle "$OSNAME Installer" --title "Error" \
+	       --msgbox "Could not save the network configuration." 0 0
+	exit $retval
+fi
+
 if [ "$BSDINSTALL_CONFIGCURRENT" ]; then
 	. $BSDINSTALL_TMPETC/._rc.conf.net
 	if [ -n "$2" ]; then
@@ -94,13 +106,18 @@ if [ "$BSDINSTALL_CONFIGCURRENT" ]; then
 	else
 		ifconfig $INTERFACE `eval echo \\\$ifconfig_$INTERFACE`
 	fi
-	if [ "$defaultrouter" ]; then
-		route delete -inet default
+	retval=$?
+	route delete -inet default
+	if [ $retval -eq 0 -a -n "$defaultrouter" ]; then
 		route add -inet default $defaultrouter
 		retval=$?
 	fi
 fi
 
+if [ $retval -ne 0 ]; then
+	bsddialog --backtitle "$OSNAME Installer" --title "Error" \
+	       --msgbox "Could not apply the network configuration." 0 0
+fi
 exit $retval
 
 ################################################################################
