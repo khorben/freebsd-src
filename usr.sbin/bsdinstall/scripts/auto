@@ -59,6 +59,7 @@ msg_restart="Restart"
 msg_shell="Shell"
 msg_shell_desc="Open a shell and partition by hand"
 msg_shell_help="Create customized partitions using command-line utilities"
+msg_skip="Skip"
 msg_yes="YES"
 
 ############################################################ FUNCTIONS
@@ -180,9 +181,50 @@ for dist in $DISTRIBUTIONS; do
 done
 
 if [ -n "$FETCH_DISTRIBUTIONS" -a -n "$BSDINSTALL_CONFIGCURRENT" ]; then
+	local proxy_ftp
+	local proxy_http
+	local proxy_no
+	local proxy_socks5
+	local value
+
 	bsddialog --backtitle "$OSNAME Installer" --title "Network Installation" --msgbox "Some installation files were not found on the boot volume. The next few screens will allow you to configure networking so that they can be downloaded from the Internet." 0 0
 	bsdinstall netconfig || error
 	NETCONFIG_DONE=yes
+
+	f_getvar "httpProxy" "proxy_http"
+	[ -n "$proxy_http" ] || proxy_http="$HTTP_PROXY"
+	[ -n "$proxy_http" ] || proxy_http="$http_proxy"
+	[ -n "$proxy_ftp" ] || proxy_ftp="$FTP_PROXY"
+	[ -n "$proxy_ftp" ] || proxy_ftp="$ftp_proxy"
+	[ -n "$proxy_no" ] || proxy_no="$NO_PROXY"
+	[ -n "$proxy_no" ] || proxy_no="$no_proxy"
+	[ -n "$proxy_no" ] || proxy_no="localhost,127.0.0.1"
+	[ -n "$proxy_socks5" ] || proxy_socks5="$SOCKS5_PROXY"
+	unset FTP_PROXY ftp_proxy HTTP_PROXY http_proxy NO_PROXY no_proxy SOCKS5_PROXY
+	exec 5>&1
+	value=$(bsddialog \
+		--title "Network Proxy Setup" \
+		--backtitle "$OSNAME Installer" \
+		--default-no --cancel-label "$msg_skip" \
+		--mixedform "If your networking environment requires setting a proxy for connectivity, specify it here.\nOtherwise, leave the values empty or skip this step." \
+		0 0 0 \
+		"HTTP Proxy:" 1 0 "$proxy_http" 1 14 25 63 0 \
+		"FTP Proxy:" 2 0 "$proxy_ftp" 2 14 25 63 0 \
+		"SOCKS5 Proxy:" 3 0 "$proxy_socks5" 3 14 25 63 0 \
+		"No proxy for:" 4 0 "$proxy_no" 4 14 25 63 0 \
+		2>&1 1>&5)
+	if [ $? -eq $BSDDIALOG_OK ]; then
+		while true; do
+			read HTTP_PROXY; export HTTP_PROXY
+			read FTP_PROXY; export FTP_PROXY
+			read SOCKS5_PROXY; export SOCKS5_PROXY
+			read NO_PROXY; export NO_PROXY
+			break
+		done <<-EOF
+$value
+EOF
+	fi
+	exec 5>&-
 fi
 
 rm -f $PATH_FSTAB
