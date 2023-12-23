@@ -36,6 +36,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 INTERFACES=""
 BSDDIALOG_ITEMS=""
 
+: ${BSDDIALOG=bsddialog}
 : ${BSDDIALOG_OK=0}
 : ${BSDDIALOG_CANCEL=1}
 : ${BSDDIALOG_HELP=2}
@@ -65,14 +66,14 @@ for IF in $INTERFACES; do
 done
 
 if [ -z "$INTERFACES" ]; then
-	bsddialog --backtitle "$OSNAME Installer" \
+	$BSDDIALOG --backtitle "$OSNAME Installer" \
 	    --title 'Network Configuration Error' \
 	    --msgbox 'No network interfaces present to configure.' 0 0
 	exit 1
 fi
 
 exec 5>&1
-INTERFACE=`echo $BSDDIALOG_ITEMS | xargs -o bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' --menu 'Please select a network interface to configure:' 0 0 0 2>&1 1>&5`
+INTERFACE=`echo $BSDDIALOG_ITEMS | xargs -o $BSDDIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' --menu 'Please select a network interface to configure:' 0 0 0 2>&1 1>&5`
 if [ $? -eq $BSDDIALOG_CANCEL ]; then exit 1; fi
 exec 5>&-
 
@@ -103,7 +104,7 @@ case $? in
 esac
 
 if [ ${IPV4_AVAIL} -eq 1 ]; then
-	bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' \
+	$BSDDIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' \
 	    --yesno 'Would you like to configure IPv4 for this interface?' 0 0
 	if [ $? -eq $BSDDIALOG_OK ]; then
 		bsdinstall netconfig_ipv4 ${INTERFACE} "${IFCONFIG_PREFIX}" || \
@@ -118,7 +119,7 @@ if [ ${IPV4_AVAIL} -eq 0 -a -n ${IFCONFIG_PREFIX} ]; then
 	sysrc -f $BSDINSTALL_TMPETC/._rc.conf.net ifconfig_$INTERFACE "${IFCONFIG_PREFIX}"
 fi
 if [ ${IPV6_AVAIL} -eq 1 ]; then
-	bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' \
+	$BSDDIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' \
 	    --yesno 'Would you like to configure IPv6 for this interface?' 0 0
 	if [ $? -eq $BSDDIALOG_OK ]; then
 		bsdinstall netconfig_ipv6 ${INTERFACE} || exec $0
@@ -183,7 +184,7 @@ else
 fi
 
 exec 5>&1
-RESOLV=$(echo "${RESOLV}" | xargs -o bsddialog --backtitle "$OSNAME Installer" \
+RESOLV=$(echo "${RESOLV}" | xargs -o $BSDDIALOG --backtitle "$OSNAME Installer" \
 	--title 'Network Configuration' \
 	--mixedform 'Resolver Configuration' 0 0 0 \
 2>&1 1>&5)
