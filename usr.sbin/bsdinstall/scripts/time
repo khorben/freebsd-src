@@ -28,8 +28,11 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
+: ${BSDDIALOG=bsddialog}
+: ${BSDDIALOG_SHELL=}
+
 # Select timezone
-chroot $BSDINSTALL_CHROOT tzsetup
+$BSDDIALOG_SHELL chroot $BSDINSTALL_CHROOT tzsetup
 
 # Switch to target timezone
 saved_TZ="$TZ"
@@ -38,7 +41,7 @@ export TZ
 
 # Set date
 exec 5>&1
-DATE=$(bsddialog --backtitle "$OSNAME Installer" \
+DATE=$($BSDDIALOG --backtitle "$OSNAME Installer" \
 	--title 'Time & Date' \
 	--ok-label 'Set Date' \
 	--cancel-label 'Skip' \
@@ -50,7 +53,7 @@ exec 5>&-
 
 # Set time
 exec 5>&1
-TIME=$(bsddialog --backtitle "$OSNAME Installer" \
+TIME=$($BSDDIALOG --backtitle "$OSNAME Installer" \
 	--title 'Time & Date' \
 	--ok-label 'Set Time' \
 	--cancel-label 'Skip' \
