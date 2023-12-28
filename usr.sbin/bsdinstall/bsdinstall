@@ -49,13 +49,28 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 
 export debugFile="${debugFile-${BSDINSTALL_LOG-${TMPDIR}/bsdinstall_log}}"
 
+############################################################ USAGE
+
+usage()
+{
+	echo "Usage: bsdinstall -$GETOPTS_EXTRA$GETOPTS_STDARGS" 1>&2
+	echo "  -d	Enable debugging output" 1>&2
+	echo "  -D	Save debugging output to a file" 1>&2
+	return 1
+}
+
 ############################################################ MAIN
 
 #
 # Process command-line arguments
 #
-while getopts $GETOPTS_STDARGS ignored; do
-	: just skipping known flags
+while getopts "$GETOPTS_EXTRA$GETOPTS_STDARGS" name; do
+	case "$name" in
+		'?')
+			usage
+			exit $?
+			;;
+	esac
 done
 shift $(( $OPTIND - 1 ))
 
