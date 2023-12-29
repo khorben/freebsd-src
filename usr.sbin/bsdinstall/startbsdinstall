@@ -9,19 +9,22 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 : ${BSDDIALOG_EXTRA=3}
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
+: ${BSDINSTALL=bsdinstall}
 
-if test "x$DISPLAY" != "x"; then
+if test "x$1" = "x-X"; then
+	shift
+
 	# Graphical installer
 	: ${BSDDIALOG=gbsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=/bin/sh -c /usr/local/bin/deforaos-session}
 	: ${BSDDIALOG_SHELL=xterm -e}
-	: ${USE_DIALOG=}
-	: ${USE_XDIALOG=1}
+	: ${BSDINSTALL_ARGS=-X}
 	export BSDDIALOG
 else
 	: ${BSDDIALOG=bsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=:}
 	: ${BSDDIALOG_SHELL=}
+	: ${BSDINSTALL_ARGS=}
 	kbdcontrol -d >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		# Syscons: use xterm, start interesting things on other VTYs
@@ -63,7 +66,7 @@ fi
 if [ -f /etc/installerconfig ]; then
 	if [ "$1" != "primary" ]; then
 		$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Installing" --msgbox "${OSNAME} is being installed from a script; please use the primary console." 0 0
-		. "$0"
+		. "$0" $BSDINSTALL_ARGS
 	elif bsdinstall script /etc/installerconfig; then
 		$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Complete" --no-cancel --ok-label "Reboot" --pause "Installation of ${OSNAME} complete! Rebooting in 10 seconds" 10 30 10
 		reboot
@@ -84,7 +87,7 @@ $BSDDIALOG_OK)	# Install
 	fi
 
 	trap true SIGINT	# Ignore cntrl-C here
-	bsdinstall
+	$BSDINSTALL $BSDINSTALL_ARGS
 	if [ $? -eq 0 ]; then
 		$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Complete" --ok-label "Reboot" --extra-button --extra-label "Shutdown" --cancel-label "Live System" --yesno "Installation of ${OSNAME} complete! Would you like to reboot into the installed system now?" 0 0
 
@@ -106,15 +109,15 @@ $BSDDIALOG_OK)	# Install
 				sleep 1
 			done
 			;;
-		$BSDDIALOG_CANCEL)	# Live System
+		$BSDDIALOG_CANCEL)	# Live System (resume multi-user boot)
 			exit 0
 			;;
 		esac
 	else
-		. "$0"
+		. "$0" $BSDINSTALL_ARGS
 	fi
 	;;
-$BSDDIALOG_CANCEL)	# Live System
+$BSDDIALOG_CANCEL)	# Live System (resume multi-user boot)
 	$BSDDIALOG_LIVE_SESSION
 	exit 0
 	;;
@@ -122,7 +125,7 @@ $BSDDIALOG_EXTRA)	# Shell
 	clear
 	echo "When finished, type 'exit' to return to the installer."
 	$BSDDIALOG_SHELL /bin/sh
-	. "$0"
+	. "$0" $BSDINSTALL_ARGS
 	;;
 esac
 
