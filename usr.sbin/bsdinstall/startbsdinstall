@@ -7,6 +7,7 @@
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
 : ${BSDINSTALL=bsdinstall}
+: ${OSNAME=FreeBSD}
 
 if test "x$1" = "x-X"; then
 	shift
@@ -42,7 +43,7 @@ else
 	else
 		# Serial or other console
 		echo
-		echo "Welcome to FreeBSD!"
+		echo "Welcome to $OSNAME!"
 		echo
 		echo "Please choose the appropriate terminal type for your system."
 		echo "Common console types are:"
@@ -62,18 +63,18 @@ fi
 
 if [ -f /etc/installerconfig ]; then
 	if [ "$1" != "primary" ]; then
-		$BSDDIALOG --backtitle "FreeBSD Installer" --title "Installing" --msgbox "FreeBSD is being installed from a script; please use the primary console." 0 0
+		$BSDDIALOG --backtitle "$OSNAME Installer" --title "Installing" --msgbox "$OSNAME is being installed from a script; please use the primary console." 0 0
 		. "$0" $BSDINSTALL_ARGS
 	elif $BSDINSTALL $BSDINSTALL_ARGS script /etc/installerconfig; then
-		$BSDDIALOG --backtitle "FreeBSD Installer" --title "Complete" --no-cancel --ok-label "Reboot" --pause "Installation of FreeBSD complete! Rebooting in 10 seconds" 10 30 10
+		$BSDDIALOG --backtitle "$OSNAME Installer" --title "Complete" --no-cancel --ok-label "Reboot" --pause "Installation of $OSNAME complete! Rebooting in 10 seconds" 10 30 10
 		reboot
 	else
-		$BSDDIALOG --backtitle "FreeBSD Installer" --title "Error" --textbox /tmp/bsdinstall_log 0 0
+		$BSDDIALOG --backtitle "$OSNAME Installer" --title "Error" --textbox /tmp/bsdinstall_log 0 0
 	fi
 	exit 
 fi
 
-$BSDDIALOG --backtitle "FreeBSD Installer" --title "Welcome" --extra-button --extra-label "Shell" --ok-label "Install" --cancel-label "Live System" --yesno "Welcome to FreeBSD! Would you like to begin an installation or use the live system?" 0 0
+$BSDDIALOG --backtitle "$OSNAME Installer" --title "Welcome" --extra-button --extra-label "Shell" --ok-label "Install" --cancel-label "Live System" --yesno "Welcome to $OSNAME! Would you like to begin an installation or use the live system?" 0 0
 
 case $? in
 $BSDDIALOG_OK)	# Install
@@ -86,7 +87,7 @@ $BSDDIALOG_OK)	# Install
 	trap true SIGINT	# Ignore cntrl-C here
 	$BSDINSTALL $BSDINSTALL_ARGS
 	if [ $? -eq 0 ]; then
-		$BSDDIALOG --backtitle "FreeBSD Installer" --title "Complete" --ok-label "Reboot" --extra-button --extra-label "Shutdown" --cancel-label "Live System" --yesno "Installation of FreeBSD complete! Would you like to reboot into the installed system now?" 0 0
+		$BSDDIALOG --backtitle "$OSNAME Installer" --title "Complete" --ok-label "Reboot" --extra-button --extra-label "Shutdown" --cancel-label "Live System" --yesno "Installation of $OSNAME complete! Would you like to reboot into the installed system now?" 0 0
 
 		case $? in
 		$BSDDIALOG_OK)		# Reboot
