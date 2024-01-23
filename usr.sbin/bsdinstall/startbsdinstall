@@ -10,6 +10,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
 : ${BSDINSTALL=bsdinstall}
+: ${OSNAME=FreeBSD}
 
 if test "x$1" = "x-X"; then
 	shift
