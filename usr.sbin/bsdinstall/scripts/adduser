@@ -118,10 +118,9 @@ $errormsg" 0 0 0 \
 		[ -n "$homedir" ] || homedir="/home/$username"
 		[ -n "$perms" ] || perms="0755"
 
-		#FIXME does not set the UID or the full name
-		chroot $BSDINSTALL_CHROOT /usr/sbin/pw useradd \
-			"$username" -u "$newuid" -g "$newgroup" -G "$groups" \
-			-d "$homedir" -L "$class" -s "$shell")
+		chroot $BSDINSTALL_CHROOT /usr/sbin/pw useradd -n "$username" \
+			-c "$fullname" -u "$newuid" -g "$newgroup" \
+			-G "$groups" -d "$homedir" -L "$class" -s "$shell")
 	errormsg=$(error_get_message $?)
 	[ -z "$errormsg" ] || continue
 
