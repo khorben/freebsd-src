@@ -111,13 +111,23 @@ $errormsg" 0 0 0 \
 		read perms
 		[ -n "$username" ] || exit 63
 		[ -n "$newuid" ] || newuid="$uid"
-		[ -n "$newgroup" ] || newgroup="$gid"
-		[ "$newgroup" != "$username" ] || newgroup=
+		[ -n "$newgroup" ] || newgroup="$username"
 		[ -n "$class" ] || class="default"
 		[ -n "$shell" ] || shell="/bin/sh"
 		[ -n "$homedir" ] || homedir="/home/$username"
 		[ -n "$perms" ] || perms="0755"
 
+		# create the group if necessary
+		chroot $BSDINSTALL_CHROOT /usr/sbin/pw group show \
+			"$newgroup" > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			chroot $BSDINSTALL_CHROOT /usr/sbin/pw group add \
+				-n "$newgroup"
+			errormsg=$(error_get_message $?)
+			[ -z "$errormsg" ] || continue
+		fi
+
+		# create the user
 		chroot $BSDINSTALL_CHROOT /usr/sbin/pw useradd -n "$username" \
 			-c "$fullname" -u "$newuid" -g "$newgroup" \
 			-G "$groups" -d "$homedir" -L "$class" -s "$shell")
