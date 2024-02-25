@@ -30,9 +30,11 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 
 : ${BSDDIALOG=bsddialog}
 : ${BSDDIALOG_SHELL=}
+: ${BSDINSTALL=bsdinstall}
+: ${BSDINSTALL_ARGS=}
 
 # Select timezone
-$BSDDIALOG_SHELL chroot $BSDINSTALL_CHROOT tzsetup
+$BSDINSTALL $BSDINSTALL_ARGS timezone
 
 # Switch to target timezone
 saved_TZ="$TZ"
