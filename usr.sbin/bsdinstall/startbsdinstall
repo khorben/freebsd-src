@@ -21,6 +21,9 @@ if test "x$1" = "x-X"; then
 	: ${BSDDIALOG_SHELL=xterm -e}
 	: ${BSDINSTALL_ARGS=-X}
 	export BSDDIALOG
+
+	# Setup the backtitle
+	$BSDDIALOG --backtitle "$OSNAME Installer" --clear-screen &
 else
 	: ${BSDDIALOG=bsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=:}
