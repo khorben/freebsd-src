@@ -103,7 +103,7 @@ $BSDDIALOG_OK)	# Install
 
 		case $? in
 		$BSDDIALOG_OK)		# Reboot
-			$BSDINSTALL_SHELL reboot
+			reboot
 			;;
 		$BSDDIALOG_EXTRA)	# Shutdown
 			shutdown -p now
