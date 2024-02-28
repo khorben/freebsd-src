@@ -18,18 +18,19 @@ if test "x$1" = "x-X"; then
 	# Graphical installer
 	: ${BSDDIALOG=gbsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=/bin/sh -c /usr/local/bin/deforaos-session}
-	: ${BSDDIALOG_SHELL=xterm -e}
 	: ${BSDINSTALL_SKIP_HARDENING=1}
 	: ${BSDINSTALL_ARGS=-X}
+	: ${BSDINSTALL_SHELL=xterm -e}
 	export BSDDIALOG
+	export BSDINSTALL_SHELL
 
 	# Setup the backtitle
 	$BSDDIALOG --backtitle "$OSNAME Installer" --clear-screen &
 else
 	: ${BSDDIALOG=bsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=:}
-	: ${BSDDIALOG_SHELL=}
 	: ${BSDINSTALL_ARGS=}
+	: ${BSDINSTALL_SHELL=}
 	kbdcontrol -d >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		# Syscons: use xterm, start interesting things on other VTYs
@@ -98,10 +99,10 @@ $BSDDIALOG_OK)	# Install
 
 		case $? in
 		$BSDDIALOG_OK)		# Reboot
-			$BSDDIALOG_SHELL reboot
+			$BSDINSTALL_SHELL reboot
 			;;
 		$BSDDIALOG_EXTRA)	# Shutdown
-			$BSDDIALOG_SHELL shutdown -p now
+			$BSDINSTALL_SHELL shutdown -p now
 			# shutdown(8) daemonizes, with the actual signal to
 			# init(8) happening in the child, but if we exit the
 			# script then runconsoles will clean up its children
@@ -129,7 +130,7 @@ $BSDDIALOG_CANCEL)	# Live System (resume multi-user boot)
 $BSDDIALOG_EXTRA)	# Shell
 	clear
 	echo "When finished, type 'exit' to return to the installer."
-	$BSDDIALOG_SHELL /bin/sh
+	$BSDINSTALL_SHELL /bin/sh
 	. "$0" $BSDINSTALL_ARGS
 	;;
 esac
