@@ -19,6 +19,7 @@ if test "x$1" = "x-X"; then
 	: ${BSDDIALOG=gbsddialog}
 	: ${BSDDIALOG_LIVE_SESSION=/bin/sh -c /usr/local/bin/deforaos-session}
 	: ${BSDDIALOG_SHELL=xterm -e}
+	: ${BSDINSTALL_SKIP_HARDENING=1}
 	: ${BSDINSTALL_ARGS=-X}
 	export BSDDIALOG
 
