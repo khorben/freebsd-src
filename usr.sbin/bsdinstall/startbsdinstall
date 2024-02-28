@@ -18,9 +18,9 @@ if test "x$1" = "x-X"; then
 	# Graphical installer
 	: ${BSDDIALOG=gbsddialog}
 	: ${BSDINSTALL_ARGS=-X}
-	: ${BSDINSTALL_LIVE_SESSION=/bin/sh -c /usr/local/bin/deforaos-session}
+	: ${BSDINSTALL_LIVE_SESSION="/bin/sh -c /usr/local/bin/deforaos-session"}
 	: ${BSDINSTALL_PARTMODE="Auto (ZFS)"}
-	: ${BSDINSTALL_SHELL=xterm -e}
+	: ${BSDINSTALL_SHELL="xterm -e"}
 	: ${BSDINSTALL_SKIP_HARDENING=1}
 	export BSDDIALOG
 	export BSDINSTALL_ARGS BSDINSTALL_PARTMODE BSDINSTALL_SHELL
@@ -77,7 +77,7 @@ if [ -f /etc/installerconfig ]; then
 	if [ "$1" != "primary" ]; then
 		$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Installing" --msgbox "${OSNAME} is being installed from a script; please use the primary console." 0 0
 		. "$0" $BSDINSTALL_ARGS
-	elif bsdinstall script /etc/installerconfig; then
+	elif $BSDINSTALL script /etc/installerconfig; then
 		$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Complete" --no-cancel --ok-label "Reboot" --pause "Installation of ${OSNAME} complete! Rebooting in 10 seconds" 10 30 10
 		reboot
 	else
@@ -106,7 +106,7 @@ $BSDDIALOG_OK)	# Install
 			$BSDINSTALL_SHELL reboot
 			;;
 		$BSDDIALOG_EXTRA)	# Shutdown
-			$BSDINSTALL_SHELL shutdown -p now
+			shutdown -p now
 			# shutdown(8) daemonizes, with the actual signal to
 			# init(8) happening in the child, but if we exit the
 			# script then runconsoles will clean up its children
