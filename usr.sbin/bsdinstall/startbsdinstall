@@ -103,9 +103,11 @@ $BSDDIALOG_OK)	# Install
 
 		case $? in
 		$BSDDIALOG_OK)		# Reboot
+			$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Please wait" --infobox "Rebooting..." 0 0
 			reboot
 			;;
 		$BSDDIALOG_EXTRA)	# Shutdown
+			$BSDDIALOG --backtitle "${OSNAME} Installer" --title "Please wait" --infobox "Shutting down..." 0 0
 			shutdown -p now
 			# shutdown(8) daemonizes, with the actual signal to
 			# init(8) happening in the child, but if we exit the
