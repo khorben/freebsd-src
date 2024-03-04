@@ -37,8 +37,8 @@ elif [ -n "$ROOTPASS_PLAIN" ]; then
 	exit $?
 fi
 
-: ${BSDDIALOG=bsddialog}
-: ${BSDDIALOG_OK=0}
+: ${BSDDIALOG:=bsddialog}
+: ${BSDDIALOG_OK:=0}
 
 error_get_message()
 {

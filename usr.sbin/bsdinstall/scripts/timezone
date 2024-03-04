@@ -28,8 +28,8 @@
 
 # Select timezone
 
-: ${BSDDIALOG=bsddialog}
-: ${BSDDIALOG_OK=0}
+: ${BSDDIALOG:=bsddialog}
+: ${BSDDIALOG_OK:=0}
 
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
