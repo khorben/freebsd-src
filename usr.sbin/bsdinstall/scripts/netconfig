@@ -36,14 +36,14 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 INTERFACES=""
 BSDDIALOG_ITEMS=""
 
-: ${BSDDIALOG=bsddialog}
-: ${BSDDIALOG_OK=0}
-: ${BSDDIALOG_CANCEL=1}
-: ${BSDDIALOG_HELP=2}
-: ${BSDDIALOG_EXTRA=3}
-: ${BSDDIALOG_ESC=5}
-: ${BSDDIALOG_ERROR=255}
-: ${BSDINSTALL=bsdinstall}
+: ${BSDDIALOG:=bsddialog}
+: ${BSDDIALOG_OK:=0}
+: ${BSDDIALOG_CANCEL:=1}
+: ${BSDDIALOG_HELP:=2}
+: ${BSDDIALOG_EXTRA:=3}
+: ${BSDDIALOG_ESC:=5}
+: ${BSDDIALOG_ERROR:=255}
+: ${BSDINSTALL:=bsdinstall}
 : ${BSDINSTALL_ARGS=}
 
 for IF in `ifconfig -l`; do

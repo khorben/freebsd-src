@@ -31,9 +31,9 @@ test -f $BSDINSTALL_DISTDIR/MANIFEST || exit 0
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
-: ${TMPDIR=/tmp}
-: ${BSDDIALOG=bsddialog}
-: ${BSDINSTALL_TMPCHECKSUM="${TMPDIR}/bsdinstall_checksum"}
+: ${TMPDIR:="/tmp"}
+: ${BSDDIALOG:="bsddialog"}
+: ${BSDINSTALL_TMPCHECKSUM:="${TMPDIR}/bsdinstall_checksum"}
 
 checksum()
 {
@@ -88,7 +88,7 @@ checksum | $BSDDIALOG --backtitle "$OSNAME Installer" \
 		 --gauge "\nVerifying checksums of selected distributions.\n" \
 		 0 0 0
 
- if [ -f "$BSDINSTALL_TMPCHECKSUM" ]; then
+if [ -f "$BSDINSTALL_TMPCHECKSUM" ]; then
 	$BSDDIALOG --backtitle "$OSNAME Installer" --title "Error" \
 	    --msgbox "$(cat "$BSDINSTALL_TMPCHECKSUM")" 0 0
 	rm -f "$BSDINSTALL_TMPCHECKSUM"

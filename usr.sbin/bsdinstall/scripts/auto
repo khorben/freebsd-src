@@ -31,8 +31,8 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 f_include $BSDCFG_SHARE/dialog.subr
-: ${BSDDIALOG=bsddialog}
-: ${BSDINSTALL=bsdinstall}
+: ${BSDDIALOG:=bsddialog}
+: ${BSDINSTALL:=bsdinstall}
 : ${BSDINSTALL_ARGS=}
 : ${BSDINSTALL_SHELL=}
 

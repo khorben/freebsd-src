@@ -28,8 +28,8 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
-: ${BSDDIALOG=bsddialog}
-: ${BSDDIALOG_OK=0}
+: ${BSDDIALOG:=bsddialog}
+: ${BSDDIALOG_OK:=0}
 
 if [ -f $BSDINSTALL_TMPETC/rc.conf.services ]; then
 	eval "$( sed -E -e 's/\<(YES|AUTO)\>/on/i' -e 's/\<NO\>/off/i' \
