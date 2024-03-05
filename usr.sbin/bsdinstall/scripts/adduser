@@ -130,7 +130,7 @@ $errormsg" 0 0 0 \
 		# create the user
 		chroot $BSDINSTALL_CHROOT /usr/sbin/pw useradd -n "$username" \
 			-c "$fullname" -u "$newuid" -g "$newgroup" \
-			-G "$groups" -d "$homedir" -L "$class" -s "$shell")
+			-G "$groups" -m -d "$homedir" -L "$class" -s "$shell")
 	errormsg=$(error_get_message $?)
 	[ -z "$errormsg" ] || continue
 
