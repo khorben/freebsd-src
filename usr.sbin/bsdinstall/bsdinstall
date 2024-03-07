@@ -70,8 +70,8 @@ usage()
 while getopts "$GETOPTS_EXTRA$GETOPTS_STDARGS" name; do
 	case "$name" in
 		X)
-			: ${USE_DIALOG=}
-			: ${USE_XDIALOG=1}
+			USE_DIALOG=
+			USE_XDIALOG=1
 			;;
 		'?')
 			usage
@@ -91,19 +91,19 @@ VERB="${1:-auto}"; shift
 f_quietly f_debug_init
 f_isset debugFile || debug=
 
-f_dprintf "Running installation step: %s %s" "$VERB" "$*"
+f_dprintf "Running installation step: %s %s" "$VERB" "${USE_XDIALOG:+-X }$*"
 if [ "$debug" ]; then
 	case "$debugFile" in
 	# If NULL, send errors to the bit-bucket
-	"") exec "/usr/libexec/bsdinstall/$VERB" "$@" 2> /dev/null ;;
+	"") exec "/usr/libexec/bsdinstall/$VERB" ${USE_XDIALOG:+-X} "$@" 2> /dev/null ;;
 	# If begins with `+', send errors to both terminal and file (no `+')
-	+*) exec "/usr/libexec/bsdinstall/$VERB" "$@" \
+	+*) exec "/usr/libexec/bsdinstall/$VERB" ${USE_XDIALOG:+-X} "$@" \
 		2>&1 >&$TERMINAL_STDOUT_PASSTHRU | tee "${debugFile#+}" ;;
 	# Otherwise, just send errors to the file specified
-	*) exec "/usr/libexec/bsdinstall/$VERB" "$@" 2>> "$debugFile"
+	*) exec "/usr/libexec/bsdinstall/$VERB" ${USE_XDIALOG:+-X} "$@" 2>> "$debugFile"
 	esac
 else
-	exec "/usr/libexec/bsdinstall/$VERB" "$@" 2> /dev/null
+	exec "/usr/libexec/bsdinstall/$VERB" ${USE_XDIALOG:+-X} "$@" 2> /dev/null
 fi
 
 ################################################################################
