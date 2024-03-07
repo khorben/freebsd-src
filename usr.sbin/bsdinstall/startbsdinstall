@@ -3,21 +3,21 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
-: ${BSDDIALOG_OK=0}
-: ${BSDDIALOG_CANCEL=1}
-: ${BSDDIALOG_HELP=2}
-: ${BSDDIALOG_EXTRA=3}
-: ${BSDDIALOG_ESC=5}
-: ${BSDDIALOG_ERROR=255}
-: ${BSDINSTALL=bsdinstall}
-: ${OSNAME=FreeBSD}
+: ${BSDDIALOG_OK:=0}
+: ${BSDDIALOG_CANCEL:=1}
+: ${BSDDIALOG_HELP:=2}
+: ${BSDDIALOG_EXTRA:=3}
+: ${BSDDIALOG_ESC:=5}
+: ${BSDDIALOG_ERROR:=255}
+: ${BSDINSTALL:="bsdinstall"}
+: ${OSNAME:="FreeBSD"}
 
 if test "x$1" = "x-X"; then
 	shift
 
 	# Graphical installer
-	: ${BSDDIALOG:=gbsddialog}
-	: ${BSDINSTALL_ARGS=-X}
+	: ${BSDDIALOG:="gbsddialog"}
+	: ${BSDINSTALL_ARGS="-X"}
 	: ${BSDINSTALL_LIVE_SESSION:="/bin/sh -c /usr/local/bin/deforaos-session"}
 	: ${BSDINSTALL_PARTMODE:="Auto (ZFS)"}
 	: ${BSDINSTALL_SHELL="xterm -e"}
@@ -33,9 +33,9 @@ if test "x$1" = "x-X"; then
 	# Setup the backtitle
 	$BSDDIALOG --backtitle "$OSNAME Installer" --clear-screen &
 else
-	: ${BSDDIALOG:=bsddialog}
+	: ${BSDDIALOG:="bsddialog"}
 	: ${BSDINSTALL_ARGS=}
-	: ${BSDINSTALL_LIVE_SESSION=:}
+	: ${BSDINSTALL_LIVE_SESSION=":"}
 	: ${BSDINSTALL_SHELL=}
 	export BSDDIALOG
 	export BSDINSTALL_ARGS BSDINSTALL_SHELL
