@@ -287,7 +287,7 @@ if f_interactive; then
 	esac
 fi
 
-if "$BSDINSTALL_PARTMODE"; then
+if [ "$BSDINSTALL_PARTMODE" ]; then
 	PARTMODE="$BSDINSTALL_PARTMODE"
 else
 	PMODES="
