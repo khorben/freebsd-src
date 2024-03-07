@@ -1,0 +1,87 @@
+#!/bin/sh
+#-
+# Copyright (c) 2011 Nathan Whitehorn
+# Copyright (c) 2024 The FreeBSD Foundation
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+
+test -f $BSDINSTALL_DISTDIR/MANIFEST || exit 0
+
+BSDCFG_SHARE="/usr/share/bsdconfig"
+. $BSDCFG_SHARE/common.subr || exit 1
+
+: ${BSDDIALOG:="bsddialog"}
+: ${TAR:="tar"}
+: ${TMPDIR:="/tmp"}
+
+: ${BSDINSTALL_TMPDISTINSTALL:="${TMPDIR}/bsdinstall_distinstall"}
+
+distinstall()
+{
+	percentage=0
+	for dist in $DISTRIBUTIONS; do
+		echo "XXX"
+		echo "$percentage"
+		echo
+		echo "$dist: installing..."
+
+		CK=`sha256 -q $BSDINSTALL_DISTDIR/$dist`
+		$TAR xzpf "$BSDINSTALL_DISTDIR/$dist" -C "$BSDINSTALL_CHROOT"
+
+		CK_VALID=$?
+		if [ $CK_VALID -eq 0 ]; then
+			percentage=$((percentage + 100/$(echo $DISTRIBUTIONS | wc -w) ))
+			echo "XXX"
+			echo "$percentage"
+			echo
+			echo "$dist: installation successful"
+		else
+			case $(/bin/freebsd-version -u) in
+			*-ALPHA*|*-CURRENT|*-STABLE|*-PRERELEASE)
+				echo "EOF"
+				echo "The installation for $dist did not work. It may have become corrupted. Please check for a valid snapshot." > "$BSDINSTALL_TMPDISTINSTALL"
+				;;
+			*)
+				echo "EOF"
+				echo "The installation for $dist did not work. It may have become corrupted, and should be redownloaded." > "$BSDINSTALL_TMPDISTINSTALL"
+				;;
+			esac
+			exit 1
+		fi
+	done
+	echo "EOF"
+}
+
+distinstall | $BSDDIALOG --backtitle "$OSNAME Installer" \
+		 --title "Installation" \
+		 --gauge "\nInstalling the distributions selected.\n" \
+		 0 0 0
+
+if [ -f "$BSDINSTALL_TMPDISTINSTALL" ]; then
+	$BSDDIALOG --backtitle "$OSNAME Installer" --title "Error" \
+	    --msgbox "$(cat "$BSDINSTALL_TMPDISTINSTALL")" 0 0
+	rm -f "$BSDINSTALL_TMPDISTINSTALL"
+	exit 1
+fi
+exit 0

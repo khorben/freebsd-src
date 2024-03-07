@@ -4,6 +4,7 @@ SCRIPTS=auto \
 	bootconfig \
 	checksum \
 	config \
+	distinstall \
 	docsinstall \
 	entropy \
 	fetchmissingdists \

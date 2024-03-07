@@ -356,7 +356,12 @@ if [ -n "$FETCH_DISTRIBUTIONS" ]; then
 	[ $FETCH_RESULT -ne 0 ] && error "Could not fetch remote distributions"
 fi
 $BSDINSTALL $BSDINSTALL_ARGS checksum || error "Distribution checksum failed"
-$BSDINSTALL $BSDINSTALL_ARGS distextract || error "Distribution extract failed"
+if [ "$USE_XDIALOG" ]; then
+	# XXX Simplified version of the same
+	$BSDINSTALL $BSDINSTALL_ARGS distinstall || error "Distribution install failed"
+else
+	$BSDINSTALL $BSDINSTALL_ARGS distextract || error "Distribution extract failed"
+fi
 
 # Set up boot loader
 $BSDINSTALL $BSDINSTALL_ARGS bootconfig || error "Failed to configure bootloader"
