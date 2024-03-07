@@ -25,10 +25,10 @@ if test "x$1" = "x-X"; then
 	export BSDDIALOG
 	export BSDINSTALL_ARGS BSDINSTALL_PARTMODE BSDINSTALL_SHELL
 	export BSDINSTALL_SKIP_HARDENING
-	# for bsdconfig(8)
-	: ${DIALOG:=Xdialog}
-	: ${USE_XDIALOG:=1}
-	export DIALOG USE_XDIALOG
+
+	# XXX For compatibility with Xdialog(1) from x11/gbsddialog
+	POSIXLY_CORRECT=1
+	export POSIXLY_CORRECT
 
 	# Setup the backtitle
 	$BSDDIALOG --backtitle "$OSNAME Installer" --clear-screen &
