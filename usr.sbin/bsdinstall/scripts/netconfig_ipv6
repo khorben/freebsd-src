@@ -48,6 +48,8 @@ f_include $BSDCFG_SHARE/dialog.subr
 # - Add DHCPv6 support once FreeBSD ships with it.
 #
 
+[ "x$1" = "x-X" ] && shift
+
 INTERFACE=$1
 AUTO="${2:-}"
 case "${INTERFACE}" in

@@ -152,10 +152,10 @@ mkdir $BSDINSTALL_TMPETC
 [ -f /usr/libexec/bsdinstall/local.pre-everything ] && f_dprintf "Running local.pre-everything" && sh /usr/libexec/bsdinstall/local.pre-everything "$BSDINSTALL_CHROOT"
 
 trap true SIGINT	# This section is optional
-[ -z "$BSDINSTALL_SKIP_KEYMAP" ] && $BSDINSTALL $BSDINSTALL_ARGS keymap
+[ -z "$BSDINSTALL_SKIP_KEYMAP" ] && $BSDINSTALL $BSDINSTALL_ARGS keymap ${USE_XDIALOG:+-X}
 
 trap error SIGINT	# Catch cntrl-C here
-if [ -z "$BSDINSTALL_SKIP_HOSTNAME" ]; then $BSDINSTALL $BSDINSTALL_ARGS hostname || error "Set hostname failed"; fi
+if [ -z "$BSDINSTALL_SKIP_HOSTNAME" ]; then $BSDINSTALL $BSDINSTALL_ARGS hostname ${USE_XDIALOG:+-X} || error "Set hostname failed"; fi
 
 export DISTRIBUTIONS="${DISTRIBUTIONS:-base.txz kernel.txz}"
 if [ -f $BSDINSTALL_DISTDIR/MANIFEST ]; then
@@ -319,7 +319,7 @@ fi
 
 case "$PARTMODE" in
 "$msg_auto_zfs")	# ZFS
-	$BSDINSTALL $BSDINSTALL_ARGS zfsboot || error "ZFS setup failed"
+	$BSDINSTALL $BSDINSTALL_ARGS zfsboot ${USE_XDIALOG:+-X} || error "ZFS setup failed"
 	$BSDINSTALL $BSDINSTALL_ARGS mount || error "Failed to mount filesystem"
 	;;
 "$msg_auto_ufs")	# Guided UFS
@@ -364,7 +364,7 @@ else
 fi
 
 # Set up boot loader
-$BSDINSTALL $BSDINSTALL_ARGS bootconfig || error "Failed to configure bootloader"
+$BSDINSTALL $BSDINSTALL_ARGS bootconfig ${USE_XDIALOG:+-X} || error "Failed to configure bootloader"
 
 [ -f /usr/libexec/bsdinstall/local.pre-configure ] && f_dprintf "Running local.pre-configure" && sh /usr/libexec/bsdinstall/local.pre-configure "$BSDINSTALL_CHROOT"
 

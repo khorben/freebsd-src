@@ -148,6 +148,8 @@ dialog_country_select()
 
 ############################################################ MAIN
 
+[ "x$1" = "x-X" ] && shift
+
 : > "$BSDINSTALL_TMPETC/wpa_supplicant.conf"
 chmod 0600 "$BSDINSTALL_TMPETC/wpa_supplicant.conf"
 

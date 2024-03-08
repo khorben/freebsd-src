@@ -46,6 +46,8 @@ BSDDIALOG_ITEMS=""
 : ${BSDINSTALL:=bsdinstall}
 : ${BSDINSTALL_ARGS=}
 
+[ "x$1" = "x-X" ] && shift
+
 for IF in `ifconfig -l`; do
 	test "$IF" = "lo0" && continue
 	(ifconfig -g wlan | egrep -wq $IF) && continue

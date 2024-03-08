@@ -39,6 +39,8 @@ f_include $BSDCFG_SHARE/dialog.subr
 : ${BSDDIALOG_OK=0}
 : ${BSDDIALOG_CANCEL=1}
 
+[ "x$1" = "x-X" ] && shift
+
 INTERFACE=$1
 IFCONFIG_PREFIX="$2"
 AUTO="${3:-}"
