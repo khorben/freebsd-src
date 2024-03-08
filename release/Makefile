@@ -4,6 +4,7 @@
 # User-driven targets:
 #  cdrom: Builds release CD-ROM media (disc1.iso)
 #  dvdrom: Builds release DVD-ROM media (dvd1.iso)
+#  installer: Builds graphical installer image (installer.img)
 #  memstick: Builds memory stick image (memstick.img)
 #  mini-memstick: Builds minimal memory stick image (mini-memstick.img)
 #  ftp: Sets up FTP distribution area (ftp)
@@ -92,6 +93,10 @@ IMAGES+=	disc1.iso bootonly.iso
 RELEASE_TARGETS+= dvdrom
 IMAGES+=	dvd1.iso
 . endif
+.endif
+.if exists(${.CURDIR}/${TARGET}/make-installer.sh)
+RELEASE_TARGETS+= installer.img
+IMAGES+=	installer.img
 .endif
 .if exists(${.CURDIR}/${TARGET}/make-memstick.sh)
 RELEASE_TARGETS+= memstick.img
@@ -275,6 +280,10 @@ dvd1.iso: dvd pkg-stage
 
 bootonly.iso: bootonly
 	cd bootonly && sh ${.CURDIR}/${TARGET}/mkisoimages.sh -b ${VOLUME_LABEL}_BO ../${.TARGET} .${NO_ROOT:D/METALOG} ${XTRADIR}
+
+installer: installer.img
+installer.img: disc1
+	cd disc1 && sh ${.CURDIR}/${TARGET}/make-installer.sh .${NO_ROOT:D/METALOG} ../${.TARGET}
 
 memstick: memstick.img
 memstick.img: disc1
