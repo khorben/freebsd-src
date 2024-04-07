@@ -30,6 +30,7 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
+: ${BSDINSTALL_ARGS=}
 : ${DIALOG="bsddialog"}
 
 error()
@@ -87,7 +88,7 @@ if [ ! -z "$LOCAL_DISTRIBUTIONS" ]; then
 	# Copy local stuff first
 	env DISTRIBUTIONS="$LOCAL_DISTRIBUTIONS" \
 		BSDINSTALL_DISTSITE="file://$BSDINSTALL_DISTDIR_ORIG" \
-		bsdinstall distfetch || \
+		bsdinstall $BSDINSTALL_ARGS distfetch || \
 		error "Failed to fetch distribution from local media"
 fi
 
@@ -109,7 +110,7 @@ for _DISTRIBUTION in $DISTRIBUTIONS; do
 done
 
 # Fetch the distributions.
-bsdinstall distfetch
+bsdinstall $BSDINSTALL_ARGS distfetch
 rc=$?
 
 if [ $rc -ne 0 ]; then

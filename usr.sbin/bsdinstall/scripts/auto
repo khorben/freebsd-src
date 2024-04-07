@@ -32,6 +32,8 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 f_include $BSDCFG_SHARE/dialog.subr
 
+: ${BSDINSTALL_ARGS=}
+
 ############################################################ GLOBALS
 
 #
@@ -76,7 +78,7 @@ error()
 	local prompt="${1:+$1\n\n}$msg_an_installation_step_has_been_aborted"
 	local hline="$hline_arrows_tab_space_enter"
 
-	[ -f "$PATH_FSTAB" ] && bsdinstall umount
+	[ -f "$PATH_FSTAB" ] && bsdinstall $BSDINSTALL_ARGS umount
 
 	local height width
 	f_dialog_buttonbox_size height width \
@@ -148,10 +150,10 @@ mkdir $BSDINSTALL_TMPETC
 [ -f /usr/libexec/bsdinstall/local.pre-everything ] && f_dprintf "Running local.pre-everything" && sh /usr/libexec/bsdinstall/local.pre-everything "$BSDINSTALL_CHROOT"
 
 trap true SIGINT	# This section is optional
-[ -z "$BSDINSTALL_SKIP_KEYMAP" ] && bsdinstall keymap
+[ -z "$BSDINSTALL_SKIP_KEYMAP" ] && bsdinstall $BSDINSTALL_ARGS keymap
 
 trap error SIGINT	# Catch cntrl-C here
-if [ -z "$BSDINSTALL_SKIP_HOSTNAME" ]; then bsdinstall hostname || error "Set hostname failed"; fi
+if [ -z "$BSDINSTALL_SKIP_HOSTNAME" ]; then bsdinstall $BSDINSTALL_ARGS hostname || error "Set hostname failed"; fi
 
 export DISTRIBUTIONS="${DISTRIBUTIONS:-base.txz kernel.txz}"
 if [ -f $BSDINSTALL_DISTDIR/MANIFEST ]; then
@@ -181,7 +183,7 @@ done
 
 if [ -n "$FETCH_DISTRIBUTIONS" -a -n "$BSDINSTALL_CONFIGCURRENT" ]; then
 	$DIALOG --backtitle "$OSNAME Installer" --title "Network Installation" --msgbox "Some installation files were not found on the boot volume. The next few screens will allow you to configure networking so that they can be downloaded from the Internet." 0 0
-	bsdinstall netconfig || error
+	bsdinstall $BSDINSTALL_ARGS netconfig || error
 	NETCONFIG_DONE=yes
 fi
 
@@ -315,12 +317,12 @@ fi
 
 case "$PARTMODE" in
 "$msg_auto_zfs")	# ZFS
-	bsdinstall zfsboot || error "ZFS setup failed"
-	bsdinstall mount || error "Failed to mount filesystem"
+	bsdinstall $BSDINSTALL_ARGS zfsboot || error "ZFS setup failed"
+	bsdinstall $BSDINSTALL_ARGS mount || error "Failed to mount filesystem"
 	;;
 "$msg_auto_ufs")	# Guided UFS
-	bsdinstall autopart || error "Partitioning error"
-	bsdinstall mount || error "Failed to mount filesystem"
+	bsdinstall $BSDINSTALL_ARGS autopart || error "Partitioning error"
+	bsdinstall $BSDINSTALL_ARGS mount || error "Failed to mount filesystem"
 	;;
 "$msg_shell")		# Shell
 	clear
@@ -330,11 +332,11 @@ case "$PARTMODE" in
 "$msg_manual")		# Manual
 	if f_isset debugFile; then
 		# Give partedit the path to our logfile so it can append
-		BSDINSTALL_LOG="${debugFile#+}" bsdinstall partedit || error "Partitioning error"
+		BSDINSTALL_LOG="${debugFile#+}" bsdinstall $BSDINSTALL_ARGS partedit || error "Partitioning error"
 	else
-		bsdinstall partedit || error "Partitioning error"
+		bsdinstall $BSDINSTALL_ARGS partedit || error "Partitioning error"
 	fi
-	bsdinstall mount || error "Failed to mount filesystem"
+	bsdinstall $BSDINSTALL_ARGS mount || error "Failed to mount filesystem"
 	;;
 *)
 	error "Unknown partitioning mode"
@@ -351,35 +353,35 @@ if [ -n "$FETCH_DISTRIBUTIONS" ]; then
 
 	[ $FETCH_RESULT -ne 0 ] && error "Could not fetch remote distributions"
 fi
-bsdinstall checksum || error "Distribution checksum failed"
-bsdinstall distextract || error "Distribution extract failed"
+bsdinstall $BSDINSTALL_ARGS checksum || error "Distribution checksum failed"
+bsdinstall $BSDINSTALL_ARGS distextract || error "Distribution extract failed"
 
 # Set up boot loader
-bsdinstall bootconfig || error "Failed to configure bootloader"
+bsdinstall $BSDINSTALL_ARGS bootconfig || error "Failed to configure bootloader"
 
 [ -f /usr/libexec/bsdinstall/local.pre-configure ] && f_dprintf "Running local.pre-configure" && sh /usr/libexec/bsdinstall/local.pre-configure "$BSDINSTALL_CHROOT"
 
-bsdinstall rootpass || error "Could not set root password"
+bsdinstall $BSDINSTALL_ARGS rootpass || error "Could not set root password"
 
 trap true SIGINT	# This section is optional
 if [ "$NETCONFIG_DONE" != yes ]; then
-	bsdinstall netconfig	# Don't check for errors -- the user may cancel
+	bsdinstall $BSDINSTALL_ARGS netconfig	# Don't check for errors -- the user may cancel
 fi
-[ -z "$BSDINSTALL_SKIP_TIME" ] && bsdinstall time
-[ -z "$BSDINSTALL_SKIP_SERVICES" ] && bsdinstall services
-[ -z "$BSDINSTALL_SKIP_HARDENING" ] && bsdinstall hardening
-[ -z "$BSDINSTALL_SKIP_FIRMWARE" ] && bsdinstall firmware
+[ -z "$BSDINSTALL_SKIP_TIME" ] && bsdinstall $BSDINSTALL_ARGS time
+[ -z "$BSDINSTALL_SKIP_SERVICES" ] && bsdinstall $BSDINSTALL_ARGS services
+[ -z "$BSDINSTALL_SKIP_HARDENING" ] && bsdinstall $BSDINSTALL_ARGS hardening
+[ -z "$BSDINSTALL_SKIP_FIRMWARE" ] && bsdinstall $BSDINSTALL_ARGS firmware
 
 [ -z "$BSDINSTALL_SKIP_USERS" ] && $DIALOG --backtitle "$OSNAME Installer" \
 	--title "Add User Accounts" --yesno \
     "Would you like to add users to the installed system now?" 0 0 && \
-    bsdinstall adduser
+    bsdinstall $BSDINSTALL_ARGS adduser
 
 # Allow user to change his mind
-[ -z "$BSDINSTALL_SKIP_FINALCONFIG" ] && bsdinstall finalconfig
+[ -z "$BSDINSTALL_SKIP_FINALCONFIG" ] && bsdinstall $BSDINSTALL_ARGS finalconfig
 
 trap error SIGINT	# SIGINT is bad again
-bsdinstall config  || error "Failed to save config"
+bsdinstall $BSDINSTALL_ARGS config  || error "Failed to save config"
 
 if [ ! -z "$BSDINSTALL_FETCHDEST" ]; then
 	rm -rf "$BSDINSTALL_FETCHDEST"
@@ -399,8 +401,8 @@ if [ -z "$BSDINSTALL_SKIP_MANUAL" ]; then
 	fi
 fi
 
-bsdinstall entropy
-bsdinstall umount
+bsdinstall $BSDINSTALL_ARGS entropy
+bsdinstall $BSDINSTALL_ARGS umount
 
 f_dprintf "Installation Completed at %s" "$( date )"
 
