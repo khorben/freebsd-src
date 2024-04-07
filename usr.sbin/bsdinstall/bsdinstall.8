@@ -53,6 +53,8 @@ these subtargets can be invoked separately by an installation script.
 .Nm
 supports the following options, global to all targets:
 .Bl -tag -width indent+
+.It Fl C Ar directory
+Set the chroot directory.
 .It Fl D Ar file
 Provide a path for the installation log file
 .Pq overrides Ev BSDINSTALL_LOG .
@@ -60,6 +62,11 @@ See
 .Sx ENVIRONMENT VARIABLES
 for more information on
 .Ev BSDINSTALL_LOG .
+.It Fl X
+Use
+.Xr gbsddialog 1 Pq Pa ports/x11/gbsddialog
+in place of
+.Xr bsddialog 1 .
 .El
 .Sh TARGETS
 Most of the following targets are only useful for scripting the installer.

@@ -127,6 +127,18 @@ f_dialog_backtitle "${ipgm:+bsdconfig }$pgm"
 f_mustberoot_init
 
 #
+# Process command-line arguments
+#
+while getopts C:$GETOPTS_STDARGS$GETOPTS_EXTRA$GETOPTS_ALLFLAGS flag; do
+	case "$flag" in
+	C)
+		CHROOTENV="$OPTARG"
+		;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
+
+#
 # Process `-C chroot_directory' command-line argument
 #
 if [ "$CHROOTENV" ]; then

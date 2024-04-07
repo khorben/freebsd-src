@@ -39,7 +39,13 @@ f_include $BSDCFG_SHARE/dialog.subr
 : ${BSDDIALOG_OK=0}
 : ${BSDDIALOG_CANCEL=1}
 
-[ "x$1" = "x-X" ] && shift
+#
+# Process command-line arguments
+#
+while getopts $GETOPTS_STDARGS$GETOPTS_EXTRA$GETOPTS_ALLFLAGS flag; do
+	:
+done
+shift $(( $OPTIND - 1 ))
 
 INTERFACE=$1
 IFCONFIG_PREFIX="$2"
