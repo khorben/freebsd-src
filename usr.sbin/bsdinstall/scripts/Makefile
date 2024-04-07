@@ -21,6 +21,7 @@ SCRIPTS=auto \
 	script \
 	services \
 	time \
+	timezone \
 	umount \
 	wlanconfig \
 	zfsboot
