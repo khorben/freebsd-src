@@ -34,6 +34,8 @@ f_dprintf "%s: loading includes..." "$0"
 f_include $BSDCFG_SHARE/dialog.subr
 f_include $BSDCFG_SHARE/variable.subr
 
+: ${BSDINSTALL_ARGS=}
+
 ############################################################ CONFIGURATION
 
 # VARIABLES:
@@ -71,7 +73,7 @@ error()
 	if [ "$ZFSBOOT_DISKS" ]; then
 		zpool export $ZFSBOOT_POOL_NAME
 	else
-		bsdinstall umount
+		bsdinstall $BSDINSTALL_ARGS umount
 	fi
 
 	exit 1
@@ -120,11 +122,11 @@ fi
 rm -f $PATH_FSTAB
 touch $PATH_FSTAB
 if [ "$ZFSBOOT_DISKS" ]; then
-	bsdinstall zfsboot
+	bsdinstall $BSDINSTALL_ARGS zfsboot
 else
-	bsdinstall scriptedpart "$PARTITIONS"
+	bsdinstall $BSDINSTALL_ARGS scriptedpart "$PARTITIONS"
 fi
-bsdinstall mount
+bsdinstall $BSDINSTALL_ARGS mount
 
 # Fetch missing distribution files, if any
 exec 5>&1
@@ -135,10 +137,10 @@ exec 5>&-
 [ $FETCH_RESULT -ne 0 ] && error "Could not fetch remote distributions"
 
 # Unpack distributions
-bsdinstall checksum
+bsdinstall $BSDINSTALL_ARGS checksum
 if [ -t 0 ]; then
 	# If install is a tty, use distextract as normal
-	bsdinstall distextract
+	bsdinstall $BSDINSTALL_ARGS distextract
 else
 	# Otherwise, we need to use tar (see https://reviews.freebsd.org/D10736)
 	for set in $DISTRIBUTIONS; do
@@ -160,10 +162,10 @@ else
 fi
 
 # Configure bootloader if needed
-bsdinstall bootconfig
+bsdinstall $BSDINSTALL_ARGS bootconfig
 
 # Finalize install
-bsdinstall config
+bsdinstall $BSDINSTALL_ARGS config
 
 # Make sure networking is functional, if we can arrange that
 if [ ! -f $BSDINSTALL_CHROOT/etc/resolv.conf -a -f /etc/resolv.conf ]; then
@@ -179,8 +181,8 @@ if [ -f $TMPDIR/bsdinstall-installscript-setup ]; then
 	rm $BSDINSTALL_CHROOT/tmp/installscript
 fi
 
-bsdinstall entropy
-bsdinstall umount
+bsdinstall $BSDINSTALL_ARGS entropy
+bsdinstall $BSDINSTALL_ARGS umount
 if [ "$ZFSBOOT_DISKS" ]; then
 	zpool export $ZFSBOOT_POOL_NAME
 fi

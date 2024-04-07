@@ -34,6 +34,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 ############################################################ MAIN
 
 : ${BSDDIALOG_OK=0}
+: ${BSDINSTALL_ARGS=}
 : ${DIALOG="bsddialog"}
 
 f_dprintf "Began Installation at %s" "$( date )"
@@ -131,30 +132,30 @@ if [ -n "$FETCH_DISTRIBUTIONS" -a -z "$BSDINSTALL_DISTSITE" ]; then
 fi
 
 if [ ! -z "$FETCH_DISTRIBUTIONS" ]; then
-	bsdinstall distfetch || error "Failed to fetch distribution"
+	bsdinstall $BSDINSTALL_ARGS distfetch || error "Failed to fetch distribution"
 fi
 
-bsdinstall checksum || error "Distribution checksum failed"
-bsdinstall distextract || error "Distribution extract failed"
+bsdinstall $BSDINSTALL_ARGS checksum || error "Distribution checksum failed"
+bsdinstall $BSDINSTALL_ARGS distextract || error "Distribution extract failed"
 
 if [ ! "$nonInteractive" == "YES" ]
 then
-    bsdinstall rootpass || error "Could not set root password"
+    bsdinstall $BSDINSTALL_ARGS rootpass || error "Could not set root password"
 fi
 
 trap true SIGINT	# This section is optional
 
 if [ ! "$nonInteractive" == "YES" ]
 then
-bsdinstall services
+bsdinstall $BSDINSTALL_ARGS services
 
     $DIALOG --backtitle "$OSNAME Installer" --title "Add User Accounts" --yesno \
         "Would you like to add users to the installed system now?" 0 0 && \
-        bsdinstall adduser
+        bsdinstall $BSDINSTALL_ARGS adduser
 fi
 
 trap error SIGINT	# SIGINT is bad again
-bsdinstall config  || error "Failed to save config"
+bsdinstall $BSDINSTALL_ARGS config  || error "Failed to save config"
 cp /etc/resolv.conf $1/etc
 cp /etc/localtime $1/etc
 cp /var/db/zoneinfo $1/var/db
@@ -170,7 +171,7 @@ if [ -f $TMPDIR/bsdinstall-installscript-setup ]; then
 	rm $BSDINSTALL_CHROOT/tmp/installscript
 fi
 
-bsdinstall entropy
+bsdinstall $BSDINSTALL_ARGS entropy
 
 f_dprintf "Installation Completed at %s" "$(date)"
 exit $SUCCESS
