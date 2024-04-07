@@ -47,7 +47,7 @@ export DEBUG_INITIALIZE_FILE=
 #       the following argument will terminate option processing unless it looks
 #       like a flag).
 #
-GETOPTS_EXTRA=
+GETOPTS_EXTRA="X"
 
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
@@ -56,6 +56,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 
 : ${TMPDIR:="/tmp"}; export TMPDIR
 
+: ${BSDINSTALL_ARGS=}; export BSDINSTALL_ARGS
 : ${BSDINSTALL_TMPETC="${TMPDIR}/bsdinstall_etc"}; export BSDINSTALL_TMPETC
 : ${BSDINSTALL_TMPBOOT="${TMPDIR}/bsdinstall_boot"}; export BSDINSTALL_TMPBOOT
 : ${PATH_FSTAB="$BSDINSTALL_TMPETC/fstab"}; export PATH_FSTAB
@@ -69,6 +70,7 @@ export debugFile="${debugFile-${BSDINSTALL_LOG-${TMPDIR}/bsdinstall_log}}"
 usage()
 {
 	echo "Usage: bsdinstall [-$GETOPTS_EXTRA$GETOPTS_STDARGS][target][...]" 1>&2
+	echo "  -X	Start in graphical mode" 1>&2
 	echo "  -d	Enable debugging output" 1>&2
 	echo "  -D	Save debugging output to a file" 1>&2
 	return 1
@@ -79,8 +81,13 @@ usage()
 #
 # Process command-line arguments
 #
+USE_XDIALOG=
 while getopts "$GETOPTS_EXTRA$GETOPTS_STDARGS" name; do
 	case "$name" in
+		X)
+			BSDINSTALL_ARGS="-X $BSDINSTALL_ARGS"
+			: ${DIALOG="Xdialog"}; export DIALOG
+			;;
 		'?')
 			usage
 			exit $?
@@ -99,19 +106,19 @@ VERB="${1:-auto}"; shift
 f_quietly f_debug_init
 f_isset debugFile || debug=
 
-f_dprintf "Running installation step: %s %s" "$VERB" "$*"
+f_dprintf "Running installation step: %s %s" "$VERB" "$BSDINSTALL_ARGS $*"
 if [ "$debug" ]; then
 	case "$debugFile" in
 	# If NULL, send errors to the bit-bucket
-	"") exec "/usr/libexec/bsdinstall/$VERB" "$@" 2> /dev/null ;;
+	"") exec "/usr/libexec/bsdinstall/$VERB" $BSDINSTALL_ARGS "$@" 2> /dev/null ;;
 	# If begins with `+', send errors to both terminal and file (no `+')
-	+*) exec "/usr/libexec/bsdinstall/$VERB" "$@" \
+	+*) exec "/usr/libexec/bsdinstall/$VERB" $BSDINSTALL_ARGS "$@" \
 		2>&1 >&$TERMINAL_STDOUT_PASSTHRU | tee "${debugFile#+}" ;;
 	# Otherwise, just send errors to the file specified
-	*) exec "/usr/libexec/bsdinstall/$VERB" "$@" 2>> "$debugFile"
+	*) exec "/usr/libexec/bsdinstall/$VERB" $BSDINSTALL_ARGS "$@" 2>> "$debugFile"
 	esac
 else
-	exec "/usr/libexec/bsdinstall/$VERB" "$@" 2> /dev/null
+	exec "/usr/libexec/bsdinstall/$VERB" $BSDINSTALL_ARGS "$@" 2> /dev/null
 fi
 
 ################################################################################

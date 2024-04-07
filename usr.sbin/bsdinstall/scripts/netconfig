@@ -42,6 +42,7 @@ BSDDIALOG_ITEMS=""
 : ${BSDDIALOG_EXTRA=3}
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
+: ${BSDINSTALL_ARGS=}
 : ${DIALOG="bsddialog"}
 
 #
@@ -110,7 +111,7 @@ if is_wireless_if $INTERFACE; then
 		ifconfig $NEXT_WLAN_IFACE create wlandev $INTERFACE
 		ifconfig $NEXT_WLAN_IFACE up
 	fi
-	bsdinstall wlanconfig $NEXT_WLAN_IFACE || exec $0
+	bsdinstall $BSDINSTALL_ARGS wlanconfig $NEXT_WLAN_IFACE || exec $0
 	INTERFACE="$NEXT_WLAN_IFACE"
 fi
 
@@ -134,7 +135,7 @@ if [ ${IPV4_AVAIL} -eq 1 -a -z "$AUTO" ]; then
 	fi
 fi
 if [ ${IPV4_AVAIL} -eq 1 ]; then
-	bsdinstall netconfig_ipv4 ${INTERFACE} "${IFCONFIG_PREFIX}" $AUTO
+	bsdinstall $BSDINSTALL_ARGS netconfig_ipv4 ${INTERFACE} "${IFCONFIG_PREFIX}" $AUTO
 	if [ $? -ne $BSDDIALOG_OK ]; then
 		if [ -z "$AUTO" ]; then
 			exec $0
@@ -156,7 +157,7 @@ if [ ${IPV6_AVAIL} -eq 1 -a -z "$AUTO" ]; then
 	fi
 fi
 if [ ${IPV6_AVAIL} -eq 1 ]; then
-	bsdinstall netconfig_ipv6 ${INTERFACE} $AUTO
+	bsdinstall $BSDINSTALL_ARGS netconfig_ipv6 ${INTERFACE} $AUTO
 	if [ $? -ne $BSDDIALOG_OK ]; then
 		if [ -z "$AUTO" ]; then
 			exec $0
