@@ -82,6 +82,14 @@ error()
 set -e
 trap error EXIT
 
+#
+# Process command-line arguments
+#
+while getopts $GETOPTS_STDARGS$GETOPTS_EXTRA$GETOPTS_ALLFLAGS flag; do
+	:
+done
+shift $(( $OPTIND - 1 ))
+
 SCRIPT="$1"
 shift
 
