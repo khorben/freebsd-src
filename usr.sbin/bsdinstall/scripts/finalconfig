@@ -45,6 +45,7 @@ while true; do
 		"Services" "Set daemons to run on startup" \
 		"System Hardening" "Set security options" \
 		"Time Zone" "Set system timezone" \
+		"Date & Time" "Set the date and time" \
 		"Handbook" "Install $OSNAME Handbook (requires network)" 2>&1 1>&5)
 	retval=$?
 	exec 5>&-
@@ -73,6 +74,9 @@ while true; do
 		bsdinstall hardening
 		;;
 	"Time Zone")
+		bsdinstall timezone
+		;;
+	"Date & Time")
 		bsdinstall time
 		;;
 	"Handbook")
