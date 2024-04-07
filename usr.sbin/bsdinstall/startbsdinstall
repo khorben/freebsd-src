@@ -9,50 +9,72 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 : ${BSDDIALOG_EXTRA=3}
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
-: ${DIALOG="bsddialog"}
+: ${OSNAME:="FreeBSD"}
 
-kbdcontrol -d >/dev/null 2>&1
-if [ $? -eq 0 ]; then
-	# Syscons: use xterm, start interesting things on other VTYs
-	TERM=xterm
+if test "x$1" = "x-X"; then
+	shift
 
-	# Don't send ESC on function-key 62/63 (left/right command key)
-	kbdcontrol -f 62 '' > /dev/null 2>&1
-	kbdcontrol -f 63 '' > /dev/null 2>&1
+	# Graphical installer
+	: ${DIALOG:="Xdialog"}; export DIALOG
+	: ${BSDINSTALL_ARGS="-X"}
+	: ${BSDINSTALL_LIVE_SESSION:="/bin/sh -c /usr/local/bin/deforaos-session"}
+	: ${BSDINSTALL_PARTMODE:="Auto (ZFS)"}; export BSDINSTALL_PARTMODE
+	: ${BSDINSTALL_SHELL="xterm -e"}
 
-	if [ -z "$EXTERNAL_VTY_STARTED" ]; then
-		# Init will clean these processes up if/when the system
-		# goes multiuser
-		touch /tmp/bsdinstall_log
-		tail -f /tmp/bsdinstall_log > /dev/ttyv2 &
-		/usr/libexec/getty autologin ttyv3 &
-		EXTERNAL_VTY_STARTED=1
-	fi
+	# XXX For compatibility with Xdialog(1) from x11/gbsddialog
+	POSIXLY_CORRECT=1
+	export POSIXLY_CORRECT
+
+	# Setup the backtitle
+	$DIALOG --backtitle "$OSNAME Installer" --clear-screen &
 else
-	# Serial or other console
-	echo
-	echo "Welcome to ${OSNAME}!"
-	echo
-	echo "Please choose the appropriate terminal type for your system."
-	echo "Common console types are:"
-	echo "   ansi     Standard ANSI terminal"
-	echo "   vt100    VT100 or compatible terminal"
-	echo "   xterm    xterm terminal emulator (or compatible)"
-	echo
-	echo -n "Console type [vt100]: "
-	read TERM
-	TERM=${TERM:-vt100}
-fi
-export TERM
+	: ${BSDINSTALL_ARGS=}
+	: ${BSDINSTALL_LIVE_SESSION=":"}
+	: ${BSDINSTALL_SHELL=}
+	: ${DIALOG:="bsddialog"}; export DIALOG
+	kbdcontrol -d >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		# Syscons: use xterm, start interesting things on other VTYs
+		TERM=xterm
 
-# Query terminal size; useful for serial lines.
-resizewin -z
+		# Don't send ESC on function-key 62/63 (left/right command key)
+		kbdcontrol -f 62 '' > /dev/null 2>&1
+		kbdcontrol -f 63 '' > /dev/null 2>&1
+
+		if [ -z "$EXTERNAL_VTY_STARTED" ]; then
+			# Init will clean these processes up if/when the system
+			# goes multiuser
+			touch /tmp/bsdinstall_log
+			tail -f /tmp/bsdinstall_log > /dev/ttyv2 &
+			/usr/libexec/getty autologin ttyv3 &
+			EXTERNAL_VTY_STARTED=1
+		fi
+	else
+		# Serial or other console
+		echo
+		echo "Welcome to ${OSNAME}!"
+		echo
+		echo "Please choose the appropriate terminal type for your system."
+		echo "Common console types are:"
+		echo "   ansi     Standard ANSI terminal"
+		echo "   vt100    VT100 or compatible terminal"
+		echo "   xterm    xterm terminal emulator (or compatible)"
+		echo
+		echo -n "Console type [vt100]: "
+		read TERM
+		TERM=${TERM:-vt100}
+	fi
+	export TERM
+
+	# Query terminal size; useful for serial lines.
+	resizewin -z
+fi
 
 if [ -f /etc/installerconfig ]; then
 	if [ "$1" != "primary" ]; then
 		$DIALOG --backtitle "${OSNAME} Installer" --title "Installing" --msgbox "${OSNAME} is being installed from a script; please use the primary console." 0 0
-		. "$0"
-	elif bsdinstall script /etc/installerconfig; then
+		. "$0" $BSDINSTALL_ARGS
+	elif $BSDINSTALL script /etc/installerconfig; then
 		$DIALOG --backtitle "${OSNAME} Installer" --title "Complete" --no-cancel --ok-label "Reboot" --pause "Installation of ${OSNAME} complete! Rebooting in 10 seconds" 10 30 10
 		reboot
 	else
@@ -72,15 +94,17 @@ $BSDDIALOG_OK)	# Install
 	fi
 
 	trap true SIGINT	# Ignore cntrl-C here
-	bsdinstall
+	bsdinstall $BSDINSTALL_ARGS
 	if [ $? -eq 0 ]; then
 		$DIALOG --backtitle "${OSNAME} Installer" --title "Complete" --ok-label "Reboot" --extra-button --extra-label "Shutdown" --cancel-label "Live System" --yesno "Installation of ${OSNAME} complete! Would you like to reboot into the installed system now?" 0 0
 
 		case $? in
 		$BSDDIALOG_OK)		# Reboot
+			$DIALOG --backtitle "${OSNAME} Installer" --title "Please wait" --infobox "Rebooting..." 0 0
 			reboot
 			;;
 		$BSDDIALOG_EXTRA)	# Shutdown
+			$DIALOG --backtitle "${OSNAME} Installer" --title "Please wait" --infobox "Shutting down..." 0 0
 			shutdown -p now
 			# shutdown(8) daemonizes, with the actual signal to
 			# init(8) happening in the child, but if we exit the
@@ -94,22 +118,23 @@ $BSDDIALOG_OK)	# Install
 				sleep 1
 			done
 			;;
-		$BSDDIALOG_CANCEL)	# Live System
+		$BSDDIALOG_CANCEL)	# Live System (resume multi-user boot)
 			exit 0
 			;;
 		esac
 	else
-		. "$0"
+		. "$0" $BSDINSTALL_ARGS
 	fi
 	;;
-$BSDDIALOG_CANCEL)	# Live System
+$BSDDIALOG_CANCEL)	# Live System (resume multi-user boot)
+	$BSDINSTALL_LIVE_SESSION
 	exit 0
 	;;
 $BSDDIALOG_EXTRA)	# Shell
 	clear
 	echo "When finished, type 'exit' to return to the installer."
-	/bin/sh
-	. "$0"
+	$BSDINSTALL_SHELL /bin/sh
+	. "$0" $BSDINSTALL_ARGS
 	;;
 esac
 

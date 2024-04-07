@@ -31,6 +31,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
 : ${BSDDIALOG_OK=0}
+: ${BSDINSTALL_ARGS=}
 : ${DIALOG="bsddialog"}
 
 while true; do
@@ -62,34 +63,34 @@ while true; do
 		break
 		;;
 	"Add User")
-		bsdinstall adduser
+		bsdinstall $BSDINSTALL_ARGS adduser
 		;;
 	"Root Password")
-		bsdinstall rootpass
+		bsdinstall $BSDINSTALL_ARGS rootpass
 		;;
 	"Hostname")
-		bsdinstall hostname
+		bsdinstall $BSDINSTALL_ARGS hostname
 		;;
 	"Network")
-		bsdinstall netconfig
+		bsdinstall $BSDINSTALL_ARGS netconfig
 		;;
 	"Services")
-		bsdinstall services
+		bsdinstall $BSDINSTALL_ARGS services
 		;;
 	"System Hardening")
-		bsdinstall hardening
+		bsdinstall $BSDINSTALL_ARGS hardening
 		;;
 	"Time Zone")
-		bsdinstall timezone
+		bsdinstall $BSDINSTALL_ARGS timezone
 		;;
 	"Date & Time")
-		bsdinstall time
+		bsdinstall $BSDINSTALL_ARGS time
 		;;
 	"Firmware")
 		bsdinstall firmware
 		;;
 	"Handbook")
-		bsdinstall docsinstall
+		bsdinstall $BSDINSTALL_ARGS docsinstall
 		;;
 	esac
 done
