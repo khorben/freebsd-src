@@ -283,31 +283,35 @@ if f_interactive; then
 	esac
 fi
 
-PMODES="
-	'$msg_auto_ufs' '$msg_auto_ufs_desc' '$msg_auto_ufs_help'
-	'$msg_manual' '$msg_manual_desc' '$msg_manual_help'
-	'$msg_shell' '$msg_shell_desc' '$msg_shell_help'
-" # END-QUOTE
+if [ "$BSDINSTALL_PARTMODE" ]; then
+	PARTMODE="$BSDINSTALL_PARTMODE"
+else
+	PMODES="
+		'$msg_auto_ufs' '$msg_auto_ufs_desc' '$msg_auto_ufs_help'
+		'$msg_manual' '$msg_manual_desc' '$msg_manual_help'
+		'$msg_shell' '$msg_shell_desc' '$msg_shell_help'
+	" # END-QUOTE
 
-CURARCH=$( uname -m )
-case $CURARCH in
-	amd64|arm64|i386|riscv)	# Booting ZFS Supported
-		PMODES="
-			'$msg_auto_zfs' '$msg_auto_zfs_desc' '$msg_auto_zfs_help'
-			$PMODES
-		" # END-QUOTE
-		;;
-	*)			# Booting ZFS Unsupported
-		;;
-esac
+	CURARCH=$( uname -m )
+	case $CURARCH in
+		amd64|arm64|i386|riscv)	# Booting ZFS Supported
+			PMODES="
+				'$msg_auto_zfs' '$msg_auto_zfs_desc' '$msg_auto_zfs_help'
+				$PMODES
+			" # END-QUOTE
+			;;
+		*)			# Booting ZFS Unsupported
+			;;
+	esac
 
-exec 5>&1
-PARTMODE=`echo $PMODES | xargs -o bsddialog --backtitle "$OSNAME Installer" \
-	--title "Partitioning" \
-	--item-help \
-	--menu "How would you like to partition your disk?" \
-	0 0 0 2>&1 1>&5` || exit 1
-exec 5>&-
+	exec 5>&1
+	PARTMODE=`echo $PMODES | xargs -o bsddialog --backtitle "$OSNAME Installer" \
+		--title "Partitioning" \
+		--item-help \
+		--menu "How would you like to partition your disk?" \
+		0 0 0 2>&1 1>&5` || exit 1
+	exec 5>&-
+fi
 
 case "$PARTMODE" in
 "$msg_auto_zfs")	# ZFS
