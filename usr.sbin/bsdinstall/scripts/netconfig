@@ -44,6 +44,14 @@ BSDDIALOG_ITEMS=""
 : ${BSDDIALOG_ERROR=255}
 : ${DIALOG="bsddialog"}
 
+#
+# Process command-line arguments
+#
+while getopts $GETOPTS_STDARGS$GETOPTS_EXTRA$GETOPTS_ALLFLAGS flag; do
+	:
+done
+shift $(( $OPTIND - 1 ))
+
 for IF in `ifconfig -l`; do
 	test "$IF" = "lo0" && continue
 	(ifconfig -g wlan | egrep -wq $IF) && continue
