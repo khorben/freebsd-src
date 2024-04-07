@@ -34,9 +34,10 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 : ${BSDDIALOG_EXTRA=3}
 : ${BSDDIALOG_ESC=5}
 : ${BSDDIALOG_ERROR=255}
+: ${DIALOG="bsddialog"}
 
 exec 5>&1
-MIRROR=`bsddialog --backtitle "$OSNAME Installer" \
+MIRROR=`$DIALOG --backtitle "$OSNAME Installer" \
     --title "Mirror Selection" --extra-button --extra-label "Other" \
     --menu "Please select the best suitable site for you or \"other\" if you want to specify a different choice. The \"Main Site\" directs users to the nearest project managed mirror via GeoDNS (they carry the full range of possible distributions and support both IPv4 and IPv6). All other sites are known as \"Community Mirrors\"; not every site listed here carries more than the base distribution kits. Select a site!" \
     0 0 16 \
@@ -113,7 +114,7 @@ $BSDDIALOG_OK)
 	;;
 $BSDDIALOG_EXTRA)
 	exec 5>&1
-	BSDINSTALL_DISTSITE=`bsddialog --backtitle "$OSNAME Installer" \
+	BSDINSTALL_DISTSITE=`$DIALOG --backtitle "$OSNAME Installer" \
 	    --title "Mirror Selection" \
 	    --inputbox "Please enter the URL to an alternate $OSNAME mirror:" \
 	    0 74 "$BSDINSTALL_DISTSITE" 2>&1 1>&5`
