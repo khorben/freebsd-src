@@ -43,7 +43,7 @@ IFCONFIG_PREFIX="$2"
 AUTO="${3:-}"
 test -z "$IFCONFIG_PREFIX" || IFCONFIG_PREFIX="$2 "
 case "${INTERFACE}" in
-"")	bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' \
+"")	$DIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' \
 	    --msgbox 'No interface specified for IPv4 configuration.' 0 0
 	exit 1
 	;;
@@ -52,7 +52,7 @@ case "$AUTO" in
 ""|auto)
 	;;
 *)
-	bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' \
+	$DIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' \
 	    --msgbox "Bad auto option '$AUTO'." 0 0
 	exit 1
 	;;
@@ -61,7 +61,7 @@ esac
 if [ -n "$AUTO" ]; then
 	DHCP=1
 else
-	bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' --yesno 'Would you like to use DHCP to configure this interface?' 0 0
+	$DIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' --yesno 'Would you like to use DHCP to configure this interface?' 0 0
 	if [ $? -eq $BSDDIALOG_OK ]; then
 		DHCP=1
 	else
@@ -74,14 +74,14 @@ if [ $DHCP -eq 1 ]; then
 		# dhclient does not build a new resolv.conf (see PR262262).
 		ifconfig $INTERFACE down
 		ifconfig $INTERFACE up
-		bsddialog --backtitle "$OSNAME Installer" --infobox "Acquiring DHCP lease..." 0 0
+		$DIALOG --backtitle "$OSNAME Installer" --infobox "Acquiring DHCP lease..." 0 0
 		err=$( pkill -F /var/run/dhclient/dhclient.${INTERFACE}.pid; dhclient $INTERFACE 2>&1 )
 		if [ $? -ne 0 ]; then
 			f_dprintf "%s" "$err"
 			if [ -n "$AUTO" ]; then
 				exit 1
 			fi
-			bsddialog --backtitle "$OSNAME Installer" --msgbox "DHCP lease acquisition failed." 0 0
+			$DIALOG --backtitle "$OSNAME Installer" --msgbox "DHCP lease acquisition failed." 0 0
 			exec $0 ${INTERFACE} "${IFCONFIG_PREFIX}"
 		fi
 	fi
@@ -94,7 +94,7 @@ NETMASK=`ifconfig $INTERFACE inet | awk '/inet/ {printf("%s\n", $4); }'`
 ROUTER=`netstat -rn -f inet | awk '/default/ {printf("%s\n", $2);}'`
 
 exec 5>&1
-IF_CONFIG=$(bsddialog --backtitle "$OSNAME Installer" --title 'Network Configuration' --form 'Static Network Interface Configuration' 0 0 0 \
+IF_CONFIG=$($DIALOG --backtitle "$OSNAME Installer" --title 'Network Configuration' --form 'Static Network Interface Configuration' 0 0 0 \
 	'IP Address' 1 1 "$IP_ADDRESS" 1 20 16 0 \
 	'Subnet Mask' 2 1 "$NETMASK" 2 20 16 0 \
 	'Default Router' 3 1 "$ROUTER" 3 20 16 0 \
