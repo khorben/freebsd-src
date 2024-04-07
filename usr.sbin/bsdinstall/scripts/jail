@@ -39,6 +39,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 # script.
 #
 user_env_vars="BSDINSTALL_DISTSITE DISTRIBUTIONS"
+: ${DIALOG="bsddialog"}
 
 ############################################################ FUNCTIONS
 
@@ -53,10 +54,10 @@ error() {
 	if [ -n "$1" ]; then
 		msg="$1\n\n"
 	fi
-	bsddialog --backtitle "$OSNAME Installer" --title "Abort" \
+	$DIALOG --backtitle "$OSNAME Installer" --title "Abort" \
 	    --no-label "Exit" --yes-label "Restart" --yesno \
 	    "${msg}An installation step has been aborted. Would you like to restart the installation or exit the installer?" 0 0
-	if [ $? -ne $BSDDIALOG_OK ]; then
+	if [ $? -ne $DIALOG_OK ]; then
 		exit
 	else
 		environment_restore
@@ -84,7 +85,7 @@ distbase() {
 		if [ ! "$nonInteractive" == "YES" ]
 		then
 			exec 5>&1
-			EXTRA_DISTS=$(echo $DISTMENU | xargs -o bsddialog \
+			EXTRA_DISTS=$(echo $DISTMENU | xargs -o $DIALOG \
 			    --backtitle "$OSNAME Installer" \
 			    --title "Distribution Select" --no-cancel \
 			    --separate-output \
@@ -147,7 +148,7 @@ environment_save()
 
 ############################################################ MAIN
 
-: ${BSDDIALOG_OK=0}
+: ${DIALOG_OK=0}
 
 f_dprintf "Began Installation at %s" "$( date )"
 
@@ -174,7 +175,7 @@ if [ -n "$SCRIPT" ]; then
 fi
 
 if [ ! "$nonInteractive" == "YES" ]; then
-	bsddialog --backtitle "$OSNAME Installer" --title "Select Installation Type" \
+	$DIALOG --backtitle "$OSNAME Installer" --title "Select Installation Type" \
 	    --yes-label "Distribution Sets" --no-label "Packages" --yesno \
 	    "Would you like to install the base system using legacy distribution sets or packages?" 0 0
 	if [ $? -eq 1 ]; then
@@ -199,7 +200,7 @@ if [ ! "$nonInteractive" == "YES" ]
 then
 bsdinstall services
 
-    bsddialog --backtitle "$OSNAME Installer" --title "Add User Accounts" --yesno \
+    $DIALOG --backtitle "$OSNAME Installer" --title "Add User Accounts" --yesno \
         "Would you like to add users to the installed system now?" 0 0 && \
         bsdinstall adduser
 fi
