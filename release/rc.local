@@ -49,6 +49,14 @@ bsdinstall_multicons_disabled()
 # resolv.conf from DHCP ends up in here, so make sure the directory exists
 mkdir /tmp/bsdinstall_etc
 
+# start services if available
+echo
+services="vboxguest vboxservice dbus powerd slim"
+for service in $services; do
+	[ -x /etc/rc.d/$service -o -x /usr/local/etc/rc.d/$service ] &&
+		/usr/sbin/service $service onestart
+done
+
 if bsdinstall_multicons_disabled; then
 	/usr/libexec/bsdinstall/startbsdinstall primary
 else
