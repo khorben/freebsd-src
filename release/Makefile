@@ -4,6 +4,7 @@
 # User-driven targets:
 #  cdrom: Builds release CD-ROM media (disc1.iso)
 #  dvdrom: Builds release DVD-ROM media (dvd1.iso)
+#  installer: Builds graphical installer image (installer.img)
 #  memstick: Builds memory stick image (memstick.img)
 #  mini-memstick: Builds minimal memory stick image (mini-memstick.img)
 #  ftp: Sets up FTP distribution area (ftp)
@@ -129,6 +130,10 @@ RELEASE_TARGETS+= dvdrom
 IMAGES+=	dvd1.iso
 . endif
 .endif
+.if exists(${.CURDIR}/${TARGET}/make-installer.sh)
+RELEASE_TARGETS+= installer.img installer.iso
+IMAGES+=	installer.img installer.iso
+.endif
 .if exists(${.CURDIR}/${TARGET}/make-memstick.sh)
 RELEASE_TARGETS+= memstick.img
 RELEASE_TARGETS+= mini-memstick.img
@@ -148,7 +153,7 @@ CLEANFILES+=	${I}.xz
 .if defined(WITH_DVD) && !empty(WITH_DVD)
 CLEANFILES+=	pkg-stage
 .endif
-CLEANDIRS=	dist pkgdb-dvd pkgdb-disc1 pkgbase-repo pkgbase-repo-dir ftp disc1 disc1-disc1 disc1-memstick bootonly bootonly-bootonly bootonly-memstick dvd pkgbase-repo.tar
+CLEANDIRS=	dist pkgdb-dvd pkgdb-disc1 pkgbase-repo pkgbase-repo-dir ftp disc1 disc1-disc1 disc1-installer disc1-memstick bootonly bootonly-bootonly bootonly-memstick dvd pkgbase-repo.tar
 beforeclean:
 	chflags -R noschg .
 .include <bsd.obj.mk>
@@ -398,6 +403,20 @@ disc1-disc1 disc1-memstick: disc1
 	mkdir ${.TARGET}
 	tar -cf- -C disc1 . | tar -xf- -C ${.TARGET}
 
+disc1-installer: disc1
+	mkdir ${.TARGET}
+	tar -cf- -C disc1 . | tar -xf- -C ${.TARGET}
+.if ${.MAKE.OS} == "FreeBSD" && (!defined(NOPKG) || empty(NOPKG))
+# Install packages onto release media.
+	${PKG_INSTALL} deforaos-browser deforaos-integration deforaos-locker \
+		deforaos-player dejavu gbsddialog gnome-icon-theme \
+		gsettings-desktop-schemas metacity setxkbmap slim \
+		virtualbox-ose-additions xf86-input-keyboard \
+		xf86-input-libinput xf86-video-scfb xf86-video-vesa xorg \
+		xterm || true
+	${PKG_CLEAN} || true
+.endif
+
 bootonly-bootonly bootonly-memstick: bootonly
 	mkdir ${.TARGET}
 	tar -cf- -C bootonly . | tar -xf- -C ${.TARGET}
@@ -411,6 +430,13 @@ dvd1.iso: dvd pkg-stage
 
 bootonly.iso: bootonly-bootonly
 	cd bootonly-bootonly && sh ${.CURDIR}/${TARGET}/mkisoimages.sh -b ${VOLUME_LABEL}_BO ../${.TARGET} ./METALOG ${XTRADIR}
+
+installer: installer.img installer.iso
+installer.img: disc1-installer
+	cd disc1-installer && sh ${.CURDIR}/${TARGET}/make-installer.sh ./METALOG ../${.TARGET}
+
+installer.iso: disc1-installer
+	cd disc1-installer && sh ${.CURDIR}/${TARGET}/mkisoimages.sh -b ${VOLUME_LABEL}_Install ../${.TARGET} ./METALOG ${XTRADIR}
 
 memstick: memstick.img
 memstick.img: disc1-memstick
