@@ -79,6 +79,10 @@ static const struct ifmedia_description
     IFM_SUBTYPE_ETHERNET_OPTION_DESCRIPTIONS;
 
 static const struct ifmedia_description
+    ifm_subtype_mbim_descriptions[] =
+    IFM_SUBTYPE_MBIM_DESCRIPTIONS;
+
+static const struct ifmedia_description
     ifm_subtype_ieee80211_descriptions[] =
     IFM_SUBTYPE_IEEE80211_DESCRIPTIONS;
 
@@ -492,6 +496,7 @@ ifconfig_media_get_status(const struct ifmediareq *ifmr)
 	switch (IFM_TYPE(ifmr->ifm_active)) {
 	case IFM_ETHER:
 	case IFM_ATM:
+	case IFM_MBIM:
 		if (ifmr->ifm_status & IFM_ACTIVE) {
 			return ("active");
 		} else {

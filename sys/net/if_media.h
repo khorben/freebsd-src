@@ -339,6 +339,18 @@ uint64_t	ifmedia_baudrate(int);
 #define	IFM_ATM_UNASSIGNED	0x00000400	/* unassigned cells */
 
 /*
+ * MBIM
+ */
+#define	IFM_MBIM	0x00000100
+#define	IFM_MBIM_UNKNOWN	3
+#define	IFM_MBIM_GPRS		4
+#define	IFM_MBIM_EDGE		5
+#define	IFM_MBIM_UMTS		6
+#define	IFM_MBIM_HSDPA		7
+#define	IFM_MBIM_HSUPA		8
+#define	IFM_MBIM_LTE		9
+
+/*
  * Shared media sub-types
  */
 #define	IFM_AUTO	0		/* Autoselect best media */
@@ -425,6 +437,7 @@ struct ifmedia_description {
 	{ IFM_ETHER,		"Ethernet" },				\
 	{ IFM_IEEE80211,	"IEEE 802.11 Wireless Ethernet" },	\
 	{ IFM_ATM,		"ATM" },				\
+	{ IFM_MBIM,		"MBIM" },				\
 	{ 0, NULL },							\
 }
 
@@ -728,6 +741,31 @@ struct ifmedia_description {
 	{ 0, NULL },							\
 }
 
+#define	IFM_SUBTYPE_MBIM_DESCRIPTIONS {					\
+	{ IFM_MBIM_UNKNOWN,	"Unknown" },				\
+	{ IFM_MBIM_GPRS,	"GPRS" },				\
+	{ IFM_MBIM_EDGE,	"EDGE" },				\
+	{ IFM_MBIM_UMTS,	"UMTS" },				\
+	{ IFM_MBIM_HSDPA,	"HSDPA" },				\
+	{ IFM_MBIM_HSUPA,	"HSUPA" },				\
+	{ IFM_MBIM_LTE,		"LTE" },				\
+}
+
+#define	IFM_SUBTYPE_MBIM_ALIASES {					\
+	{ IFM_MBIM_UNKNOWN,	"UNKNOWN" },				\
+	{ IFM_MBIM_GPRS,	"2G" },					\
+	{ IFM_MBIM_EDGE,	"2.5G" },				\
+	{ IFM_MBIM_UMTS,	"3G" },					\
+	{ IFM_MBIM_HSDPA,	"3G" },					\
+	{ IFM_MBIM_HSUPA,	"3G" },					\
+	{ IFM_MBIM_LTE,		"4G" },					\
+	{ 0, NULL },							\
+}
+
+#define	IFM_SUBTYPE_MBIM_OPTION_DESCRIPTIONS {				\
+	{ 0, NULL },							\
+}
+
 #define	IFM_SUBTYPE_SHARED_DESCRIPTIONS {				\
 	{ IFM_AUTO,	"autoselect" },					\
 	{ IFM_MANUAL,	"manual" },					\
@@ -931,6 +969,8 @@ struct ifmedia_status_description {
 	{ IFM_IEEE80211,	IFM_AVALID,	IFM_ACTIVE,		\
 	    { "no network", "active" } },				\
 	{ IFM_ATM,		IFM_AVALID,	IFM_ACTIVE,		\
+	    { "no network", "active" } },				\
+	{ IFM_MBIM,		IFM_AVALID,	IFM_ACTIVE,		\
 	    { "no network", "active" } },				\
 	{ 0,			0,		0,			\
 	    { NULL, NULL } }						\

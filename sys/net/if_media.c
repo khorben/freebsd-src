@@ -398,6 +398,12 @@ static const struct ifmedia_description ifm_subtype_atm_descriptions[] =
 static const struct ifmedia_description ifm_subtype_atm_option_descriptions[] =
     IFM_SUBTYPE_ATM_OPTION_DESCRIPTIONS;
 
+static const struct ifmedia_description ifm_subtype_mbim_descriptions[] =
+    IFM_SUBTYPE_MBIM_DESCRIPTIONS;
+
+static const struct ifmedia_description ifm_subtype_mbim_option_descriptions[] =
+    IFM_SUBTYPE_MBIM_OPTION_DESCRIPTIONS;
+
 static const struct ifmedia_description ifm_subtype_shared_descriptions[] =
     IFM_SUBTYPE_SHARED_DESCRIPTIONS;
 
@@ -425,6 +431,11 @@ static const struct ifmedia_type_to_subtype ifmedia_types_to_subtypes[] = {
 	{
 	  &ifm_subtype_atm_descriptions[0],
 	  &ifm_subtype_atm_option_descriptions[0],
+	  NULL,
+	},
+	{
+	  &ifm_subtype_mbim_descriptions[0],
+	  &ifm_subtype_mbim_option_descriptions[0],
 	  NULL,
 	},
 };
