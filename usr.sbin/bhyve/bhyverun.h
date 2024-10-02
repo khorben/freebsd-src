@@ -45,9 +45,9 @@ struct vcpu;
 struct vmctx;
 struct vm_run;
 
-void *paddr_guest2host(struct vmctx *ctx, uintptr_t addr, size_t len);
+void __result_use_check *paddr_guest2host(struct vmctx *ctx, uintptr_t addr, size_t len);
 #ifdef BHYVE_SNAPSHOT
-uintptr_t paddr_host2guest(struct vmctx *ctx, void *addr);
+uintptr_t __result_use_check paddr_host2guest(struct vmctx *ctx, void *addr);
 #endif
 
 struct vcpu;
