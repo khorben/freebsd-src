@@ -175,22 +175,22 @@ static usb_handle_request_t umb_handle_request;
 static int	 umb_deactivate(device_t);
 static void	 umb_ncm_setup(struct umb_softc *, struct usb_config *);
 static void	 umb_close_bulkpipes(struct umb_softc *);
-static int	 umb_ioctl(struct ifnet *, u_long, caddr_t);
+static int	 umb_ioctl(if_t , u_long, caddr_t);
 static void	 umb_init(void *);
 #ifdef DEV_NETMAP
-static void	 umb_input(struct ifnet *, struct mbuf *);
+static void	 umb_input(if_t , struct mbuf *);
 #endif
-static int	 umb_output(struct ifnet *, struct mbuf *,
+static int	 umb_output(if_t , struct mbuf *,
 		    const struct sockaddr *, struct route *);
-static void	 umb_start(struct ifnet *);
+static void	 umb_start(if_t );
 static void	 umb_start_task(struct usb_proc_msg *);
 #if 0
-static void	 umb_watchdog(struct ifnet *);
+static void	 umb_watchdog(if_t );
 #endif
 static void	 umb_statechg_timeout(void *);
 
-static int	 umb_mediachange(struct ifnet *);
-static void	 umb_mediastatus(struct ifnet *, struct ifmediareq *);
+static int	 umb_mediachange(if_t );
+static void	 umb_mediastatus(if_t , struct ifmediareq *);
 
 static void	 umb_add_task(struct umb_softc *sc, usb_proc_callback_t,
 		    struct usb_proc_msg *, struct usb_proc_msg *, int);
@@ -572,7 +572,7 @@ umb_attach_task(struct usb_proc_msg *msg)
 {
 	struct umb_task *task = (struct umb_task *)msg;
 	struct umb_softc *sc = task->sc;
-	struct ifnet *ifp;
+	if_t ifp;
 
 	mtx_unlock(&sc->sc_mutex);
 
@@ -593,14 +593,14 @@ umb_attach_task(struct usb_proc_msg *msg)
 	if_setinitfn(ifp, umb_init);
 
 #if 0
-	ifp->if_watchdog = umb_watchdog;
+	if_setwatchdog(ifp, umb_watchdog);
 #endif
-	ifp->if_link_state = LINK_STATE_DOWN;
+	if_setlink_state(ifp, LINK_STATE_DOWN);
 	ifmedia_init(&sc->sc_im, 0, umb_mediachange, umb_mediastatus);
 	ifmedia_add(&sc->sc_im, IFM_NONE | IFM_AUTO, 0, NULL);
 
-	ifp->if_addrlen = 0;
-	ifp->if_hdrlen = sizeof (struct ncm_header16) +
+	if_setaddrlen(ifp, 0);
+	if_sethdrlen(ifp, sizeof (struct ncm_header16) +);
 	    sizeof (struct ncm_pointer16);
 	/* XXX hard-coded atm */
 	if_setmtu(ifp, MIN(2048, sc->sc_maxpktlen));
@@ -623,12 +623,12 @@ static int
 umb_detach(device_t dev)
 {
 	struct umb_softc *sc = device_get_softc(dev);
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	usb_proc_drain(&sc->sc_taskqueue);
 
 	mtx_lock(&sc->sc_mutex);
-	if (ifp != NULL && (ifp->if_drv_flags & IFF_DRV_RUNNING))
+	if (ifp != NULL && (if_getdrvflags(ifp) & IFF_DRV_RUNNING))
 		umb_down(sc, 1);
 	umb_close(sc);
 	mtx_unlock(&sc->sc_mutex);
@@ -647,7 +647,7 @@ umb_detach(device_t dev)
 	free(sc->sc_ctrl_msg, M_DEVBUF);
 	free(sc->sc_resp_buf, M_DEVBUF);
 
-	if (ifp != NULL && ifp->if_softc) {
+	if (ifp != NULL && if_getsoftc(ifp)) {
 		ifmedia_removeall(&sc->sc_im);
 	}
 	if (sc->sc_attached) {
@@ -713,7 +713,7 @@ static int
 umb_deactivate(device_t dev)
 {
 	struct umb_softc *sc = device_get_softc(dev);
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (ifp != NULL) {
 		if_dead(ifp);
@@ -725,9 +725,9 @@ umb_deactivate(device_t dev)
 static void
 umb_close_bulkpipes(struct umb_softc *sc)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
-	ifp->if_drv_flags &= ~(IFF_DRV_RUNNING | IFF_DRV_OACTIVE);
+	if_setdrvflagbits(ifp, 0, (IFF_DRV_RUNNING | IFF_DRV_OACTIVE));
 
 	umb_rxflush(sc);
 	umb_txflush(sc);
@@ -737,9 +737,9 @@ umb_close_bulkpipes(struct umb_softc *sc)
 }
 
 static int
-umb_ioctl(struct ifnet *ifp, u_long cmd, caddr_t data)
+umb_ioctl(if_t ifp, u_long cmd, caddr_t data)
 {
-	struct umb_softc *sc = ifp->if_softc;
+	struct umb_softc *sc = if_getsoftc(ifp);
 	struct in_ifaddr *ia = (struct in_ifaddr *)data;
 	struct ifreq *ifr = (struct ifreq *)data;
 	int error = 0;
@@ -812,11 +812,11 @@ umb_ioctl(struct ifnet *ifp, u_long cmd, caddr_t data)
 		break;
 	case SIOCSIFMTU:
 		/* Does this include the NCM headers and tail? */
-		if (ifr->ifr_mtu > ifp->if_mtu) {
+		if (ifr->ifr_mtu > if_getmtu(ifp)) {
 			error = EINVAL;
 			break;
 		}
-		ifp->if_mtu = ifr->ifr_mtu;
+		if_setmtu(ifp, ifr->ifr_mtu);
 		break;
 	case SIOCAIFADDR:
 	case SIOCSIFDSTADDR:
@@ -846,7 +846,7 @@ umb_init(void *arg)
 }
 
 static void
-umb_input(struct ifnet *ifp, struct mbuf *m)
+umb_input(if_t ifp, struct mbuf *m)
 {
 	struct mbuf *mn;
 	struct epoch_tracker et;
@@ -869,7 +869,7 @@ umb_input(struct ifnet *ifp, struct mbuf *m)
 }
 
 static int
-umb_output(struct ifnet *ifp, struct mbuf *m, const struct sockaddr *dst,
+umb_output(if_t ifp, struct mbuf *m, const struct sockaddr *dst,
     struct route *rtp)
 {
 	int error;
@@ -899,7 +899,7 @@ umb_output(struct ifnet *ifp, struct mbuf *m, const struct sockaddr *dst,
 	 * Queue message on interface, and start output if interface
 	 * not yet active.
 	 */
-	error = (ifp->if_transmit)(ifp, m);
+	error = (ifp->if_transmit)(ifp, m); /* XXX - IFAPI */
 	if (error) {
 		if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
 		return (ENOBUFS);
@@ -909,11 +909,11 @@ umb_output(struct ifnet *ifp, struct mbuf *m, const struct sockaddr *dst,
 }
 
 static void
-umb_start(struct ifnet *ifp)
+umb_start(if_t ifp)
 {
-	struct umb_softc *sc = ifp->if_softc;
+	struct umb_softc *sc = if_getsoftc(ifp);
 
-	if (sc->sc_dying || !(ifp->if_drv_flags & IFF_DRV_RUNNING))
+	if (sc->sc_dying || !(if_getdrvflags(ifp) & IFF_DRV_RUNNING))
 		return;
 
 	mtx_lock(&sc->sc_mutex);
@@ -926,13 +926,13 @@ umb_start_task(struct usb_proc_msg *msg)
 {
 	struct umb_task *task = (struct umb_task *)msg;
 	struct umb_softc *sc = task->sc;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	DPRINTF("%s()\n", __func__);
 
 	mtx_assert(&sc->sc_mutex, MA_OWNED);
 
-	ifp->if_drv_flags |= IFF_DRV_RUNNING;
+	if_setdrvflagbits(ifp, IFF_DRV_RUNNING, 0);
 
 	/* start interrupt transfer */
 	usbd_transfer_start(sc->sc_xfer[UMB_INTR_RX]);
@@ -942,9 +942,9 @@ umb_start_task(struct usb_proc_msg *msg)
 
 #if 0
 static void
-umb_watchdog(struct ifnet *ifp)
+umb_watchdog(if_t ifp)
 {
-	struct umb_softc *sc = ifp->if_softc;
+	struct umb_softc *sc = if_getsoftc(ifp);
 
 	if (sc->sc_dying)
 		return;
@@ -960,12 +960,12 @@ static void
 umb_statechg_timeout(void *arg)
 {
 	struct umb_softc *sc = arg;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	mtx_assert(&sc->sc_mutex, MA_OWNED);
 
 	if (sc->sc_info.regstate != MBIM_REGSTATE_ROAMING || sc->sc_roaming)
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_DEBUG, "%s: state change timeout\n",
 					DEVNAM(sc));
 
@@ -975,15 +975,15 @@ umb_statechg_timeout(void *arg)
 }
 
 static int
-umb_mediachange(struct ifnet * ifp)
+umb_mediachange(if_t  ifp)
 {
 	return 0;
 }
 
 static void
-umb_mediastatus(struct ifnet * ifp, struct ifmediareq * imr)
+umb_mediastatus(if_t  ifp, struct ifmediareq * imr)
 {
-	switch (ifp->if_link_state) {
+	switch (if_getlinkstate(ifp)) {
 	case LINK_STATE_UP:
 		imr->ifm_status = IFM_AVALID | IFM_ACTIVE;
 		break;
@@ -1021,14 +1021,14 @@ umb_add_task(struct umb_softc *sc, usb_proc_callback_t callback,
 static void
 umb_newstate(struct umb_softc *sc, enum umb_state newstate, int flags)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (newstate == sc->sc_state)
 		return;
 	if (((flags & UMB_NS_DONT_DROP) && newstate < sc->sc_state) ||
 	    ((flags & UMB_NS_DONT_RAISE) && newstate > sc->sc_state))
 		return;
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_DEBUG, "%s: state going %s from '%s' to '%s'\n",
 		    DEVNAM(sc), newstate > sc->sc_state ? "up" : "down",
 		    umb_istate(sc->sc_state), umb_istate(newstate));
@@ -1043,7 +1043,7 @@ umb_state_task(struct usb_proc_msg *msg)
 {
 	struct umb_task *task = (struct umb_task *)msg;
 	struct umb_softc *sc = task->sc;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	struct ifreq ifr;
 	int	 state;
 
@@ -1058,20 +1058,20 @@ umb_state_task(struct usb_proc_msg *msg)
 		return;
 	}
 
-	if (ifp->if_flags & IFF_UP)
+	if (if_getflags(ifp) & IFF_UP)
 		umb_up(sc);
 	else
 		umb_down(sc, 0);
 
 	state = (sc->sc_state == UMB_S_UP) ? LINK_STATE_UP : LINK_STATE_DOWN;
-	if (ifp->if_link_state != state) {
-		if (ifp->if_flags & IFF_DEBUG)
+	if (if_getlinkstate(ifp) != state) {
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_DEBUG, "%s: link state changed from %s to %s\n",
 			    DEVNAM(sc),
-			    (ifp->if_link_state == LINK_STATE_UP)
+			    (if_getlinkstate(ifp) == LINK_STATE_UP)
 			    ? "up" : "down",
 			    (state == LINK_STATE_UP) ? "up" : "down");
-		ifp->if_link_state = state;
+		if_setlink_state(ifp, state);
 		if (state != LINK_STATE_UP) {
 			/*
 			 * Purge any existing addresses
@@ -1097,7 +1097,7 @@ umb_state_task(struct usb_proc_msg *msg)
 static void
 umb_up(struct umb_softc *sc)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	switch (sc->sc_state) {
 	case UMB_S_DOWN:
@@ -1142,9 +1142,9 @@ umb_up(struct umb_softc *sc)
 		break;
 	case UMB_S_UP:
 		DPRINTF("init: reached state UP\n");
-		if (!(ifp->if_flags & IFF_DRV_RUNNING)) {
-			ifp->if_drv_flags |= IFF_DRV_RUNNING;
-			ifp->if_drv_flags &= ~IFF_DRV_OACTIVE;
+		if (!(if_getflags(ifp) & IFF_DRV_RUNNING)) {
+			if_setdrvflagbits(ifp, IFF_DRV_RUNNING, 0);
+			if_setdrvflagbits(ifp, 0, IFF_DRV_OACTIVE);
 			umb_rx(sc);
 		}
 		break;
@@ -1338,7 +1338,7 @@ static void
 umb_handle_opendone_msg(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_f2h_openclosedone *resp = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	uint32_t status;
 
 	status = le32toh(resp->status);
@@ -1351,7 +1351,7 @@ umb_handle_opendone_msg(struct umb_softc *sc, void *data, int len)
 			    NULL, 0);
 		}
 		umb_newstate(sc, UMB_S_OPEN, UMB_NS_DONT_DROP);
-	} else if (ifp->if_flags & IFF_DEBUG)
+	} else if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_ERR, "%s: open error: %s\n", DEVNAM(sc),
 		    umb_status2str(status));
 	return;
@@ -1434,7 +1434,7 @@ static int
 umb_decode_register_state(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_registration_state_info *rs = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (len < sizeof (*rs))
 		return 0;
@@ -1457,7 +1457,7 @@ umb_decode_register_state(struct umb_softc *sc, void *data, int len)
 	if (sc->sc_info.regstate == MBIM_REGSTATE_ROAMING &&
 	    !sc->sc_roaming &&
 	    sc->sc_info.activation == MBIM_ACTIVATION_STATE_ACTIVATED) {
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_INFO,
 			    "%s: disconnecting from roaming network\n",
 			    DEVNAM(sc));
@@ -1490,7 +1490,7 @@ static int
 umb_decode_subscriber_status(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_subscriber_ready_info *si = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	int	npn;
 
 	if (len < sizeof (*si))
@@ -1511,7 +1511,7 @@ umb_decode_subscriber_status(struct umb_softc *sc, void *data, int len)
 
 	if (sc->sc_info.sim_state == MBIM_SIMSTATE_LOCKED)
 		sc->sc_info.pin_state = UMB_PIN_REQUIRED;
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_INFO, "%s: SIM %s\n", DEVNAM(sc),
 		    umb_simstate(sc->sc_info.sim_state));
 	if (sc->sc_info.sim_state == MBIM_SIMSTATE_INITIALIZED)
@@ -1523,7 +1523,7 @@ static int
 umb_decode_radio_state(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_radio_state_info *rs = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (len < sizeof (*rs))
 		return 0;
@@ -1541,7 +1541,7 @@ umb_decode_radio_state(struct umb_softc *sc, void *data, int len)
 		 */
 		umb_newstate(sc, UMB_S_OPEN, 0);
 	} else if (!sc->sc_info.sw_radio_on) {
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_INFO, "%s: radio is off\n", DEVNAM(sc));
 		umb_newstate(sc, UMB_S_OPEN, 0);
 	} else
@@ -1553,7 +1553,7 @@ static int
 umb_decode_pin(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_pin_info *pi = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	uint32_t	attempts_left;
 
 	if (len < sizeof (*pi))
@@ -1583,7 +1583,7 @@ umb_decode_pin(struct umb_softc *sc, void *data, int len)
 		}
 		break;
 	}
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_INFO, "%s: %s state %s (%d attempts left)\n",
 		    DEVNAM(sc), umb_pin_type(le32toh(pi->type)),
 		    (le32toh(pi->state) == MBIM_PIN_STATE_UNLOCKED) ?
@@ -1605,7 +1605,7 @@ umb_decode_packet_service(struct umb_softc *sc, void *data, int len)
 	struct mbim_cid_packet_service_info *psi = data;
 	int	 state, highestclass;
 	uint64_t up_speed, down_speed;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (len < sizeof (*psi))
 		return 0;
@@ -1618,7 +1618,7 @@ umb_decode_packet_service(struct umb_softc *sc, void *data, int len)
 	if (sc->sc_info.packetstate  != state ||
 	    sc->sc_info.uplink_speed != up_speed ||
 	    sc->sc_info.downlink_speed != down_speed) {
-		if (ifp->if_flags & IFF_DEBUG) {
+		if (if_getflags(ifp) & IFF_DEBUG) {
 			log(LOG_INFO, "%s: packet service ", DEVNAM(sc));
 			if (sc->sc_info.packetstate  != state)
 				log(LOG_INFO, "changed from %s to ",
@@ -1638,7 +1638,7 @@ umb_decode_packet_service(struct umb_softc *sc, void *data, int len)
 		 * For devices using automatic registration mode, just proceed,
 		 * once registration has completed.
 		 */
-		if (ifp->if_flags & IFF_UP) {
+		if (if_getflags(ifp) & IFF_UP) {
 			switch (sc->sc_info.regstate) {
 			case MBIM_REGSTATE_HOME:
 			case MBIM_REGSTATE_ROAMING:
@@ -1666,7 +1666,7 @@ static int
 umb_decode_signal_state(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_signal_state *ss = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	int	 rssi;
 
 	if (len < sizeof (*ss))
@@ -1676,7 +1676,7 @@ umb_decode_signal_state(struct umb_softc *sc, void *data, int len)
 		rssi = UMB_VALUE_UNKNOWN;
 	else {
 		rssi = -113 + 2 * le32toh(ss->rssi);
-		if ((ifp->if_flags & IFF_DEBUG) && sc->sc_info.rssi != rssi &&
+		if ((if_getflags(ifp) & IFF_DEBUG) && sc->sc_info.rssi != rssi &&
 		    sc->sc_state >= UMB_S_CONNECTED)
 			log(LOG_INFO, "%s: rssi %d dBm\n", DEVNAM(sc), rssi);
 	}
@@ -1691,7 +1691,7 @@ static int
 umb_decode_connect_info(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_connect_info *ci = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	int	 act;
 
 	if (len < sizeof (*ci))
@@ -1709,10 +1709,10 @@ umb_decode_connect_info(struct umb_softc *sc, void *data, int len)
 	}
 	act = le32toh(ci->activation);
 	if (sc->sc_info.activation != act) {
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_INFO, "%s: connection %s\n", DEVNAM(sc),
 			    umb_activation(act));
-		if ((ifp->if_flags & IFF_DEBUG) &&
+		if ((if_getflags(ifp) & IFF_DEBUG) &&
 		    le32toh(ci->iptype) != MBIM_CONTEXT_IPTYPE_DEFAULT &&
 		    le32toh(ci->iptype) != MBIM_CONTEXT_IPTYPE_IPV4)
 			log(LOG_DEBUG, "%s: got iptype %d connection\n",
@@ -1735,7 +1735,7 @@ static int
 umb_add_inet_config(struct umb_softc *sc, struct in_addr ip, u_int prefixlen,
     struct in_addr gw)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	struct in_aliasreq ifra;
 	struct sockaddr_in *sin;
 	int	 rv;
@@ -1767,7 +1767,7 @@ umb_add_inet_config(struct umb_softc *sc, struct in_addr ip, u_int prefixlen,
 		return rv;
 	}
 
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_INFO, "%s: IPv4 addr %s, mask %s, "
 		    "gateway %s\n", DEVNAM(sc),
 		    umb_ntop(sintosa(&ifra.ifra_addr)),
@@ -1781,7 +1781,7 @@ static int
 umb_decode_ip_configuration(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_cid_ip_configuration_info *ic = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	uint32_t avail_v4;
 	uint32_t val;
 	int	 n, i;
@@ -1810,7 +1810,7 @@ umb_decode_ip_configuration(struct umb_softc *sc, void *data, int len)
 
 		if (n == 0 || off + sizeof (ipv4elem) > len)
 			goto tryv6;
-		if (n != 1 && ifp->if_flags & IFF_DEBUG)
+		if (n != 1 && if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_INFO, "%s: more than one IPv4 addr: %d\n",
 			    DEVNAM(sc), n);
 
@@ -1846,17 +1846,17 @@ umb_decode_ip_configuration(struct umb_softc *sc, void *data, int len)
 
 	if ((avail_v4 & MBIM_IPCONF_HAS_MTUINFO)) {
 		val = le32toh(ic->ipv4_mtu);
-		if (ifp->if_mtu != val && val <= sc->sc_maxpktlen) {
-			ifp->if_mtu = val;
-			if (ifp->if_mtu > val)
-				ifp->if_mtu = val;
-			if (ifp->if_flags & IFF_DEBUG)
+		if (if_getmtu(ifp) != val && val <= sc->sc_maxpktlen) {
+			if_setmtu(ifp, val);
+			if (if_getmtu(ifp) > val)
+				if_setmtu(ifp, val);
+			if (if_getflags(ifp) & IFF_DEBUG)
 				log(LOG_INFO, "%s: MTU %d\n", DEVNAM(sc), val);
 		}
 	}
 
 	avail_v4 = le32toh(ic->ipv6_available);
-	if ((ifp->if_flags & IFF_DEBUG) && avail_v4 & MBIM_IPCONF_HAS_ADDRINFO) {
+	if ((if_getflags(ifp) & IFF_DEBUG) && avail_v4 & MBIM_IPCONF_HAS_ADDRINFO) {
 		/* XXX FIXME: IPv6 configuration missing */
 		log(LOG_INFO, "%s: ignoring IPv6 configuration\n", DEVNAM(sc));
 	}
@@ -1880,7 +1880,7 @@ static void
 umb_rxeof(struct usb_xfer *xfer, usb_error_t status)
 {
 	struct umb_softc *sc = usbd_xfer_softc(xfer);
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	int actlen;
 	int aframes;
 	int i;
@@ -1946,7 +1946,7 @@ umb_rxeof(struct usb_xfer *xfer, usb_error_t status)
 static void
 umb_rxflush(struct umb_softc *sc)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	struct mbuf *m;
 
 	mtx_assert(&sc->sc_mutex, MA_OWNED);
@@ -1961,8 +1961,8 @@ umb_rxflush(struct umb_softc *sc)
 		 */
 		mtx_unlock(&sc->sc_mutex);
 		CURVNET_SET_QUIET(if_getvnet(ifp));
-		if (ifp->if_drv_flags & IFF_DRV_RUNNING)
-			ifp->if_input(ifp, m);
+		if (if_getdrvflags(ifp) & IFF_DRV_RUNNING)
+			ifp->if_input(ifp, m); /* XXX - IFAPI */
 		else
 			m_freem(m);
 		CURVNET_RESTORE();
@@ -2019,7 +2019,7 @@ static void
 umb_txeof(struct usb_xfer *xfer, usb_error_t status)
 {
 	struct umb_softc *sc = usbd_xfer_softc(xfer);
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	struct mbuf *m;
 
 	DPRINTF("%s(%u) state=%u\n", __func__, status, USB_GET_STATE(xfer));
@@ -2028,7 +2028,7 @@ umb_txeof(struct usb_xfer *xfer, usb_error_t status)
 
 	switch (USB_GET_STATE(xfer)) {
 	case USB_ST_TRANSFERRED:
-		ifp->if_drv_flags &= ~IFF_DRV_OACTIVE;
+		if_setdrvflagbits(ifp, 0, IFF_DRV_OACTIVE);
 		if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
 
 		umb_txflush(sc);
@@ -2036,10 +2036,10 @@ umb_txeof(struct usb_xfer *xfer, usb_error_t status)
 		/* fall through */
 	case USB_ST_SETUP:
 tr_setup:
-		if ((ifp->if_drv_flags & IFF_DRV_RUNNING) == 0)
+		if ((if_getdrvflags(ifp) & IFF_DRV_RUNNING) == 0)
 			break;
 
-		IFQ_DRV_DEQUEUE(&ifp->if_snd, m);
+		m = if_dequeue(ifp); /* XXX - IFAPI */
 		if (m == NULL)
 			break;
 
@@ -2051,7 +2051,7 @@ tr_setup:
 
 		BPF_MTAP(ifp, m);
 
-		ifp->if_drv_flags |= IFF_DRV_OACTIVE;
+		if_setdrvflagbits(ifp, IFF_DRV_OACTIVE, 0);
 		usbd_transfer_submit(xfer);
 
 		break;
@@ -2087,7 +2087,7 @@ umb_txflush(struct umb_softc *sc)
 static void
 umb_decap(struct umb_softc *sc, struct usb_xfer *xfer, int frame)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	char *buf;
 	int len;
 	char	*dp;
@@ -2279,7 +2279,7 @@ umb_get_encap_response(struct umb_softc *sc, void *buf, int *len)
 static void
 umb_ctrl_msg(struct umb_softc *sc, uint32_t req, void *data, int len)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	uint32_t tid;
 	struct mbim_msghdr *hdr = data;
 	usb_error_t err;
@@ -2313,7 +2313,7 @@ umb_ctrl_msg(struct umb_softc *sc, uint32_t req, void *data, int len)
 #endif
 	err = umb_send_encap_command(sc, data, len);
 	if (err != USB_ERR_NORMAL_COMPLETION) {
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_ERR, "%s: send %s msg (tid %u) failed: %s\n",
 			    DEVNAM(sc), umb_request2str(req), tid,
 			    usbd_errstr(err));
@@ -2459,14 +2459,14 @@ umb_packet_service(struct umb_softc *sc, int attach)
 static void
 umb_connect(struct umb_softc *sc)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
 	if (sc->sc_info.regstate == MBIM_REGSTATE_ROAMING && !sc->sc_roaming) {
 		log(LOG_INFO, "%s: connection disabled in roaming network\n",
 		    DEVNAM(sc));
 		return;
 	}
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_DEBUG, "%s: connecting ...\n", DEVNAM(sc));
 	umb_send_connect(sc, MBIM_CONNECT_ACTIVATE);
 }
@@ -2474,9 +2474,9 @@ umb_connect(struct umb_softc *sc)
 static void
 umb_disconnect(struct umb_softc *sc)
 {
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 
-	if (ifp->if_flags & IFF_DEBUG)
+	if (if_getflags(ifp) & IFF_DEBUG)
 		log(LOG_DEBUG, "%s: disconnecting ...\n", DEVNAM(sc));
 	umb_send_connect(sc, MBIM_CONNECT_DEACTIVATE);
 }
@@ -2562,7 +2562,7 @@ static void
 umb_command_done(struct umb_softc *sc, void *data, int len)
 {
 	struct mbim_f2h_cmddone *cmd = data;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	uint32_t status;
 	uint32_t cid;
 	uint32_t infolen;
@@ -2590,7 +2590,7 @@ umb_command_done(struct umb_softc *sc, void *data, int len)
 	case MBIM_STATUS_SUCCESS:
 		break;
 	case MBIM_STATUS_NOT_INITIALIZED:
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_ERR, "%s: SIM not initialized (PIN missing)\n",
 			    DEVNAM(sc));
 		return;
@@ -2598,7 +2598,7 @@ umb_command_done(struct umb_softc *sc, void *data, int len)
 		sc->sc_info.pin_state = UMB_PIN_REQUIRED;
 		/*FALLTHROUGH*/
 	default:
-		if (ifp->if_flags & IFF_DEBUG)
+		if (if_getflags(ifp) & IFF_DEBUG)
 			log(LOG_ERR, "%s: set/qry %s failed: %s\n", DEVNAM(sc),
 			    umb_cid2str(cid), umb_status2str(status));
 		return;
@@ -2790,7 +2790,7 @@ umb_intr(struct usb_xfer *xfer, usb_error_t status)
 	struct umb_softc *sc = usbd_xfer_softc(xfer);
 	struct usb_cdc_notification notification;
 	struct usb_page_cache *pc;
-	struct ifnet *ifp = GET_IFP(sc);
+	if_t ifp = GET_IFP(sc);
 	int	 total_len;
 
 	mtx_assert(&sc->sc_mutex, MA_OWNED);
@@ -2819,7 +2819,7 @@ umb_intr(struct usb_xfer *xfer, usb_error_t status)
 
 		switch (notification.bNotification) {
 		case UCDC_N_NETWORK_CONNECTION:
-			if (ifp->if_flags & IFF_DEBUG)
+			if (if_getflags(ifp) & IFF_DEBUG)
 				log(LOG_DEBUG, "%s: network %sconnected\n",
 						DEVNAM(sc),
 						UGETW(notification.wValue)
