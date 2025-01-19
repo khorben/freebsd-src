@@ -595,13 +595,12 @@ umb_attach_task(struct usb_proc_msg *msg)
 #if 0
 	if_setwatchdog(ifp, umb_watchdog);
 #endif
-	if_setlink_state(ifp, LINK_STATE_DOWN);
+	if_link_state_change(ifp, LINK_STATE_DOWN);
 	ifmedia_init(&sc->sc_im, 0, umb_mediachange, umb_mediastatus);
 	ifmedia_add(&sc->sc_im, IFM_NONE | IFM_AUTO, 0, NULL);
 
-	if_setaddrlen(ifp, 0);
-	if_sethdrlen(ifp, sizeof (struct ncm_header16) +);
-	    sizeof (struct ncm_pointer16);
+	if_setifheaderlen(ifp, sizeof (struct ncm_header16) +
+	    sizeof (struct ncm_pointer16)); /* XXX - IFAPI */
 	/* XXX hard-coded atm */
 	if_setmtu(ifp, MIN(2048, sc->sc_maxpktlen));
 	if_setsendqlen(ifp, ifqmaxlen);
@@ -899,7 +898,7 @@ umb_output(if_t ifp, struct mbuf *m, const struct sockaddr *dst,
 	 * Queue message on interface, and start output if interface
 	 * not yet active.
 	 */
-	error = (ifp->if_transmit)(ifp, m); /* XXX - IFAPI */
+	error = if_transmit(ifp, m);
 	if (error) {
 		if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
 		return (ENOBUFS);
@@ -1071,7 +1070,7 @@ umb_state_task(struct usb_proc_msg *msg)
 			    (if_getlinkstate(ifp) == LINK_STATE_UP)
 			    ? "up" : "down",
 			    (state == LINK_STATE_UP) ? "up" : "down");
-		if_setlink_state(ifp, state);
+		if_link_state_change(ifp, state); /* XXX - IFAPI */
 		if (state != LINK_STATE_UP) {
 			/*
 			 * Purge any existing addresses
@@ -1962,7 +1961,7 @@ umb_rxflush(struct umb_softc *sc)
 		mtx_unlock(&sc->sc_mutex);
 		CURVNET_SET_QUIET(if_getvnet(ifp));
 		if (if_getdrvflags(ifp) & IFF_DRV_RUNNING)
-			ifp->if_input(ifp, m); /* XXX - IFAPI */
+			if_input(ifp, m);
 		else
 			m_freem(m);
 		CURVNET_RESTORE();
