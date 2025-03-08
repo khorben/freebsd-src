@@ -203,6 +203,7 @@ SUBDIR=	\
 	${_ix} \
 	${_ixv} \
 	${_ixl} \
+	iwx \
 	jme \
 	kbdmux \
 	kgssapi \
