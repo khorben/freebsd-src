@@ -22,15 +22,13 @@ SRCS+=	packet.c sparse_array.c
 
 # record
 SRCS+=	dtls1_bitmap.c rec_layer_d1.c rec_layer_s3.c ssl3_buffer.c
-SRCS+=	ssl3_record.c ssl3_record_tls13.c tls_pad.c
+SRCS+=	ssl3_record_tls13.c tls_pad.c
 
 # statem
 SRCS+=	extensions.c extensions_clnt.c extensions_cust.c extensions_srvr.c
 SRCS+=	statem.c statem_clnt.c statem_dtls.c statem_lib.c statem_srvr.c
 
-.if ${MK_OPENSSL_KTLS} != "no"
-SRCS+=	ktls.c
-.else
+.if ${MK_OPENSSL_KTLS} == "no"
 CFLAGS+=-DOPENSSL_NO_KTLS
 .endif
 
