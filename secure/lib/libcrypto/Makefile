@@ -102,7 +102,7 @@ SRCS+=	bn_sqr.c bn_sqrt.c bn_srp.c bn_word.c bn_x931p.c
 .if defined(ASM_aarch64)
 SRCS+=	armv8-mont.S bn_asm.c
 .elif defined(ASM_amd64)
-SRCS+=	rsaz-avx2.S rsaz-avx512.S rsaz-x86_64.S rsaz_exp.c rsaz_exp_x2.c
+SRCS+=	rsaz-avx2.S rsaz-x86_64.S rsaz_exp.c rsaz_exp_x2.c
 SRCS+=	x86_64-gcc.c x86_64-gf2m.S x86_64-mont.S x86_64-mont5.S
 .elif defined(ASM_arm)
 SRCS+=	armv4-gf2m.S armv4-mont.S bn_asm.c
@@ -440,7 +440,7 @@ SRCS+=	poly1305_prov.c
 SRCS+=	siphash_prov.c
 
 # providers/implementations/rands
-SRCS+=	crngt.c drbg.c drbg_ctr.c drbg_hash.c drbg_hmac.c test_rng.c
+SRCS+=	drbg.c drbg_ctr.c drbg_hash.c drbg_hmac.c test_rng.c
 SRCS+=	seed_src.c
 
 # providers/implementations/rands/seeding
@@ -511,12 +511,6 @@ SRCS+=	siphash.c
 # srp
 SRCS+=	srp_lib.c srp_vfy.c
 
-# ssl
-SRCS+=	s3_cbc.c
-
-# ssl/record
-SRCS+=	tls_pad.c
-
 # stack
 SRCS+=	stack.c
 
@@ -560,10 +554,10 @@ SRCS+=	x509_v3.c x509_vfy.c x509_vpm.c x509cset.c x509name.c x509rset.c
 SRCS+=	x509spki.c x509type.c x_all.c x_attrib.c x_crl.c x_exten.c x_name.c
 SRCS+=	x_pubkey.c x_req.c x_x509.c x_x509a.c
 
-INCS=	aes.h asn1.h asn1_mac.h asn1err.h asn1t.h async.h asyncerr.h bio.h
+INCS=	aes.h asn1.h asn1err.h asn1t.h async.h asyncerr.h bio.h
 INCS+=	bioerr.h blowfish.h bn.h bnerr.h buffer.h buffererr.h camellia.h
-INCS+=	cast.h cmac.h cmp.h cmp_util.h cmperr.h cms.h cmserr.h comp.h comperr.h conf.h conf_api.h
-INCS+=	conferr.h configuration.h conftypes.h core.h core_dispatch.h core_names.h core_object.h
+INCS+=	cast.h cmac.h cmp.h cmp_util.h cmperr.h cms.h cmserr.h comperr.h conf.h conf_api.h
+INCS+=	conferr.h configuration.h conftypes.h core.h core_dispatch.h core_object.h
 INCS+=	crmf.h crmferr.h crypto.h cryptoerr.h cryptoerr_legacy.h ct.h cterr.h
 INCS+=	decoder.h decodererr.h des.h dh.h dherr.h dsa.h
 INCS+=	dsaerr.h dtls1.h e_os2.h ebcdic.h ec.h ecdh.h ecdsa.h ecerr.h encoder.h encodererr.h
@@ -573,7 +567,7 @@ INCS+=	objects.h objectserr.h ocsp.h ocsperr.h opensslconf.h opensslv.h
 INCS+=	ossl_typ.h param_build.h params.h pem.h pem2.h pemerr.h pkcs12.h pkcs12err.h pkcs7.h
 INCS+=	pkcs7err.h prov_ssl.h proverr.h provider.h rand.h randerr.h rc2.h rc4.h rc5.h ripemd.h
 INCS+=	rsa.h rsaerr.h safestack.h seed.h self_test.h sha.h srp.h srtp.h ssl.h ssl2.h
-INCS+=	ssl3.h sslerr.h sslerr_legacy.h stack.h store.h storeerr.h symhacks.h tls1.h trace.h ts.h
+INCS+=	ssl3.h sslerr_legacy.h stack.h store.h storeerr.h symhacks.h tls1.h trace.h ts.h
 INCS+=	tserr.h txt_db.h types.h ui.h uierr.h whrlpool.h x509.h x509_vfy.h x509err.h
 INCS+=	x509v3.h x509v3err.h
 
