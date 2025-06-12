@@ -19,7 +19,7 @@
  * The prime is: 2^768 - 2 ^704 - 1 + 2^64 * { [2^638 pi] + 149686 }
  *
  * RFC2409 specifies a generator of 2.
- * RFC2412 specifies a generator of of 22.
+ * RFC2412 specifies a generator of 22.
  */
 
 BIGNUM *BN_get_rfc2409_prime_768(BIGNUM *bn)
@@ -82,12 +82,10 @@ BIGNUM *BN_get_rfc2409_prime_1024(BIGNUM *bn)
  * RFC2312 specifies a generator of 22.
  */
 
-#ifndef FIPS_MODULE
 BIGNUM *BN_get_rfc3526_prime_1536(BIGNUM *bn)
 {
     return COPY_BN(bn, ossl_bignum_modp_1536_p);
 }
-#endif
 
 /*-
  * "2048-bit MODP Group" from RFC3526, Section 3.

@@ -104,6 +104,14 @@ crypto/openssl/amd64/aesni-gcm-x86_64.S	optional ossl
 crypto/openssl/amd64/chacha-x86_64.S	optional ossl
 crypto/openssl/amd64/ghash-x86_64.S	optional ossl
 crypto/openssl/amd64/poly1305-x86_64.S	optional ossl
+crypto/openssl/amd64/rsaz-2k-avx512.S	optional ossl
+crypto/openssl/amd64/rsaz-2k-avxifma.S	optional ossl
+crypto/openssl/amd64/rsaz-3k-avx512.S	optional ossl
+crypto/openssl/amd64/rsaz-3k-avxifma.S	optional ossl
+crypto/openssl/amd64/rsaz-4k-avx512.S	optional ossl
+crypto/openssl/amd64/rsaz-4k-avxifma.S	optional ossl
+crypto/openssl/amd64/rsaz-avx2.S	optional ossl
+crypto/openssl/amd64/rsaz-x86_64.S	optional ossl
 crypto/openssl/amd64/sha1-x86_64.S	optional ossl
 crypto/openssl/amd64/sha256-x86_64.S	optional ossl
 crypto/openssl/amd64/sha512-x86_64.S	optional ossl
