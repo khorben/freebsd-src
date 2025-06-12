@@ -83,11 +83,14 @@ SRCS=	x86_64cpuid.pl
 # aes
 SRCS+=	aes-x86_64.pl \
 	aesni-mb-x86_64.pl aesni-sha1-x86_64.pl aesni-sha256-x86_64.pl \
-	aesni-x86_64.pl bsaes-x86_64.pl vpaes-x86_64.pl
+	aesni-x86_64.pl aesni-xts-avx512.pl bsaes-x86_64.pl vpaes-x86_64.pl
 
 # bn
-SRCS+=	rsaz-avx2.pl rsaz-avx512.pl rsaz-x86_64.pl x86_64-gf2m.pl \
-	x86_64-mont.pl x86_64-mont5.pl
+SRCS+=	rsaz-avx2.pl rsaz-x86_64.pl \
+	rsaz-2k-avx512.pl rsaz-2k-avxifma.pl \
+	rsaz-3k-avx512.pl rsaz-3k-avxifma.pl \
+	rsaz-4k-avx512.pl rsaz-4k-avxifma.pl \
+	x86_64-gf2m.pl x86_64-mont.pl x86_64-mont5.pl
 
 # camellia
 SRCS+=	cmll-x86_64.pl

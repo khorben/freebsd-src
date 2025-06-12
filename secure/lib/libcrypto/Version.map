@@ -5397,3 +5397,8 @@ OPENSSL_3_0_9 {
         i2s_ASN1_UTF8STRING;
         s2i_ASN1_UTF8STRING;
 } OPENSSL_1_1_1h;
+
+OPENSSL_3_5_0 {
+    global:
+	EVP_MD_CTX_get_size_ex;
+} OPENSSL_3_0_9;
