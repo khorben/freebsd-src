@@ -1,6 +1,6 @@
 PACKAGE?=	openssl-lib
 
-SHLIBDIR=	${LIBDIR}/engines-3
+SHLIBDIR=	${LIBDIR}/engines-35
 
 LCRYPTO_SRC=	${SRCTOP}/crypto/openssl
 

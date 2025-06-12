@@ -51,6 +51,14 @@
 #   xargs -n1 | sort | uniq -d;
 # done
 
+# 20250615: OpenSSL 3.5.0
+OLD_LIBS+=lib/libcrypto.so.30
+OLD_LIBS+=usr/lib/engines-3/capi.so
+OLD_LIBS+=usr/lib/engines-3/devcrypto.so
+OLD_LIBS+=usr/lib/engines-3/loader_attic.so
+OLD_LIBS+=usr/lib/engines-3/padlock.so
+OLD_LIBS+=usr/lib/libssl.so.30
+
 # 20250521: don't install zoneinfo version
 OLD_FILES+=usr/share/zoneinfo/version
 

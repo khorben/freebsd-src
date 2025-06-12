@@ -2,7 +2,7 @@ prefix=/usr
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
-enginesdir=${libdir}/engines-3
+enginesdir=${libdir}/engines-35
 
 Name: OpenSSL-libcrypto
 Description: OpenSSL cryptography library
