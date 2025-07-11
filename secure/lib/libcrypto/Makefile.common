@@ -102,7 +102,7 @@ CFLAGS+=	-DKECCAK1600_ASM
 MANDIR=		${SHAREDIR}/openssl/man/man
 
 CFLAGS+=	-DOPENSSLDIR="\"/etc/ssl\""
-CFLAGS+=	-DENGINESDIR="\"${LIBDIR}/engines-3\""
+CFLAGS+=	-DENGINESDIR="\"${LIBDIR}/engines-35\""
 CFLAGS+=	-DMODULESDIR="\"${LIBDIR}/ossl-modules\""
 
 CFLAGS+=	-DNDEBUG
