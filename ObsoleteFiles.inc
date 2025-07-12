@@ -72,6 +72,14 @@ OLD_FILES+=usr/share/flua/yaml.lua
 # 20250615: don't install man page for absent function
 OLD_FILES+=usr/share/man/man9/vm_map_simplify_entry.9.gz
 
+# 20250615: OpenSSL 3.5.0
+OLD_LIBS+=lib/libcrypto.so.30
+OLD_LIBS+=usr/lib/engines-3/capi.so
+OLD_LIBS+=usr/lib/engines-3/devcrypto.so
+OLD_LIBS+=usr/lib/engines-3/loader_attic.so
+OLD_LIBS+=usr/lib/engines-3/padlock.so
+OLD_LIBS+=usr/lib/libssl.so.30
+
 # 20250521: don't install zoneinfo version
 OLD_FILES+=usr/share/zoneinfo/version
 
