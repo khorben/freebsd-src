@@ -156,7 +156,7 @@ SRCS+=	c_cfb64.c c_ecb.c c_enc.c c_ofb64.c c_skey.c
 
 # chacha
 .if defined(ASM_aarch64)
-SRCS+=	chacha-armv8.S
+SRCS+=	chacha-armv8.S chacha-armv8-sve.S
 .elif defined(ASM_amd64)
 SRCS+=	chacha-x86_64.S
 .elif defined(ASM_arm)
@@ -324,7 +324,7 @@ SRCS+=	ml_kem.c
 SRCS+=	cbc128.c ccm128.c cfb128.c ctr128.c cts128.c gcm128.c ocb128.c
 SRCS+=	ofb128.c siv128.c wrap128.c xts128.c xts128gb.c
 .if defined(ASM_aarch64)
-SRCS+=	ghashv8-armx.S aes-gcm-armv8_64.S
+SRCS+=	ghashv8-armx.S aes-gcm-armv8_64.S aes-gcm-armv8-unroll8_64.S
 ACFLAGS.ghashv8-armx.S=	-march=armv8-a+crypto
 .elif defined(ASM_amd64)
 SRCS+=	aesni-gcm-x86_64.S aes-gcm-avx512.S ghash-x86_64.S
