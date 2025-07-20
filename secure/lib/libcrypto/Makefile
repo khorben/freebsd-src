@@ -166,9 +166,9 @@ SRCS+=	chacha-x86.S
 .elif defined(ASM_powerpc)
 SRCS+=	chacha_ppc.c chacha-ppc.S
 .elif defined(ASM_powerpc64)
-SRCS+=	chacha_ppc.c chacha-ppc.S
+SRCS+=	chacha_ppc.c chacha-ppc.S chachap10-ppc.S
 .elif defined(ASM_powerpc64le)
-SRCS+=	chacha_ppc.c chacha-ppc.S
+SRCS+=	chacha_ppc.c chacha-ppc.S chachap10-ppc.S
 .else
 SRCS+=	chacha_enc.c
 .endif
@@ -337,9 +337,9 @@ SRCS+=	ghash-x86.S
 .elif defined(ASM_powerpc)
 SRCS+=	ghashp8-ppc.S
 .elif defined(ASM_powerpc64)
-SRCS+=	ghashp8-ppc.S
+SRCS+=	aes-gcm-ppc.S ghashp8-ppc.S
 .elif defined(ASM_powerpc64le)
-SRCS+=	ghashp8-ppc.S
+SRCS+=	aes-gcm-ppc.S ghashp8-ppc.S
 .endif
 
 # objects
