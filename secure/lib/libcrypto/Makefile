@@ -235,6 +235,8 @@ SRCS+=	f_generic.c f_impl32.c f_impl64.c scalar.c
 # see OPENSSL_NO_EC_NISTP_64_GCC_128 in configuration.h
 .if ${MACHINE_ABI:Mlittle-endian} && ${MACHINE_ABI:Mlong64}
 SRCS+=	ecp_nistp224.c ecp_nistp256.c ecp_nistp384.c ecp_nistp521.c ecp_nistputil.c
+.else
+CFLAGS+=-DOPENSSL_NO_EC_NISTP_64_GCC_128
 .endif
 .if defined(ASM_aarch64)
 SRCS+=	ecp_nistz256-armv8.S ecp_nistz256.c
