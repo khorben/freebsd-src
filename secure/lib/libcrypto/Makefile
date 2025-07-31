@@ -164,7 +164,7 @@ SRCS+=	chacha-armv4.S
 .elif defined(ASM_i386)
 SRCS+=	chacha-x86.S
 .elif defined(ASM_powerpc)
-SRCS+=	chacha_ppc.c chacha-ppc.S
+SRCS+=	chacha_ppc.c chacha-ppc.S chachap10-ppc.S
 .elif defined(ASM_powerpc64)
 SRCS+=	chacha_ppc.c chacha-ppc.S chachap10-ppc.S
 .elif defined(ASM_powerpc64le)
@@ -672,6 +672,9 @@ buildasm cleanasm:
 
 .include <bsd.lib.mk>
 
+.if ${MACHINE_ARCH} == "powerpc"
+PICFLAG=	-fPIC
+.endif
 PICFLAG+=	-DOPENSSL_PIC
 
 .if defined(ASM_${MACHINE_CPUARCH})
