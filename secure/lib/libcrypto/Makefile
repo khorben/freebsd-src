@@ -672,7 +672,8 @@ buildasm cleanasm:
 
 .include <bsd.lib.mk>
 
-.if ${MACHINE_ARCH} == "powerpc"
+.if ${MACHINE} == "powerpc"
+# Work around "relocation R_PPC_GOT16 out of range" errors
 PICFLAG=	-fPIC
 .endif
 PICFLAG+=	-DOPENSSL_PIC
