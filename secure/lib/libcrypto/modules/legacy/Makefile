@@ -22,6 +22,7 @@ SRCS+=	md4_prov.c wp_prov.c ripemd_prov.c
 
 # kdfs
 SRCS+=	pbkdf1.c
+SRCS+=	pvkkdf.c
 
 .include <bsd.lib.mk>
 
