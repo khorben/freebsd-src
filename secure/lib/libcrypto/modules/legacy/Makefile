@@ -1,7 +1,7 @@
 SHLIB_NAME?=	legacy.so
 LIBADD=		crypto
 
-SRCS+=	legacyprov.c prov_running.c
+SRCS+=	legacyprov.c prov_running.c params_idx.c
 
 # ciphers
 SRCS+=	ciphercommon.c ciphercommon_hw.c ciphercommon_block.c \
@@ -29,4 +29,5 @@ SRCS+=	pvkkdf.c
 .PATH:	${LCRYPTO_SRC}/providers/implementations/ciphers \
 	${LCRYPTO_SRC}/providers/implementations/digests \
 	${LCRYPTO_SRC}/providers/implementations/kdfs \
+	${LCRYPTO_SRC}/crypto \
 	${LCRYPTO_SRC}/ssl
