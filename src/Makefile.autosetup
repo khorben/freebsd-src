@@ -1,0 +1,137 @@
+include @builddir@/mk/defs.mk
+PROG=	pkg
+SRCS=	add.c \
+	alias.c \
+	annotate.c \
+	audit.c \
+	autoremove.c \
+	check.c \
+	clean.c \
+	config.c \
+	create.c \
+	delete.c \
+	event.c \
+	fetch.c \
+	globals.c \
+	info.c \
+	install.c \
+	key.c \
+	lock.c \
+	main.c \
+	plugins.c \
+	query.c \
+	register.c \
+	repo.c \
+	repositories.c \
+	rquery.c \
+	search.c \
+	set.c \
+	shell.c \
+	shlib.c \
+	ssh.c \
+	stats.c \
+	triggers.c \
+	unregister.c \
+	update.c \
+	updating.c \
+	upgrade.c \
+	utils.c \
+	version.c \
+	which.c
+
+LOCAL_CFLAGS=	-I$(top_srcdir)/compat \
+		-I$(top_srcdir)/external/libucl/include \
+		-I$(top_srcdir)/external/include \
+		-I$(top_builddir)/ \
+		-I$(top_srcdir)/libpkg \
+		-I$(top_builddir)/libpkg \
+		-DGITHASH=\"@GITHASH@\" \
+		-DHAVE_CONFIG_H \
+		-Werror=switch
+LIBPKGFLAT=	-L$(top_builddir)/libpkg -lpkg_flat
+OTHER_LIBS=	@EXTRA_LIBS@ -lm -pthread
+
+@if HAVE_PKG_LIBARCHIVE
+OTHER_LIBS+=	@PKG_LIBARCHIVE_LDFLAGS@ @PKG_LIBARCHIVE_LIBS@
+LOCAL_CFLAGS+=	@PKG_LIBARCHIVE_CFLAGS@
+@else
+OTHER_LIBS+=	-larchive -lbz2 -lz -llzma @ZSTDLIB@
+@endif
+
+@if HAVE_LIBUTIL
+OTHER_LIBS+=	-lutil
+@endif
+
+@if HAVE_LIBFTS
+OTHER_LIBS+=	-lfts
+@endif
+
+@if HAVE_LIBDL
+OTHER_LIBS+=	-ldl
+@endif
+
+@if PKG_OPENSSL_LIBS
+LOCAL_CFLAGS+=	@PKG_OPENSSL_CFLAGS@
+OTHER_LIBS+=	@PKG_OPENSSL_LDFLAGS@ @PKG_OPENSSL_LIBS@
+@else
+OTHER_LIBS+=	-lssl -lcrypto
+@endif
+
+# libmd must be linked after libssl/libcrypto.
+@if HAVE_LIBMD
+OTHER_LIBS+=	-lmd
+@endif
+
+@if PKG_LIBCURL_LIBS
+LOCAL_CFLAGS+=	@PKG_LIBCURL_CFLAGS@
+OTHER_LIBS+=	@PKG_LIBCURL_LDFLAGS@ @PKG_LIBCURL_LIBS@
+@endif
+
+@if pkgos_darwin
+LOCAL_LDFLAGS=	$(LIBPKGFLAT) $(LIBS) $(OTHER_LIBS) -lresolv -lz \
+	-framework CoreFoundation -framework CoreServices \
+	-framework SystemConfiguration
+STATIC_LDFLAGS=	$(LIBPKGFLAT) $(LIBS) $(OTHER_LIBS) -lresolv -lz \
+	-framework CoreFoundation -framework CoreServices \
+	-framework SystemConfiguration
+# OSX doesn't support static binaries, sigh
+STATIC_ARG=
+@else
+LOCAL_LDFLAGS=	-Wl,-Bstatic \
+		@waflags@ $(LIBPKGFLAT) @nowaflags@ \
+		$(LIBS) \
+		-Wl,-Bdynamic -Wl,--as-needed $(OTHER_LIBS) \
+		-Wl,--export-dynamic
+STATIC_ARG=	-static
+STATIC_LDFLAGS=	$(LIBPKGFLAT) $(LIBS) $(OTHER_LIBS)
+@endif
+
+VPATH=	$(top_srcdir)/src
+
+include $(MK)/prog.mk
+
+@if HAVE_STATIC
+all: pkg-static
+install: install-static
+
+pkg-static: $(OBJS) $(top_builddir)/libpkg/libpkg_flat.a
+	$(CC) -o $@ $(OBJS) $(STATIC_ARG) $(LDFLAGS) $(STATIC_LDFLAGS)
+
+install-static: pkg-static
+	install -d -m 755 $(DESTDIR)$(sbindir)
+	install -m 755 pkg-static $(DESTDIR)$(sbindir)/pkg-static
+@endif
+
+${OBJS}: $(top_builddir)/pkg_config.h
+
+$(PROG): $(top_builddir)/libpkg/libpkg_flat.a
+
+install: $(PROG)
+	install -d -m 755 $(DESTDIR)$(sbindir)
+	install -m 755 pkg $(DESTDIR)$(sbindir)/pkg
+	install -d -m 755 $(DESTDIR)$(etcdir)
+	install -m 644 $(top_srcdir)/src/pkg.conf.sample $(DESTDIR)$(etcdir)/
+
+clean: clean-pkg-static
+clean-pkg-static:
+	rm -f pkg-static
