@@ -30,6 +30,7 @@ _PRIVATELIBS=	\
 		kldelf \
 		ldns \
 		opencsd \
+		pkg \
 		pkgconf \
 		samplerate \
 		sqlite3 \
@@ -204,6 +205,7 @@ _LIBRARIES=	\
 		pcap \
 		pcsclite \
 		pjdlog \
+		pkg \
 		pmc \
 		proc \
 		procstat \
@@ -318,6 +320,7 @@ _DP_9p=		sbuf
 .if ${MK_CASPER} != "no"
 _DP_9p+=	casper cap_pwd cap_grp
 .endif
+_DP_pkg=	sqlite3
 
 # XXX: Not bootstrapped so uses host version on non-FreeBSD, so don't use a
 # FreeBSD-specific dependency list
