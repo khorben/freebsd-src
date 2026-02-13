@@ -58,6 +58,7 @@ SUBDIR=	adduser \
 	nologin \
 	pciconf \
 	periodic \
+	pkg \
 	pnfsdscopymr \
 	pnfsdsfile \
 	pnfsdskill \

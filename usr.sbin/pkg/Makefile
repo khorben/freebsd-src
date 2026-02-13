@@ -1,35 +1,68 @@
-PACKAGE=	pkg-bootstrap
+.include <src.opts.mk>
 
-.MAKEFLAGS: -W
-_BRANCH!=	${MAKE} -C ${SRCTOP}/release -V BRANCH
-BRANCH?=	${_BRANCH}
-.if ${BRANCH:MCURRENT} != ""
-PKGCONFBRANCH?=	latest
-.else
-. if ${BRANCH:MBETA*} || ${BRANCH:MRC*} || ${BRANCH:MRELEASE*}
-PKGCONFBRANCH?=	quarterly-release
-. else
-.  if ${MACHINE} != "amd64" && ${MACHINE} != "i386" && ${MACHINE} != "arm64"
-PKGCONFBRANCH?=	quarterly
-.  else
-PKGCONFBRANCH?=	latest
-.  endif
-. endif
-.endif
-PKGCONF?=	FreeBSD.conf.${PKGCONFBRANCH}
-CONFS=		${PKGCONF}
-CONFSNAME_${PKGCONF}=	${PKGCONF:C/\.conf.+$/.conf/}
-CONFSDIR=	/etc/pkg
-CONFSMODE=	644
+PACKAGE=pkg
+
 PROG=	pkg
-SRCS=	pkg.c rsa.c dns_utils.c config.c ecc.c hash.c
 MAN=	pkg.7
+SRCS=	add.c \
+	alias.c \
+	annotate.c \
+	audit.c \
+	autoremove.c \
+	check.c \
+	clean.c \
+	config.c \
+	create.c \
+	delete.c \
+	event.c \
+	fetch.c \
+	globals.c \
+	info.c \
+	install.c \
+	key.c \
+	lock.c \
+	main.c \
+	plugins.c \
+	query.c \
+	register.c \
+	repo.c \
+	repositories.c \
+	rquery.c \
+	search.c \
+	set.c \
+	shell.c \
+	shlib.c \
+	ssh.c \
+	stats.c \
+	triggers.c \
+	unregister.c \
+	update.c \
+	updating.c \
+	upgrade.c \
+	utils.c \
+	version.c \
+	which.c
+
+LIBADD=	pkg
+
+PKGDIR=	${SRCTOP}/contrib/pkg
+
+CFLAGS+=-DHAVE_CONFIG_H
+CFLAGS+=-DGITHASH=\"\"
+CFLAGS+=-Wno-error=cast-qual
+CFLAGS+=-Wno-error=format
+CFLAGS+=-Wno-error=gnu-pointer-arith
+CFLAGS+=-Wno-error=incompatible-pointer-types-discards-qualifiers
+CFLAGS+=-Wno-error=missing-prototypes
+CFLAGS+=-Wno-error=missing-variable-declarations
+CFLAGS+=-Wno-error=shadow
+CFLAGS+=-Wno-error=sign-compare
 
 CFLAGS+=-I${SRCTOP}/contrib/libucl/include
-.PATH:	${SRCTOP}/contrib/libucl/include
-LIBADD=	archive der fetch pkgecc ucl crypto ssl util md
+CFLAGS+=-I${SRCTOP}/lib/libpkg
+CFLAGS+=-I${PKGDIR}/compat
+CFLAGS+=-I${PKGDIR}/libpkg
 
-CFLAGS+=-I${SRCTOP}/contrib/libder/libder
-CFLAGS+=-I${SRCTOP}/crypto/libecc/include
+.PATH:	${PKGDIR}/src
 
 .include <bsd.prog.mk>
