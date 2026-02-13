@@ -1,0 +1,218 @@
+include @builddir@/mk/defs.mk
+LIB=	pkg
+SRCS=	backup_lib.c \
+	merge3.c \
+	pkg_audit.c \
+	pkg_deps.c \
+	pkg_repo_meta.c \
+	pkg.c \
+	pkg_key.c \
+	pkgsign.c \
+	pkgsign_ecc.c \
+	pkgsign_ossl.c \
+	clean_cache.c \
+	metalog.c \
+	pkg_checksum.c \
+	pkg_manifest.c \
+	pkg_repo_update.c \
+	pkgdb_iterator.c \
+	lua.c \
+	lua_scripts.c \
+	scripts.c \
+	diff.c \
+	packing.c \
+	pkg_config.c \
+	pkg_event.c \
+	pkg_object.c \
+	pkg_osvf.c \
+	pkg_repo.c \
+	pkgdb_query.c \
+	sha256.c dns_utils.c \
+	pkg_add.c \
+	pkg_create.c \
+	pkg_jobs_conflicts.c pkg_ports.c \
+	pkg_solve.c \
+	pkgdb.c \
+	pkg_abi.c \
+	pkg_elf.c \
+	pkg_abi_macho.c \
+	binfmt_macho.c \
+	ssh.c \
+	pkgbase.c \
+	pkg_arch.c \
+	pkg_cudf.c \
+	pkg_cpe.c \
+	pkg_jobs_universe.c  pkg_printf.c \
+	pkg_status.c \
+	plugins.c \
+	utils.c fetch.c \
+	pkg_sandbox.c \
+	pkg_attributes.c \
+	pkg_delete.c \
+	pkg_jobs.c \
+	pkg_jobs_schedule.c \
+	pkg_repo_create.c \
+	pkg_version.c \
+	rcscripts.c \
+	flags.c \
+	fetch_ssh.c \
+	fetch_libcurl.c \
+	fetch_file.c \
+	triggers.c \
+	pkghash.c \
+	yuarel.c \
+	json.c
+
+LOCAL_CFLAGS=	-I$(top_srcdir)/compat \
+		-I$(top_srcdir)/external/blake2 \
+		-I$(top_srcdir)/external/sqlite \
+		-I$(top_srcdir)/external/uthash \
+		-I$(top_srcdir)/external/picosat \
+		-I$(top_srcdir)/external/yxml \
+		-I$(top_srcdir)/external/include \
+		-I$(top_srcdir)/external/libucl/include \
+		-I$(top_srcdir)/external/lua/src \
+		-I$(top_srcdir)/external/liblua/ \
+		-I$(top_srcdir)/external/libder/libder \
+		-I$(top_srcdir)/external/libecc/include \
+		-I$(top_srcdir)/libpkg/repo \
+		-I$(top_builddir)/libpkg/repo \
+		-I$(top_srcdir)/libpkg \
+		-I$(top_builddir)/libpkg \
+		-I$(top_srcdir) \
+		-I$(top_builddir) \
+		-Wl,--as-needed \
+		-Wno-pointer-sign \
+		-Wno-missing-field-initializers \
+		-Wno-sign-compare \
+		-DPREFIX=\"$(PREFIX)\" \
+		-DHAVE_CONFIG_H
+
+LOCAL_LDFLAGS=	@waflags@ \
+		@REPOS_LDFLAGS@ \
+		-L$(top_builddir)/external/sqlite -lsqlite_pic \
+		-L$(top_builddir)/external/libucl -lucl_pic \
+		-L$(top_builddir)/external/picosat -lpicosat_pic \
+		-L$(top_builddir)/external/linenoise -llinenoise_pic \
+		-L$(top_builddir)/external/yxml -lyxml_pic \
+		-L$(top_builddir)/external/blake2 -lblake2_pic \
+		-L$(top_builddir)/compat -lbsd_compat_pic \
+		-L$(top_builddir)/external/liblua -llua_pic \
+		-L$(top_builddir)/external/libder -lder_pic \
+		-L$(top_builddir)/external/libecc -lecc_pic \
+		@nowaflags@ \
+		-lm
+
+STATIC_LIBS=	@REPOS_STATIC_LIBS@ \
+		$(top_builddir)/external/sqlite/libsqlite.a \
+		$(top_builddir)/external/libucl/libucl.a \
+		$(top_builddir)/external/picosat/libpicosat.a \
+		$(top_builddir)/external/linenoise/liblinenoise.a \
+		$(top_builddir)/external/yxml/libyxml.a \
+		$(top_builddir)/external/blake2/libblake2.a \
+		$(top_builddir)/external/liblua/liblua.a \
+		$(top_builddir)/compat/libbsd_compat.a \
+		$(top_builddir)/external/libder/libder.a \
+		$(top_builddir)/external/libecc/libecc.a \
+		lib$(LIB).a
+
+@if HAVE_LIBUTIL
+LOCAL_LDFLAGS+=	-lutil
+@endif
+@if HAVE_LIBFTS
+LOCAL_LDFLAGS+=	-lfts
+@endif
+@if HAVE_LIBDL
+LOCAL_LDFLAGS+= -ldl
+@endif
+
+@if pkgos_darwin
+LOCAL_LDFLAGS+=	-lresolv -lz \
+	-framework CoreFoundation -framework CoreServices \
+	-framework SystemConfiguration
+@else
+@if pkgos_freebsd
+LOCAL_LDFLAGS+=	-Wl,--version-script=$(top_srcdir)/libpkg/libpkg.ver,--undefined-version
+@else
+### --undefined-version is a FreeBSD ld option
+LOCAL_LDFLAGS+=	-Wl,--version-script=$(top_srcdir)/libpkg/libpkg.ver
+@endif
+@endif
+
+@if libelf-internal
+LOCAL_CFLAGS+= -I$(top_srcdir)/external/libelf
+STATIC_LIBS+=	$(top_builddir)/external/libelf/libelf.a
+LOCAL_LDFLAGS+=	-L$(top_builddir)/external/libelf -lelf
+@endif
+
+@if libelf-external
+LOCAL_LDFLAGS+=	-lelf
+@endif
+
+@if PKG_LIBARCHIVE_LIBS
+LOCAL_CFLAGS+=	@PKG_LIBARCHIVE_CFLAGS@
+LOCAL_LDFLAGS+=	@PKG_LIBARCHIVE_LDFLAGS@ @PKG_LIBARCHIVE_LIBS@
+@else
+LOCAL_LDFLAGS+=	-larchive
+@endif
+
+@if PKG_OPENSSL_LIBS
+LOCAL_CFLAGS+=	@PKG_OPENSSL_CFLAGS@
+LOCAL_LDFLAGS+=	@PKG_OPENSSL_LDFLAGS@ @PKG_OPENSSL_LIBS@
+@else
+LOCAL_LDFLAGS+=	-lssl -lcrypto
+@endif
+
+@if PKG_LIBLDNS_LIBS
+LOCAL_CFLAGS+=	@PKG_LIBLDNS_CFLAGS@
+LOCAL_LDFLAGS+=	@PKG_LIBLDNS_LDFLAGS@ @PKG_LIBLDNS_LIBS@
+@endif
+
+@if PKG_LIBCURL_LIBS
+LOCAL_CFLAGS+=	@PKG_LIBCURL_CFLAGS@
+LOCAL_LDFLAGS+=	@PKG_LIBCURL_LDFLAGS@ @PKG_LIBCURL_LIBS@
+@else
+LOCAL_CFLAGS+=	-I$(top_srcdir)/external/curl/include
+LOCAL_LDFLAGS+=	-L$(top_builddir)/external/libcurl -lcurl_pic
+STATIC_LIBS+=	$(top_builddir)/external/libcurl/libcurl.a
+@endif
+
+VPATH=	$(top_srcdir)/libpkg
+.PATH:	$(top_srcdir)/libpkg
+
+include $(MK)/lib.mk
+
+$(OBJS) $(SHOBJS): $(top_builddir)/pkg_config.h
+
+all: lib$(LIB)_flat.a
+
+lib$(LIB)$(LIBSOEXT): $(STATIC_LIBS)
+
+@if pkgos_darwin
+lib$(LIB)_flat.a: $(STATIC_LIBS)
+	libtool -static -o lib$(LIB)_flat.a $(STATIC_LIBS)
+@else
+lib$(LIB)_flat.a: ${STATIC_LIBS} mergelib_script
+	$(AR) -M < mergelib_script
+@endif
+
+mergelib_script: $(STATIC_LIBS)
+	@echo "CREATE lib$(LIB)_flat.a" > $@
+	@for l in $(STATIC_LIBS); do \
+		echo "ADDLIB $$l"; \
+	done >> $@
+	@echo "SAVE" >> $@
+	@echo "END" >> $@
+
+install: all pkg.h lib$(LIB)$(LIBSOEXT) lib$(LIB)_flat.a
+	install -d -m 755 $(DESTDIR)$(libdir)
+	install -d -m 755 $(DESTDIR)$(includedir)
+	install -d -m 755 $(DESTDIR)$(includedir)/pkg
+	install -d -m 755 $(DESTDIR)$(pkgconfigdir)
+	install -m 644 lib$(LIB)$(LIBSOEXT) $(DESTDIR)$(libdir)/
+	ln -sf lib$(LIB)$(LIBSOEXT) $(DESTDIR)$(libdir)/lib$(LIB)$(SH_SOEXT)
+	install -m 644 lib$(LIB)_flat.a $(DESTDIR)$(libdir)/lib$(LIB).a
+	install -m 644 pkg.h $(DESTDIR)$(includedir)/
+	install -m 644 $(top_srcdir)/libpkg/pkg/vec.h $(DESTDIR)$(includedir)/pkg
+	install -m 644 $(top_srcdir)/libpkg/pkg/audit.h $(DESTDIR)$(includedir)/pkg
+	install -m 644 pkg.pc $(DESTDIR)$(pkgconfigdir)/

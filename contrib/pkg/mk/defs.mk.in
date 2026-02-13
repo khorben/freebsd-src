@@ -1,0 +1,52 @@
+RANLIB=	@RANLIB@
+AR=	@AR@
+CC=	@CC@
+@if coverage
+CFLAGS+=	@COVERAGE_CFLAGS@
+LDFLAGS+=	@COVERAGE_LDFLAGS@
+SH_LDFLAGS+=	@COVERAGE_LDFLAGS@
+@endif
+@if asan
+CFLAGS+=	@ASAN_CFLAGS@
+LDFLAGS+=	@ASAN_LDFLAGS@
+SH_LDFLAGS+=	@ASAN_LDFLAGS@
+@endif
+@if lsan
+CFLAGS+=	@LSAN_CFLAGS@
+LDFLAGS+=	@LSAN_LDFLAGS@
+SH_LDFLAGS+=	@LSAN_LDFLAGS@
+@endif
+@if ubsan
+CFLAGS+=	@UBSAN_CFLAGS@
+LDFLAGS+=	@UBSAN_LDFLAGS@
+SH_LDFLAGS+=	@UBSAN_LDFLAGS@
+@endif
+@if tsan
+CFLAGS+=	@TSAN_CFLAGS@
+LDFLAGS+=	@TSAN_LDFLAGS@
+SH_LDFLAGS+=	@TSAN_LDFLAGS@
+@endif
+SHOBJ_CFLAGS=	@SHOBJ_CFLAGS@
+LIBSOEXT=	@LIBSOEXT@
+SH_SOEXT=	@SH_SOEXT@
+SH_PREFIX=	@SH_SOPREFIX@
+SH_LDFLAGS+=	@SH_LDFLAGS@
+PREFIX=		@prefix@
+top_srcdir=	@abs_top_srcdir@
+top_builddir=	@abs_top_builddir@
+etcdir=		$(PREFIX)/etc
+libdir=		$(PREFIX)/lib
+sbindir=	$(PREFIX)/sbin
+includedir=	$(PREFIX)/include
+mandir=		@mandir@
+sysconfdir=	@sysconfdir@
+pkgconfigdir=	@pkgconfigdir@
+MK=	$(top_srcdir)/mk
+
+all:
+
+clean:
+
+install:
+
+check:
