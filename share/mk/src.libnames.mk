@@ -319,7 +319,6 @@ _DP_9p=		sbuf
 .if ${MK_CASPER} != "no"
 _DP_9p+=	casper cap_pwd cap_grp
 .endif
-_DP_pkg=	archive elf sqlite3 ssl crypto util
 
 # XXX: Not bootstrapped so uses host version on non-FreeBSD, so don't use a
 # FreeBSD-specific dependency list
@@ -370,6 +369,7 @@ _DP_crypt=	md
 _DP_pcap=	ibverbs mlx5
 .endif
 _DP_pjdlog=	util
+_DP_pkg=	archive elf sqlite3 ssl crypto util
 _DP_usb=	pthread
 _DP_unbound=	ssl crypto pthread
 _DP_rt=	pthread
