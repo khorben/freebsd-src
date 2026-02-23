@@ -4,7 +4,11 @@ PACKAGE=	pkg
 PRIVATELIB=	yes
 LIB=		pkg
 
-LIBADD=		sqlite3
+LIBADD=		archive
+LIBADD+=	elf
+LIBADD+=	sqlite3
+LIBADD+=	ssl crypto
+LIBADD+=	util
 
 CFLAGS+=	-DHAVE_CONFIG_H
 CFLAGS+=	-DPREFIX=\"/usr/local\"
