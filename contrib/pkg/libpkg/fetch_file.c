@@ -84,7 +84,7 @@ file_open(struct pkg_repo *repo, struct fetch_item *fi)
 	if (st.st_mtime <= fi->mtime)
 		return (EPKG_UPTODATE);
 
-	pkg_dbg(PKG_DBG_FETCH, 1,  "mtime: local %ld, remote %ld", st.st_mtime, fi->mtime);
+	pkg_dbg(PKG_DBG_FETCH, 1,  "mtime: local %ld, remote %ld", (long)st.st_mtime, (long)fi->mtime);
 	repo->fh = fopen(u, "re");
 	if (repo->fh == NULL)
 		return (EPKG_FATAL);
