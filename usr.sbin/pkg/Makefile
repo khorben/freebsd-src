@@ -43,7 +43,7 @@ SRCS=	add.c \
 	version.c \
 	which.c
 
-LIBADD=	jail pkg util
+LIBADD=	jail pkg ucl util
 
 PKGDIR=	${SRCTOP}/contrib/pkg
 
