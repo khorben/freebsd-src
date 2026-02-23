@@ -3552,8 +3552,6 @@ _libcom_err= lib/libcom_err
 .endif
 .endif
 
-lib/libpkg__L= lib/libarchive__L lib/libelf__L lib/libsqlite3__L
-
 .if ${MK_NIS} != "no"
 _lib_libypclnt=	lib/libypclnt
 .endif
@@ -3561,6 +3559,9 @@ _lib_libypclnt=	lib/libypclnt
 .if ${MK_OPENSSL} == "no"
 lib/libradius__L: lib/libmd__L
 .endif
+
+lib/libpkg__L: \
+	lib/libarchive__L lib/libelf__L lib/libsqlite3__L lib/libutil__L
 
 lib/libproc__L: \
     ${_cddl_lib_libctf:D${_cddl_lib_libctf}__L} \
