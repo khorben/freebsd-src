@@ -1,4 +1,6 @@
-PKGDIR=	${SRCTOP}/contrib/pkg
+PKGDIR=		${SRCTOP}/contrib/pkg
+
+SUBDIR=		librepo-binary
 
 PACKAGE=	pkg
 PRIVATELIB=	yes
@@ -44,6 +46,8 @@ CFLAGS.binfmt_macho.c+=	-DHAVE_SYS_ENDIAN_H=1
 CFLAGS.pkg_elf.c+=	-DHAVE_SYS_ENDIAN_H=1
 CFLAGS.fetch_libcurl.c+=-Wno-error=attribute-warning
 CFLAGS.ssh.c+=	-Wno-error=implicit-function-declaration
+
+LDFLAGS+=	librepo-binary/librepo-binary.a
 
 SRCS=	backup_lib.c \
 	merge3.c \
