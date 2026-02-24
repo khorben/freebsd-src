@@ -6,10 +6,10 @@ NO_PIC=
 CFLAGS+=	${PICFLAG}
 CFLAGS+=	-DHAVE_CONFIG_H
 CFLAGS+=	-DBUILDING_LIBCURL
+CFLAGS+=	-I${SRCTOP}/lib/libpkg/libcurl
 CFLAGS+=	-I${PKGDIR}/external/curl/include
 CFLAGS+=	-I${PKGDIR}/external/libcurl
 CFLAGS+=	-Wno-error=unused-parameter
-
 
 # From contrib/pkg/external/libcurl/Makefile.autosetup
 SRCS=	\
