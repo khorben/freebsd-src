@@ -3329,7 +3329,8 @@ _prebuild_libs=	${_kerberos5_lib_libasn1} \
 		lib/libutil lib/libpjdlog ${_lib_libypclnt} lib/libz lib/msun \
 		lib/libxo \
 		${_secure_lib_libcrypto} ${_secure_lib_libssl} \
-		${_lib_libldns} ${_secure_lib_libssh}
+		${_lib_libldns} ${_secure_lib_libssh} \
+		lib/libarchive
 
 .if ${MK_DIALOG} != "no"
 _prebuild_libs+= gnu/lib/libdialog
@@ -3369,6 +3370,7 @@ lib/ofed/libmlx5__L:	lib/ofed/libibverbs__L lib/libthr__L
 _lib_casper=	lib/libcasper
 .endif
 
+lib/libarchive__L: lib/libz__L secure/lib/libcrypto__L
 lib/libpjdlog__L: lib/libutil__L
 lib/libcasper__L: lib/libnv__L
 lib/liblzma__L: lib/libmd__L lib/libthr__L
