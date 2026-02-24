@@ -15,6 +15,7 @@ CFLAGS+=	-Wno-error=cast-qual
 CFLAGS+=	-Wno-error=missing-prototypes
 CFLAGS+=	-Wno-error=strict-prototypes
 
+# From contrib/pkg/libpkg/repo/binary/Makefile.autosetup
 SRCS=	binary.c \
 	common.c \
 	fetch.c \

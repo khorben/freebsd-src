@@ -1,6 +1,8 @@
 PKGDIR=		${SRCTOP}/contrib/pkg
 
-SUBDIR=		librepo-binary
+SUBDIR= \
+	libcurl \
+	librepo-binary
 
 PACKAGE=	pkg
 PRIVATELIB=	yes
@@ -47,6 +49,7 @@ CFLAGS.pkg_elf.c+=	-DHAVE_SYS_ENDIAN_H=1
 CFLAGS.fetch_libcurl.c+=-Wno-error=attribute-warning
 CFLAGS.ssh.c+=	-Wno-error=implicit-function-declaration
 
+LDFLAGS+=	libcurl/libcurl.a
 LDFLAGS+=	librepo-binary/librepo-binary.a
 
 SRCS=	backup_lib.c \
