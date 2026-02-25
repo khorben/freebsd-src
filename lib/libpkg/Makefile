@@ -1,6 +1,7 @@
 PKGDIR=		${SRCTOP}/contrib/pkg
 
 SUBDIR= \
+	libblake2 \
 	libcurl \
 	libpicosat \
 	librepo-binary
@@ -50,6 +51,7 @@ CFLAGS.pkg_elf.c+=	-DHAVE_SYS_ENDIAN_H=1
 CFLAGS.fetch_libcurl.c+=-Wno-error=attribute-warning
 CFLAGS.ssh.c+=	-Wno-error=implicit-function-declaration
 
+LDFLAGS+=	libblake2/libblake2.a
 LDFLAGS+=	libcurl/libcurl.a
 LDFLAGS+=	libpicosat/libpicosat.a
 LDFLAGS+=	librepo-binary/librepo-binary.a
