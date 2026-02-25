@@ -3,6 +3,7 @@ PKGDIR=		${SRCTOP}/contrib/pkg
 SUBDIR= \
 	libblake2 \
 	libcurl \
+	liblua \
 	libpicosat \
 	librepo-binary
 
@@ -53,6 +54,7 @@ CFLAGS.ssh.c+=	-Wno-error=implicit-function-declaration
 
 LDFLAGS+=	libblake2/libblake2.a
 LDFLAGS+=	libcurl/libcurl.a
+LDFLAGS+=	liblua/liblua.a
 LDFLAGS+=	libpicosat/libpicosat.a
 LDFLAGS+=	librepo-binary/librepo-binary.a
 
