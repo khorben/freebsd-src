@@ -2,6 +2,7 @@ PKGDIR=		${SRCTOP}/contrib/pkg
 
 SUBDIR= \
 	libcurl \
+	libpicosat \
 	librepo-binary
 
 PACKAGE=	pkg
@@ -50,6 +51,7 @@ CFLAGS.fetch_libcurl.c+=-Wno-error=attribute-warning
 CFLAGS.ssh.c+=	-Wno-error=implicit-function-declaration
 
 LDFLAGS+=	libcurl/libcurl.a
+LDFLAGS+=	libpicosat/libpicosat.a
 LDFLAGS+=	librepo-binary/librepo-binary.a
 
 SRCS=	backup_lib.c \
