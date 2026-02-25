@@ -43,19 +43,20 @@ remote SSH server.
 <a name="pkgbootstrap"></a>
 ### Pkg bootstrap
 
-All supported versions of FreeBSD now contain /usr/sbin/pkg a.k.a
-*pkg(7)*.  This is a small placeholder that has just the minimum
-functionality required to install the real pkg(8).
+Previous versions of FreeBSD contained a placeholder at /usr/sbin/pkg a.k.a
+*pkg(7)*.  This small program had just the minimum functionality required to
+install the real pkg(8).
 
-To use, simply run any pkg(8) command line.  pkg(7) will intercept the
-command, and if you confirm that is your intention, download the
-pkg(8) tarball, install pkg(8) from it, bootstrap the local package
-database and then proceed to run the command you originally requested.
+pkg(7) intercepted the command, and if you confirmed that was your intention,
+downloaded the pkg(8) tarball, installed pkg(8) from it, bootstrapped the local
+package database and then proceeded to run the command originally requested.
+This mechanism is no longer necessary or supported.
 
-More recent versions of pkg(7) understand `pkg -N` as a test to see if
-pkg(8) is installed without triggering the installation, and
+Later versions of pkg(7) understood `pkg -N` as a test to see if
+pkg(8) was installed without triggering the installation, and
 conversely, `pkg bootstrap [-f]` to install pkg(8) (or force it to be
 reinstalled) without performing any other actions.
+This test is no longer necessary or supported either.
 
 <a name="resources"></a>
 ### Additional resources

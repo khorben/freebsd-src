@@ -49,6 +49,7 @@ PKGDIR=	${SRCTOP}/contrib/pkg
 
 CFLAGS+=-DHAVE_CONFIG_H
 CFLAGS+=-DGITHASH=\"\"
+CFLAGS+=-DPKG_IN_BASE
 CFLAGS+=-Wno-error=cast-qual
 CFLAGS+=-Wno-error=format
 CFLAGS+=-Wno-error=gnu-pointer-arith

@@ -686,9 +686,13 @@ main(int argc, char **argv)
 		errx(EXIT_FAILURE, "register pkg_shutdown() to run at exit");
 
 	if (jail_str == NULL && !pkg_compiled_for_same_os_major())
+#ifdef PKG_IN_BASE
+		warnx("Warning: Major OS version upgrade detected.");
+#else
 		warnx("Warning: Major OS version upgrade detected.  Running "
 		    "\"pkg bootstrap -f\" recommended");
 
+#endif
 
 	plugins_enabled = pkg_object_bool(pkg_config_get("PKG_ENABLE_PLUGINS"));
 
@@ -741,6 +745,10 @@ main(int argc, char **argv)
 				break;
 			}
 		}
+#ifdef PKG_IN_BASE
+		printf("pkg(8) is installed in the base system.\n");
+		exit(EXIT_SUCCESS);
+#else
 		if (!force) {
 			printf("pkg(8) already installed, use -f to force.\n");
 			exit(EXIT_SUCCESS);
@@ -763,6 +771,7 @@ main(int argc, char **argv)
 				errx(EXIT_FAILURE, "pkg(7) bootstrapper not"
 				    " found at /usr/sbin/pkg.");
 		}
+#endif
 	}
 
 	save_argv = argv;
