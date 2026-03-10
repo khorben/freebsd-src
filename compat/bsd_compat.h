@@ -1,0 +1,172 @@
+/*-
+ * Copyright (c) 2014 Landon Fuller <landon@landonf.org>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer
+ *    in this position and unchanged.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef _BSD_COMPAT_H
+#define _BSD_COMPAT_H
+
+#include "pkg_config.h"
+
+#ifdef __OpenBSD__
+ #include "../external/libelf/_elftc.h"
+
+ #ifndef EPROTO
+  #define EPROTO EINTR
+ #endif
+#endif
+
+#if !__has_include(<bsd/sys/cdefs.h>)
+
+#include <sys/cdefs.h>
+
+#else
+
+/* Deal with broken __DECONST */
+#ifndef __uintptr_t
+# include <stdint.h>
+# define __uintptr_t uintptr_t
+#endif
+
+#include <bsd/sys/cdefs.h>
+#endif
+
+#if __has_include(<bsd/stdlib.h>)
+#include <bsd/stdlib.h>
+#endif
+
+#if __has_include(<bsd/unistd.h>)
+#include <bsd/unistd.h>
+#endif
+
+#if __has_include(<bsd/string.h>)
+#include <bsd/string.h>
+#endif
+
+#if __has_include(<bsd/stdio.h>)
+#include <bsd/stdio.h>
+#endif
+
+#if __has_include(<bsd/stdlib.h>)
+#include <bsd/stdlib.h>
+#endif
+
+#if __has_include(<bsd/err.h>)
+#include <bsd/err.h>
+#endif
+
+#if __has_include(<bsd/libutil.h>)
+#include <bsd/libutil.h>
+#endif
+
+#if __has_include(<bsd/sys/time.h>)
+#include <bsd/sys/time.h>
+#endif
+
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include "endian_util.h"
+
+#if !HAVE_HUMANIZE_NUMBER
+#include "humanize_number.h"
+#endif
+
+#if !HAVE_CLOSEFROM
+void closefrom(int lowfd);
+#endif
+
+#ifndef AT_FDCWD
+#define AT_FDCWD		-100
+#endif
+
+#ifndef AT_SYMLINK_NOFOLLOW
+#define	AT_SYMLINK_NOFOLLOW	0x200
+#endif
+
+#if !HAVE_STRTONUM
+long long strtonum(const char *, long long, long long, const char **);
+#endif
+
+#ifndef _PATH_GROUP
+#define _PATH_GROUP "/etc/group"
+#endif
+
+#ifndef __FBSDID
+#define __FBSDID(x)
+#endif
+
+#ifndef EAUTH
+#define EAUTH 80
+#endif
+
+#ifndef ENEEDAUTH
+#define ENEEDAUTH 81
+#endif
+
+#ifndef MAXLOGNAME
+#define MAXLOGNAME 33
+#endif
+
+#ifndef __DECONST
+#define __DECONST(type, var)    ((type)(uintptr_t)(const void *)(var))
+#endif
+
+#ifndef __unused
+#if defined(__GNUC__) || defined(__clang__)
+# define __unused __attribute__((__unused__))
+#else
+# define __unused
+#endif
+#endif
+
+#ifndef __unreachable
+# if defined (__GNUC__) || defined (__clang__)
+#  define __unreachable()    __builtin_unreachable()
+# else
+#  define __unreachable()    ((void)0)
+# endif
+#endif
+
+#if !HAVE_FUNOPEN
+#if !HAVE_FOPENCOOKIE
+# error "Your system has neither funopen nor fopencookie, cannot continue"
+#endif
+FILE * funopen(const void *cookie, int (*readfn)(void *, char *, int),
+         int (*writefn)(void *, const char *, int),
+         off_t (*seekfn)(void *, off_t, int), int (*closefn)(void *));
+#endif
+
+#if !HAVE_GETPROGNAME
+# if defined (__linux__) && defined (__GLIBC__)
+extern char *program_invocation_short_name;
+#  define getprogname()    program_invocation_short_name
+# elif defined (__linux__) && !defined (__GLIBC__)
+extern char *__progname;
+#  define getprogname()    __progname
+# else
+#  error "Don't know how to replace getprogname()"
+# endif
+#endif
+
+#endif

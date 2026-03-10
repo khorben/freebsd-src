@@ -1,0 +1,147 @@
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.Dd December 12, 2025
+.Dt PKG-TRIGGERS 5
+.Os
+.Sh NAME
+.Nm triggers
+.Nd trigger file format
+.Sh DESCRIPTION
+Package triggers define commands to be executed at the end of a
+.Xr pkg 8
+transaction when particular files are installed, modified, or removed.
+Triggers can be used, for example, to update a database or index of files based
+on files installed by other packages.
+Triggers are always executed at the end of the transaction, after all changes
+to files have been committed to disk.
+They are only executed once even if they have been triggered multiple times.
+.Pp
+Triggers are searched for in the list of directories configured by the
+.Ev PKG_TRIGGERS_DIR
+configuration option.
+By default, this includes
+.Pa /usr/share/pkg/triggers
+and
+.Pa <localbase>/share/pkg/triggers .
+Triggers are in UCL format and should have a
+.Va .ucl
+extension.
+.Pp
+The format is the following:
+.Bl -tag -width xxxxxxxxxxx
+.It Cm description
+An optional string providing a human-readable description
+of what the trigger does.
+.It Cm path
+An array of strings containing exact paths.
+Each time a package installs a file or directory whose name is equal to one of
+the strings, the trigger will be executed at the end of the transaction.
+.It Cm path_glob
+An array of strings containing shell-style glob patterns.
+Each time a package installs a file or directory whose name matches one of the
+patterns, the trigger will be executed at the end of the transaction.
+.It Cm path_regexp
+An array of strings containing regular expressions.
+Each time a package installs a file or directory whose name matches one of the
+regular expressions, the trigger will be executed at the end of the
+transaction.
+.It Cm cleanup
+An object which represents the script to execute in case the transaction results
+in removal of the trigger from the installation.
+The object requires the following fields:
+.Bl -tag -width xxxxxxx
+.It Cm type
+The type of the script to be executed.
+The only supported type is Lua, indicated by the value
+.Dq lua
+(see
+.Xr pkg-lua-script 5 ) .
+.It Cm script
+The script itself.
+.It Cm sandbox
+A boolean controlling whether the script runs inside a
+.Xr capsicum 4
+sandbox.
+Defaults to
+.Cm true .
+When disabled, the script has full system access including
+.Fn pkg.exec .
+.El
+.It Cm trigger
+An object which represents the script to execute at the end of the transaction
+if a pattern has been matched.
+This object requires the following fields:
+.Bl -tag -width xxxxxxx
+.It Cm type
+The type of the script to be executed.
+The only supported type is Lua, indicated by the value
+.Dq lua
+(see
+.Xr pkg-lua-script 5 ) .
+.It Cm script
+The script itself.
+It will receive as arguments the list of paths that matched the patterns during
+the transaction.
+.It Cm sandbox
+A boolean controlling whether the script runs inside a
+.Xr capsicum 4
+sandbox.
+Defaults to
+.Cm true .
+When disabled, the script has full system access including
+.Fn pkg.exec .
+.El
+.El
+.Sh SEE ALSO
+.Xr pkg_create 3 ,
+.Xr pkg_printf 3 ,
+.Xr pkg_repo_create 3 ,
+.Xr pkg_repos 3 ,
+.Xr pkg-keywords 5 ,
+.Xr pkg-lua-script 5 ,
+.Xr pkg-repository 5 ,
+.Xr pkg-script 5 ,
+.Xr pkg.conf 5 ,
+.Xr pkg 8 ,
+.Xr pkg-add 8 ,
+.Xr pkg-alias 8 ,
+.Xr pkg-annotate 8 ,
+.Xr pkg-audit 8 ,
+.Xr pkg-autoremove 8 ,
+.Xr pkg-check 8 ,
+.Xr pkg-clean 8 ,
+.Xr pkg-config 8 ,
+.Xr pkg-create 8 ,
+.Xr pkg-delete 8 ,
+.Xr pkg-fetch 8 ,
+.Xr pkg-help 8 ,
+.Xr pkg-info 8 ,
+.Xr pkg-install 8 ,
+.Xr pkg-key 8 ,
+.Xr pkg-lock 8 ,
+.Xr pkg-plugins 8 ,
+.Xr pkg-query 8 ,
+.Xr pkg-register 8 ,
+.Xr pkg-repo 8 ,
+.Xr pkg-repositories 8 ,
+.Xr pkg-rquery 8 ,
+.Xr pkg-search 8 ,
+.Xr pkg-set 8 ,
+.Xr pkg-shell 8 ,
+.Xr pkg-shlib 8 ,
+.Xr pkg-ssh 8 ,
+.Xr pkg-stats 8 ,
+.Xr pkg-unregister 8 ,
+.Xr pkg-update 8 ,
+.Xr pkg-updating 8 ,
+.Xr pkg-upgrade 8 ,
+.Xr pkg-version 8 ,
+.Xr pkg-which 8
