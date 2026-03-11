@@ -85,6 +85,7 @@ SUBDIR=	${SUBDIR_BOOTSTRAP} \
 	libpathconv \
 	libpcap \
 	libpjdlog \
+	libpkg \
 	libproc \
 	libprocstat \
 	libregex \

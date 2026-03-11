@@ -26,6 +26,8 @@
                     ..
                 ..
             ..
+            pkg               tags=package=pkg-dev
+            ..
             pkgconf           tags=package=pkgconf-dev
             ..
             samplerate        tags=package=sound-dev
