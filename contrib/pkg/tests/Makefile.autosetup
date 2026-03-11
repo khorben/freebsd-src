@@ -1,0 +1,242 @@
+include @builddir@/mk/defs.mk
+
+TESTS=	\
+	checksum \
+	deps_formula \
+	merge \
+	packing \
+	pkg_add_dir_to_del \
+	pkg_cpe \
+	pkg_printf \
+	pkg_validation \
+	pkg_osvf \
+	pkg \
+	plist \
+	lua \
+	ssh \
+	utils \
+	metalog \
+	vec \
+	pkg_elf \
+	hash \
+	shlibs \
+	kv
+
+TESTS_SH= \
+	frontend/pkg.sh \
+	frontend/add.sh \
+	frontend/alias.sh \
+	frontend/annotate.sh \
+	frontend/autoremove.sh \
+	frontend/autoupgrade.sh \
+	frontend/check.sh \
+	frontend/config.sh \
+	frontend/configmerge.sh \
+	frontend/conflicts.sh \
+	frontend/conflicts-multirepo.sh \
+	frontend/create.sh \
+	frontend/create-parsebin.sh \
+	frontend/delete.sh \
+	frontend/extract.sh \
+	frontend/fetch.sh \
+	frontend/install.sh \
+	frontend/jpeg.sh \
+	frontend/key.sh \
+	frontend/lock.sh \
+	frontend/messages.sh \
+	frontend/multipleprovider.sh \
+	frontend/packagesplit.sh \
+	frontend/packagemerge.sh \
+	frontend/php-pr.sh \
+	frontend/pubkey.sh \
+	frontend/query.sh \
+	frontend/register.sh \
+	frontend/repo.sh \
+	frontend/requires.sh \
+	frontend/rootdir.sh \
+	frontend/rubypuppet.sh \
+	frontend/search.sh \
+	frontend/set.sh \
+	frontend/version.sh \
+	frontend/vital.sh \
+	frontend/unregister.sh \
+	frontend/update.sh \
+	frontend/updating.sh \
+	frontend/upgrade.sh \
+	frontend/issue1374.sh \
+	frontend/issue1425.sh \
+	frontend/issue1440.sh \
+	frontend/issue1445.sh \
+	frontend/fingerprint.sh \
+	frontend/lua.sh \
+	frontend/shellscript.sh \
+	frontend/clean.sh \
+	frontend/backup_lib.sh \
+	frontend/abi.sh \
+	frontend/http.sh \
+	frontend/triggers.sh \
+	frontend/info.sh
+
+#
+# These files are mostly simple binaries obtained from
+# int main(void) { return 0; }
+#
+# The freebsd-*.bin files are copies of /usr/bin/uname from official
+# 14.1 release artifacts for the given architecture.
+
+
+TESTS_SHELL_BINS= \
+	frontend/dfly.bin \
+	frontend/freebsd-aarch64.bin \
+	frontend/freebsd-amd64.bin \
+	frontend/freebsd-armv6.bin \
+	frontend/freebsd-armv7.bin \
+	frontend/freebsd-i386.bin \
+	frontend/freebsd-powerpc.bin \
+	frontend/freebsd-powerpc64.bin \
+	frontend/freebsd-powerpc64le.bin \
+	frontend/freebsd-riscv64.bin \
+	frontend/linux.bin \
+	frontend/macos.bin \
+	frontend/macos106.bin \
+	frontend/macos150.bin \
+	frontend/macosfat.bin \
+	frontend/macosfatlib.bin \
+	frontend/libtestfbsd.so.1 \
+	frontend/libtest2fbsd.so.1 \
+	frontend/libfoo.so.1
+
+lua_OBJS=	lib/lua.o
+merge_OBJS=	lib/merge.o
+plist_OBJS=	lib/plist.o
+checksum_OBJS=	lib/checksum.o
+pkg_printf_OBJS=	lib/pkg_printf_test.o \
+			lib/pkg_printf.o
+deps_formula_OBJS=	lib/deps_formula.o
+pkg_add_dir_to_del_OBJS=	lib/pkg_add_dir_to_del.o
+pkg_cpe_OBJS=	lib/pkg_cpe.o
+pkg_validation_OBJS=	lib/pkg_validation.o
+packing_OBJS=	lib/packing.o
+ssh_OBJS=	lib/ssh.o
+utils_OBJS=	lib/utils.o
+metalog_OBJS=	lib/metalog.o
+vec_OBJS=	lib/vec.o
+pkg_elf_OBJS=	lib/pkg_elf.o
+hash_OBJS=	lib/hash.o
+shlibs_OBJS=	lib/shlibs.o
+kv_OBJS=	lib/kv.o
+pkg_OBJS=	lib/pkg.o
+pkg_osvf_OBJS=	lib/pkg_osvf.o
+
+SRCS=	\
+	$(packing_OBJS:.o=.c) \
+	$(merge_OBJS:.o=.c) \
+	$(plist_OBJS:.o=.c) \
+	$(lua_OBJS:.o=.c) \
+	$(checksum_OBJS:.o=.c) \
+	$(pkg_printf_OBJS:.o=.c) \
+	$(deps_formula_OBJS:.o=.c) \
+	$(pkg_add_dir_to_del_OBJS:.o=.c) \
+	$(pkg_cpe_OBJS:.o=.c) \
+	$(pkg_validation_OBJS:.o=.c) \
+	$(pkg_osvf_OBJS:.o=.c) \
+	$(ssh_OBJS:.o=.c) \
+	$(utils_OBJS:.o=.c) \
+	$(metalog_OBJS:.o=.c) \
+	$(vec_OBJS:.o=.c) \
+	$(pkg_elf_OBJS:.o=.c) \
+	$(hash_OBJS:.o=.c) \
+	$(shlibs_OBJS:.o=.c) \
+	$(kv_OBJS:.o=.c) \
+	$(pkg_OBJS:.o=.c)
+
+include $(MK)/common.mk
+
+TESTS_SHELL=	$(TESTS_SH:.sh=)
+
+LOCAL_CFLAGS=	-I$(top_srcdir)/compat \
+		-I$(top_srcdir)/external/libucl/include \
+		-I$(top_srcdir)/external/uthash \
+		-I$(top_srcdir)/external/include \
+		-I$(top_srcdir)/external/sqlite \
+		-I$(top_srcdir)/external/lua/src \
+		-I$(top_srcdir)/libpkg \
+		-I$(top_builddir)/ \
+		-I$(top_builddir)/libpkg \
+		@PKG_ATF_C_CFLAGS@ \
+		-DTESTING \
+		-DTESTING_TOP_DIR="\"@abs_top_srcdir@/tests\""
+
+LIBS=	\
+	-L$(top_builddir)/libpkg -lpkg_flat \
+	-lm \
+	@EXTRA_LIBS@
+
+@if HAVE_PKG_LIBARCHIVE
+CFLAGS+=	@PKG_LIBARCHIVE_CFLAGS@
+LIBS+=	@PKG_LIBARCHIVE_LDFLAGS@ @PKG_LIBARCHIVE_LIBS@
+@else
+LIBS+=	-L/usr/lib -larchive -lbz2 -lz -llzma
+@endif
+OTHER_LIBS=	-pthread
+@if HAVE_LIBUTIL
+OTHER_LIBS+=	-lutil
+@endif
+@if HAVE_LIBFTS
+OTHER_LIBS+=	-lfts
+@endif
+@if HAVE_LIBDL
+OTHER_LIBS+=	-ldl
+@endif
+@if PKG_LIBCURL_LIBS
+CFLAGS+=	@PKG_LIBCURL_CFLAGS@
+LIBS+=	@PKG_LIBCURL_LDFLAGS@ @PKG_LIBCURL_LIBS@
+@endif
+@if PKG_OPENSSL_LIBS
+CFLAGS+=	@PKG_OPENSSL_CFLAGS@
+LIBS+=	@PKG_OPENSSL_LDFLAGS@ @PKG_OPENSSL_LIBS@
+@else
+OTHER_LIBS+=	-lssl -lcrypto
+@endif
+
+
+# Hack to determine we are on osx
+@if pkgos_darwin
+OTHER_LIBS+=	-lresolv
+@endif
+
+LOCAL_LDFLAGS=	$(LIBS) $(OTHER_LIBS)
+LOCAL_LDFLAGS+=	@PKG_ATF_C_LDFLAGS@ @PKG_ATF_C_LIBS@
+
+VPATH=	$(top_srcdir)/tests
+
+all: $(TESTS) Kyuafile ${TESTS_SHELL} $(TESTS_SHELL_BINS) frontend/Kyuafile
+
+$(TESTS): $(OBJS) $(top_builddir)/libpkg/libpkg_flat.a
+	$(CC) -o $@ $($@_OBJS) $(LDFLAGS) $(LOCAL_LDFLAGS)
+
+lib/pkg_printf.c: $(top_srcdir)/libpkg/pkg_printf.c
+	cp $(top_srcdir)/libpkg/pkg_printf.c $@
+
+.sh:
+	install -m 755 $< $@
+
+clean:
+	rm -f lib/pkg_printf.c $(OBJS) $(TESTS) $(TESTS_SHELL) $(TESTS_SHELL_BINS) Kyuafile frontend/Kyuafile
+
+Kyuafile: $(TESTS)
+	@echo "Generating $@"
+	@echo 'syntax(2)' > $@
+	@echo 'test_suite("pkg")' >> $@
+	@for p in $(TESTS); do \
+		echo "atf_test_program{name='$$p'}" >> $@ ; \
+	done
+	@echo 'include("frontend/Kyuafile")' >> $@
+
+frontend/Kyuafile: $(TESTS_SHELL) $(TESTS_SHELL_BINS)
+	@echo "Generating $@"
+	@echo 'syntax(2)' > $@
+	@echo 'test_suite("pkg")' >> $@
+	@for p in $(TESTS_SHELL); do \
+		echo "atf_test_program{name='$${p##*/}'}" >> $@ ; \
+	done

@@ -1,0 +1,224 @@
+.\"
+.\" FreeBSD pkg - a next generation package for the installation and maintenance
+.\" of non-core utilities.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.Dd December 12, 2025
+.Dt PKG-LUA-SCRIPT 5
+.Os
+.Sh NAME
+.Nm "lua scripts"
+.Nd lua scripts that are run by
+.Xr pkg 8
+.Sh DESCRIPTION
+.Xr pkg 8
+run scripts at given phases of the process it is running.
+.Pp
+The phases are the following:
+.Bl -tag -width Ds
+.It Cm pre-install :
+run before installing the files on the system.
+.It Cm post-install :
+run after installing the files on the system.
+.It Cm pre-deinstall :
+run before removing the files on the system.
+.It Cm post-deinstall :
+run after removing the files on the system.
+.El
+.Pp
+A package can contain multiple scripts per phase, they will all be run inside
+their own lua VM.
+.Pp
+In the particular case of an upgrade the scripts are run in the following order:
+.Bl -enum -compact
+.It
+new pre-install
+.It
+old pre-deinstall
+.It
+replace binaries
+.It
+new post-install
+.El
+.Pp
+Lua scripts are always run after shell scripts (of the same phase).
+.Sh API
+All the regular lua APIs are available with the exception of the following changes:
+.Bl -tag -width Ds
+.It Fn io.open
+has been modified to only open files relatively to the rootdir if specified by
+the
+.Ar -r
+argument passed to
+.Xr pkg 8 .
+.It Fn os.remove
+has been modified to only remove files relatively to the rootdir if specified by
+the
+.Ar -r
+argument passed to
+.Xr pkg 8 .
+.It Fn os.rename
+has been modified to only rename files relatively to the rootdir if specified by
+the
+.Ar -r
+argument passed to
+.Xr pkg 8 .
+.It Fn os.execute
+has been disabled.
+.It Fn os.exit
+has been disabled.
+.El
+.Pp
+The following variables are available defined to any lua scripts:
+.Bl -tag -width Ds
+.It Va pkg_name
+name of the package.
+.It Va pkg_prefix
+.Va PREFIX
+defined within the package at build time.
+.It Va pkg_rootdir
+represents the root directory where the package will be installed as specified
+by the
+.Fl r
+arguments passed to
+.Xr pkg 8 .
+.It Va pkg_metalog
+String containing the path to a
+.Xr mtree 5
+METALOG file in which package file metadata (e.g., ownership, mode) should be
+recorded.
+This is typically used when installing packages as a non-root user.
+If no METALOG is configured, this variable is unset and is equal to nil.
+.It Va pkg_upgrade
+Boolean to inform the scripts that it is running or not in the context of an upgrade
+.It Va arg
+When the first line of a Lua script starts with
+.Dq -- args:\&
+followed by a space-separated list of tokens, those tokens are parsed
+and made available in the global
+.Va arg
+table.
+This allows passing arguments to Lua scripts, should not be used by regular scripts.
+This is used internally for deferred triggers.
+.El
+.Pp
+The following functions have been added:
+.Bl -tag -width Ds
+.It Ft out Fn pkg.prefixed_path "in"
+prepend
+.Va pkg_prefix
+to
+.Ar in
+if needed and returns it as
+.Ft out .
+.It Fn pkg.print_msg "msg"
+send messages to the user that will be shown at the end of the
+.Xr pkg 8
+process.
+.It Fn pkg.filecmp "file1" "file2"
+Compare 2 files, return
+.Va 0
+if the files are identical,
+.Va 1
+if the files are different and
+.Va >1
+if an error occurred
+.It Fn pkg.metalog_copy "source" "destination"
+Will create an entry in the
+.Qq metalog
+if one has been defined which will clone the
+metadata from the
+.Va source
+and use it for a new entry for
+.Va destination
+path.
+.It Fn pkg.copy "source" "destination"
+Copy a file preserving its attributes. return
+.Va -1
+if an error occurred
+.It Ft st Fn pkg.stat "file"
+return an object table
+.Ft st
+with the following fields:
+.Va type ,
+.Va size ,
+.Va uid ,
+.Va gid
+.It Fn pkg.symlink "source" "destination"
+Create a symbolic link
+.Va destination
+pointing at
+.Va source
+.It Fn pkg.exec arguments
+Will execute the command
+.Ar arguments
+expected in the following form:
+.So
+.Bro command, arg1, arg2, arg3, ...
+.Brc
+.Sc
+.It Ft res Fn pkg.readdir path
+Will return an
+.Va ipair
+with the list of elements contained in the directory
+the special directory
+.Va So .
+.Sc
+and
+.Va Sq ..
+are be filtered out.
+.El
+.Sh SEE ALSO
+.Xr pkg_create 3 ,
+.Xr pkg_printf 3 ,
+.Xr pkg_repo_create 3 ,
+.Xr pkg_repos 3 ,
+.Xr pkg-keywords 5 ,
+.Xr pkg-repository 5 ,
+.Xr pkg-script 5 ,
+.Xr pkg-triggers 5 ,
+.Xr pkg.conf 5 ,
+.Xr pkg 8 ,
+.Xr pkg-add 8 ,
+.Xr pkg-alias 8 ,
+.Xr pkg-annotate 8 ,
+.Xr pkg-audit 8 ,
+.Xr pkg-autoremove 8 ,
+.Xr pkg-check 8 ,
+.Xr pkg-clean 8 ,
+.Xr pkg-config 8 ,
+.Xr pkg-create 8 ,
+.Xr pkg-delete 8 ,
+.Xr pkg-fetch 8 ,
+.Xr pkg-help 8 ,
+.Xr pkg-info 8 ,
+.Xr pkg-install 8 ,
+.Xr pkg-key 8 ,
+.Xr pkg-lock 8 ,
+.Xr pkg-plugins 8 ,
+.Xr pkg-query 8 ,
+.Xr pkg-register 8 ,
+.Xr pkg-repo 8 ,
+.Xr pkg-repositories 8 ,
+.Xr pkg-rquery 8 ,
+.Xr pkg-search 8 ,
+.Xr pkg-set 8 ,
+.Xr pkg-shell 8 ,
+.Xr pkg-shlib 8 ,
+.Xr pkg-ssh 8 ,
+.Xr pkg-stats 8 ,
+.Xr pkg-triggers 8 ,
+.Xr pkg-unregister 8 ,
+.Xr pkg-update 8 ,
+.Xr pkg-updating 8 ,
+.Xr pkg-upgrade 8 ,
+.Xr pkg-version 8 ,
+.Xr pkg-which 8

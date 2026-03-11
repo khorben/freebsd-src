@@ -1,0 +1,312 @@
+#! /usr/bin/env atf-sh
+
+. $(atf_get_srcdir)/test_environment.sh
+tests_init	\
+		add \
+		add_automatic \
+		add_noscript \
+		add_noscript \
+		add_force \
+		add_accept_missing \
+		add_quiet \
+		add_stdin \
+		add_stdin_missing \
+		add_no_version \
+		add_no_version_multi \
+		add_deps_multi \
+		add_wrong_version
+		#add_require
+
+initialize_pkg() {
+	touch a
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 1
+	cat << EOF >> test.ucl
+files: {
+	${TMPDIR}/a: ""
+}
+scripts: {
+	pre-install: <<EOD
+echo "pre-install"
+EOD
+	post-install: <<EOD
+echo "post-install"
+EOD
+}
+EOF
+
+	atf_check \
+		-o empty \
+		-e empty \
+		-s exit:0 \
+		pkg create -M test.ucl
+}
+
+add_body() {
+	initialize_pkg
+
+OUTPUT="${JAILED}Installing test-1...
+pre-install
+${JAILED}Extracting test-1:  done
+post-install
+"
+	atf_check \
+		-o inline:"${OUTPUT}" \
+		-e empty \
+		pkg add test-1.pkg
+
+# test automatic is not set
+	atf_check \
+		-o inline:"0\n" \
+		-e empty \
+		pkg query "%a" test
+}
+
+add_automatic_body() {
+	initialize_pkg
+
+OUTPUT="${JAILED}Installing test-1...
+pre-install
+${JAILED}Extracting test-1:  done
+post-install
+"
+	atf_check \
+		-o inline:"${OUTPUT}" \
+		-e empty \
+		pkg add -A test-1.pkg
+
+	atf_check \
+		-o inline:"1\n" \
+		-e empty \
+		pkg query "%a" test
+
+}
+
+add_noscript_body() {
+	initialize_pkg
+
+OUTPUT="${JAILED}Installing test-1...
+${JAILED}Extracting test-1:  done
+"
+	cat test-1.pkg | atf_check \
+		-o inline:"${OUTPUT}" \
+		-e empty \
+		pkg add -I test-1.pkg
+}
+
+add_force_body() {
+	initialize_pkg
+}
+
+
+add_accept_missing_body() {
+	touch a
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 1
+	cat << EOF >> test.ucl
+deps: {
+	b: {
+		origin: "wedontcare",
+		version: "1"
+	}
+}
+files: {
+	${TMPDIR}/a: ""
+}
+scripts: {
+	pre-install: <<EOD
+echo "pre-install"
+EOD
+	post-install: <<EOD
+echo "post-install"
+EOD
+}
+EOF
+
+	atf_check \
+		-o empty \
+		-e empty \
+		-s exit:0 \
+		pkg create -M test.ucl
+
+	atf_check \
+		-o inline:"${JAILED}Installing test-1...\n\nFailed to install the following 1 package(s): test-1.pkg\n" \
+		-e inline:"${PROGNAME}: Missing dependency 'b'\n" \
+		-s exit:1 \
+		pkg add test-1.pkg
+
+OUTPUT="${JAILED}Installing test-1...
+pre-install
+${JAILED}Extracting test-1:  done
+post-install
+"
+	atf_check \
+		-o inline:"${OUTPUT}" \
+		-e inline:"${PROGNAME}: Missing dependency 'b'\n" \
+		-s exit:0 \
+		pkg add -M test-1.pkg
+}
+
+add_quiet_body() {
+	initialize_pkg
+
+	atf_check \
+		-o inline:"pre-install\npost-install\n" \
+		-e empty \
+		pkg add -q ./test-1.pkg
+}
+
+add_stdin_body() {
+	initialize_pkg
+
+OUTPUT="${JAILED}Installing test-1...
+pre-install
+${JAILED}Extracting test-1:  done
+post-install
+"
+	cat test-1.pkg | atf_check \
+		-o inline:"${OUTPUT}" \
+		-e empty \
+		pkg add -
+}
+
+add_stdin_missing_body() {
+	touch a
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 1
+	cat << EOF >> test.ucl
+deps: {
+	b: {
+		origin: "wedontcare",
+		version: "1"
+	}
+}
+files: {
+	${TMPDIR}/a: ""
+}
+scripts: {
+	pre-install: <<EOD
+echo "pre-install"
+EOD
+	post-install: <<EOD
+echo "post-install"
+EOD
+}
+EOF
+
+	atf_check \
+		-o empty \
+		-e empty \
+		-s exit:0 \
+		pkg create -M test.ucl
+
+	atf_check \
+		-o inline:"${JAILED}Installing test-1...\n\nFailed to install the following 1 package(s): -\n" \
+		-e inline:"${PROGNAME}: Missing dependency 'b'\n" \
+		-s exit:1 \
+		pkg add - < test-1.pkg
+
+OUTPUT="${JAILED}Installing test-1...
+pre-install
+${JAILED}Extracting test-1:  done
+post-install
+"
+	atf_check \
+		-o inline:"${OUTPUT}" \
+		-e inline:"${PROGNAME}: Missing dependency 'b'\n" \
+		-s exit:0 \
+		pkg add -M - < test-1.pkg
+}
+
+add_no_version_body() {
+	for p in test final ; do
+		atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg ${p} ${p} 1
+		if [ ${p} = "final" ]; then
+			cat << EOF >> final.ucl
+deps {
+	test {
+		origin = "test";
+	}
+}
+EOF
+		fi
+		atf_check -o ignore -s exit:0 \
+			pkg create -M ${p}.ucl
+	done
+	atf_check -o ignore -s exit:0 \
+		pkg add final-1.pkg
+}
+
+add_no_version_multi_body() {
+	for p in test final ; do
+		atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg ${p} ${p} 1
+		if [ ${p} = "final" ]; then
+			cat << EOF >> final.ucl
+deps {
+	test {
+		origin = "test";
+	},
+	pkgnotfound {
+		origin = "pkgnotfound";
+	}
+}
+EOF
+		fi
+		atf_check -o ignore -s exit:0 \
+			pkg create -M ${p}.ucl
+	done
+	atf_check -o ignore -e ignore -s exit:1 \
+		pkg add final-1.pkg
+}
+
+add_deps_multi_body() {
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 2
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg final final 1
+
+	cat << EOF >> final.ucl
+deps {
+	test {
+		origin = "test";
+	},
+}
+EOF
+	atf_check -o ignore -s exit:0 pkg create -M test.ucl
+	atf_check -o ignore -s exit:0 pkg create -M final.ucl
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 1
+	atf_check -o ignore -s exit:0 pkg create -M test.ucl
+	atf_check -o "match:.*test-2.*" -e empty -s exit:0 \
+		pkg add final-1.pkg
+}
+
+add_require_body() {
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg test test 1
+	atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg final final 1
+	cat << EOF >> final.ucl
+requires: [functionA]
+EOF
+	cat << EOF >> test.ucl
+provides: [functionA]
+EOF
+
+	atf_check -o ignore -s exit:0 pkg create -M test.ucl
+	atf_check  -s exit:0 pkg create -M final.ucl
+	atf_check -o match:".*test-1.*" -e ignore -s exit:0 \
+		pkg add final-1.pkg
+}
+
+add_wrong_version_body() {
+	for p in test final ; do
+		atf_check -s exit:0 sh ${RESOURCEDIR}/test_subr.sh new_pkg ${p} ${p} 1
+		if [ ${p} = "final" ]; then
+			cat << EOF >> final.ucl
+deps {
+	test {
+		origin = "test";
+		version = "2";
+	}
+}
+EOF
+		fi
+		atf_check -o ignore -s exit:0 \
+			pkg create -M ${p}.ucl
+	done
+	atf_check -o ignore -s exit:0 \
+		pkg add final-1.pkg
+}

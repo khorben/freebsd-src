@@ -1,0 +1,6 @@
+#
+# Suppress errors that are recognized but fix is considered beyond the scope of this project.
+# (e.g. in external source).
+#
+# For syntax see: https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html#issue-suppression
+#

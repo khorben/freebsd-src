@@ -1,0 +1,82 @@
+include @builddir@/mk/defs.mk
+DIRS=	external compat libpkg/repo libpkg src docs scripts
+@if TESTS
+DIRS+=	tests
+@endif
+
+include $(MK)/dir.mk
+include $(MK)/common.mk
+
+VPATH=	$(top_srcdir)
+
+@if coverage
+check: clean-profiles
+
+clean-profiles:
+	rm -f /tmp/pkg.*.profraw
+@endif
+
+configure_call: auto.def @CONF_GEN_FILES@
+	sh configure_call
+	${MAKE}
+
+Makefile: configure_call
+
+check: all
+
+@if TESTS
+all: Kyuafile Makefile
+
+check: UndefinedBehaviour.suppress Leak.suppress
+	export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=$(top_builddir)/UndefinedBehaviour.suppress; \
+	export LSAN_OPTIONS=print_suppressions=0:exitcode=0:suppressions=$(top_builddir)/Leak.suppress; \
+	if [ "$$(uname)" != "FreeBSD" ]; then \
+		export ASAN_OPTIONS=detect_leaks=1 ; \
+	fi ; \
+	export LLVM_PROFILE_FILE=/tmp/pkg.%p.profraw; \
+	if [ "$(HTML)" != "" ]; then \
+		args="-r $(top_builddir)/res.db" ; \
+	fi ; \
+	parallel=$$(getconf NPROCESSORS_ONLN 2>/dev/null || getconf _NPROCESSORS_ONLN ) ; \
+	kyua --config=none \
+		--variable parallelism=$${parallel} \
+		test $$args \
+		--kyuafile='$(top_builddir)/Kyuafile' \
+		--build-root='$(top_builddir)' || FAILED=1 ; \
+	if [ "$(HTML)" != "" ]; then \
+		kyua report-html --force $$args --output=$(HTML) ; \
+		rm -f $(top_builddir)/res.db ; \
+	fi ; \
+	exit $${FAILED}
+@endif
+
+@if coverage
+check-coverage: check
+	llvm-profdata merge --output=pkg.profdata /tmp/pkg.*.profraw
+
+report-coverage:
+	llvm-cov report ./src/pkg -instr-profile=pkg.profdata --use-color -ignore-filename-regex=external -ignore-filename-regex=compat
+@endif
+
+COCCI_ARGS=	-I ${top_srcdir} \
+		-I /usr/include \
+		-I /usr/local/include \
+		-I ${top_srcdir}/compat \
+		-I ${top_srcdir}/libpkg \
+		-I ${top_srcdir}/src \
+		-I ${top_srcdir}/external/yxml \
+		-I ${top_srcdir}/external/libucl/include \
+		-I ${top_srcdir}/external/uthash \
+		-I ${top_srcdir}/external/sqlite  \
+		-I ${top_srcdir}/external/libelf
+
+1cocci:
+	spatch ${COCCI_ARGS} -in_place -sp_file $(top_srcdir)/tests/cocci/${COCCITEST} -dir ${top_srcdir}/libpkg ; \
+	spatch ${COCCI_ARGS} -in_place -sp_file $(top_srcdir)/tests/cocci/${COCCITEST} -dir ${top_srcdir}/src ;
+
+cocci:
+	for c in ${top_srcdir}/tests/cocci/*.cocci ; do \
+		echo "Passing $$c" ; \
+		spatch ${COCCI_ARGS} -in_place -sp_file $$c -dir ${top_srcdir}/libpkg ; \
+		spatch ${COCCI_ARGS} -in_place -sp_file $$c -dir ${top_srcdir}/src ; \
+	done
