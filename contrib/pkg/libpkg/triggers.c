@@ -602,10 +602,10 @@ triggers_execute(struct triggers *t)
 	}
 
 	if (ctx.touched_dir_hash) {
-		const char *dir;
+		char *dir;
 		stringset_foreach(ctx.touched_dir_hash, dir) {
 			vec_foreach(*triggers, i)
-				trigger_check_match(triggers->d[i], (char *)dir);
+				trigger_check_match(triggers->d[i], dir);
 		}
 	}
 

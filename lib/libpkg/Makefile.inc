@@ -1,0 +1,1 @@
+PKGDIR=		${SRCTOP}/contrib/pkg
