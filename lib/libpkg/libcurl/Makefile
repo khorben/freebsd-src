@@ -1,0 +1,128 @@
+PKGDIR=		${SRCTOP}/contrib/pkg
+
+LIB=		curl
+NO_PIC=
+
+CFLAGS+=	${PICFLAG}
+CFLAGS+=	-DHAVE_CONFIG_H
+CFLAGS+=	-DBUILDING_LIBCURL
+CFLAGS+=	-I${SRCTOP}/lib/libpkg/libcurl
+CFLAGS+=	-I${PKGDIR}/external/curl/include
+CFLAGS+=	-I${PKGDIR}/external/libcurl
+CFLAGS+=	-Wno-error=unused-parameter
+
+# From contrib/pkg/external/libcurl/Makefile.autosetup
+SRCS=	\
+	version.c \
+	asyn-base.c \
+	asyn-thrdd.c \
+	base64.c \
+	bufref.c \
+	cf-https-connect.c \
+	cf-socket.c \
+	cfilters.c \
+	conncache.c \
+	connect.c \
+	content_encoding.c \
+	cookie.c \
+	curl_addrinfo.c \
+	curl_fopen.c \
+	curl_get_line.c \
+	curl_threads.c \
+	curl_trc.c \
+	dynbuf.c \
+	easy.c \
+	easygetopt.c \
+	easyoptions.c \
+	escape.c \
+	fopen.c \
+	formdata.c \
+	getenv.c \
+	getinfo.c \
+	hash.c \
+	headers.c \
+	hostip.c \
+	hostip4.c \
+	hostip6.c \
+	hsts.c \
+	http_chunks.c \
+	http_proxy.c \
+	http.c \
+	idn.c \
+	if2ip.c \
+	llist.c \
+	macos.c \
+	mime.c \
+	mprintf.c \
+	multi.c \
+	multi_ntfy.c \
+	netrc.c \
+	nonblock.c \
+	noproxy.c \
+	parsedate.c \
+	progress.c \
+	rand.c \
+	rename.c \
+	select.c \
+	sendf.c \
+	setopt.c \
+	share.c \
+	slist.c \
+	socks.c \
+	speedcheck.c \
+	splay.c \
+	strcase.c \
+	strdup.c \
+	strerr.c \
+	strerror.c \
+	strparse.c \
+	timeval.c \
+	transfer.c \
+	url.c \
+	urlapi.c \
+	warnless.c \
+	vtls.c \
+	vtls_scache.c \
+	openssl.c \
+	keylog.c \
+	hostcheck.c \
+	vauth.c \
+	vquic.c \
+	bufq.c \
+	cf-h1-proxy.c \
+	cf-h2-proxy.c \
+	cf-haproxy.c \
+	cf-ip-happy.c \
+	dynhds.c \
+	http1.c \
+	http_digest.c \
+	http_aws_sigv4.c \
+	digest.c \
+	sha256.c \
+	md5.c \
+	hmac.c \
+	altsvc.c \
+	curl_sha512_256.c \
+	cw-out.c \
+	request.c \
+	socketpair.c \
+	timediff.c \
+	uint-table.c \
+	uint-bset.c \
+	uint-spbset.c \
+	uint-hash.c \
+	cshutdn.c \
+	multi_ev.c \
+	cw-pause.c \
+	strequal.c \
+	wait.c
+
+MK_INSTALLLIB=	no
+
+.PATH:	${PKGDIR}/external/curl/lib
+.PATH:	${PKGDIR}/external/curl/lib/curlx
+.PATH:	${PKGDIR}/external/curl/lib/vauth
+.PATH:	${PKGDIR}/external/curl/lib/vquic
+.PATH:	${PKGDIR}/external/curl/lib/vtls
+
+.include <bsd.lib.mk>
