@@ -1,0 +1,78 @@
+# This BSD makefile helps provide a deterministic means of doing a "clean"
+# vendor import of pkg.
+#
+# Recommended use:
+#
+#   $ make import VERSION=x.y.z
+
+ARCHIVE=pkg-${VERSION}.tar.gz
+BUILDDIR=${.CURDIR}/../../contrib/pkg/build
+CP?=	cp -f
+FETCH?=	fetch
+GIT?=	git
+MKDIR?=	mkdir -p
+MV?=	mv -f
+RM?=	rm -f
+TAR?=	tar
+URL=	https://github.com/FreeBSD/pkg/archive/refs/tags/${VERSION}.tar.gz
+WORKTREE=${.CURDIR}/../../../vendor-pkg
+
+.PHONY: commit configure download extract import merge worktree
+
+all: import
+
+commit:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@(cd ${WORKTREE} && ${GIT} add *)
+	@(cd ${WORKTREE} && ${GIT} commit -m "Vendor import of pkg ${VERSION}" || true)
+	@(cd ${WORKTREE} && ${GIT} tag -f vendor/pkg/${VERSION})
+
+configure:
+	${RM} -r ${BUILDDIR}
+	${MKDIR} ${BUILDDIR}
+	(cd ${BUILDDIR} && ../configure \
+		--prefix=/usr \
+		--with-openssl.pc)
+	${MKDIR} ${.CURDIR}/../../lib/libpkg
+	${CP} ${BUILDDIR}/pkg_config.h \
+		${.CURDIR}/../../lib/libpkg/pkg_config.h
+	${MKDIR} ${.CURDIR}/../../lib/libpkg/libcurl
+	${CP} ${BUILDDIR}/external/libcurl/curl_cfg.h \
+		${.CURDIR}/../../lib/libpkg/libcurl/curl_cfg.h
+
+download:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@[ -f ${.CURDIR}/${ARCHIVE} ] || \
+		(echo "Downloading pkg ${VERSION}..."; \
+		 ${FETCH} -o ${.CURDIR}/${ARCHIVE} ${URL})
+
+extract:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	(cd ${WORKTREE} && ${GIT} rm -fr *) || true
+	${TAR} -C ${WORKTREE} -xzf ${.CURDIR}/${ARCHIVE}
+	${MV} ${WORKTREE}/pkg-${VERSION}/* ${WORKTREE}
+	${RM} -fr ${WORKTREE}/pkg-${VERSION}
+
+import: download worktree extract commit merge configure
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+merge:
+	(cd ${.CURDIR}/../.. && \
+		if [ -d contrib/pkg ]; then \
+			${GIT} subtree merge -P contrib/pkg vendor/pkg; \
+		else \
+			${GIT} subtree add -P contrib/pkg vendor/pkg; \
+		fi)
+
+
+worktree:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@[ -f ${WORKTREE}/.git ] || \
+		(echo "Creating worktree for pkg ${VERSION}..."; \
+		 cd ${.CURDIR}; \
+		 ${GIT} worktree add -b vendor/pkg ${WORKTREE} origin/vendor/pkg || \
+		 ${GIT} worktree add --orphan -b vendor/pkg ${WORKTREE})
