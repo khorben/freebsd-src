@@ -1,0 +1,13 @@
+# Copyright (c) 2026 The FreeBSD Foundation
+#
+# SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
+# SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
+#
+Name: red
+Description: Text editor
+URL: https://man.freebsd.org/cgi/man.cgi?query=red(1)
+Version: 15.0
+Source: https://cgit.freebsd.org/src/tree/bin/ed
+License: BSD-2-Clause
+Copyright: 1993 Andrew Moore, Talke Studio, 1993 Andrew Moore
+Requires: csu, libc, libcompiler_rt

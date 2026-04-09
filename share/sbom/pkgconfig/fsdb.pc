@@ -1,0 +1,13 @@
+# Copyright (c) 2026 The FreeBSD Foundation
+#
+# SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
+# SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
+#
+Name: fsdb
+Description: FFS debugging/editing tool
+URL: https://man.freebsd.org/cgi/man.cgi?query=fsdb(8)
+Version: 15.0
+Source: https://cgit.freebsd.org/src/tree/sbin/fsdb
+License: BSD-3-Clause
+Copyright: 1995 John T. Kohl
+Requires: csu, libc, libcompiler_rt, libedit, libufs
