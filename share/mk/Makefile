@@ -50,6 +50,7 @@ FILES=	\
 	bsd.port.subdir.mk \
 	bsd.prog.mk \
 	bsd.progs.mk \
+	bsd.sbom.mk \
 	bsd.snmpmod.mk \
 	bsd.subdir.mk \
 	bsd.suffixes-extra.mk \
