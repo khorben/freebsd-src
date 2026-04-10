@@ -847,6 +847,10 @@
             triggers
             ..
         ..
+        sbom
+            spdx
+            ..
+        ..
         security
         ..
         sendmail
