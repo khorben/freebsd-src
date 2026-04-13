@@ -1,0 +1,90 @@
+# This BSD makefile helps provide a deterministic means of doing a "clean"
+# vendor import of pkgconf.
+#
+# Recommended use:
+#
+#   $ make import VERSION=x.y.z
+
+ARCHIVE=pkgconf-${VERSION}.tar.gz
+CONTRIB=pkgconf
+CP?=	cp -f
+DEVNULL=/dev/null
+FETCH?=	fetch
+GIT?=	git
+MKDIR?=	mkdir -p
+MV?=	mv -f
+RM?=	rm -f
+SHASUM?=shasum
+TAR?=	tar
+URL=	https://github.com/pkgconf/pkgconf/archive/refs/tags/${ARCHIVE}
+VENDOR?=${CONTRIB}
+WORKTREE=${.CURDIR}/../../../vendor-${VENDOR}
+
+.PHONY: commit configure download extract import merge worktree
+
+all: import
+
+commit:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@echo "==> Committing ${VENDOR} ${VERSION}..."
+	(cd ${WORKTREE} && ${GIT} add -A)
+	(cd ${WORKTREE} && \
+		if ! ${GIT} refs exists vendor/${VENDOR} 2> ${DEVNULL} || \
+		   ! ${GIT} diff --quiet; then \
+			   ${GIT} commit -m "$$(cd ${.CURDIR} && printf "Vendor import of %s %s\n\nObtained from %s\n\nSHA1: %s\nSHA256: %s\n" \
+				 "${VENDOR}" "${VERSION}" "${URL}" \
+				 "$$(${SHASUM} -a 1 < ${ARCHIVE})" \
+				 "$$(${SHASUM} -a 256 < ${ARCHIVE})")"; \
+			 ${GIT} tag -f vendor/${VENDOR}/${VERSION}; \
+		fi)
+
+configure:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@echo "==> Configuring ${VENDOR} ${VERSION}..."
+	(cd ${WORKTREE} && ./autogen.sh)
+	${MKDIR} ${WORKTREE}/build
+	(cd ${WORKTREE}/build && \
+		../configure --prefix=/usr)
+	${MKDIR} ${.CURDIR}/../../lib/libpkgconf/libpkgconf
+	${CP} ${WORKTREE}/build/libpkgconf/config.h \
+		${.CURDIR}/../../lib/libpkgconf/libpkgconf/config.h
+
+download:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@[ -f ${.CURDIR}/${ARCHIVE} ] || \
+		(echo "==> Downloading ${VENDOR} ${VERSION} as ${ARCHIVE}..."; \
+		 ${FETCH} -o ${.CURDIR}/${ARCHIVE} ${URL})
+
+extract:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@echo "==> Extracting ${ARCHIVE} in worktree..."
+	(cd ${WORKTREE} && ${RM} -r *)
+	${TAR} -C ${WORKTREE} -xzf ${.CURDIR}/${ARCHIVE}
+	${MV} ${WORKTREE}/${VENDOR}-${VENDOR}-${VERSION}/* ${WORKTREE}
+	${RM} -r ${WORKTREE}/${VENDOR}-${VENDOR}-${VERSION}
+
+import: download worktree extract commit merge configure
+
+merge:
+	(cd ${.CURDIR}/../.. && \
+		if [ -d contrib/${CONTRIB} ]; then \
+			EDITOR=true ${GIT} subtree merge -P contrib/${CONTRIB} vendor/${VENDOR}; \
+		else \
+			${GIT} subtree add -P contrib/${CONTRIB} vendor/${VENDOR}; \
+		fi)
+
+worktree:
+	@[ -n "${VERSION}" ] || (echo "VERSION= must be set"; false)
+
+	@[ -f ${WORKTREE}/.git ] || \
+		(echo "==> Creating worktree for ${VENDOR} ${VERSION}..."; \
+		 cd ${.CURDIR}; \
+		if ${GIT} refs exists vendor/${VENDOR} 2> ${DEVNULL}; then \
+			${GIT} worktree add -b vendor/${VENDOR} ${WORKTREE}; \
+		else \
+			${GIT} worktree add --orphan -b vendor/${VENDOR} ${WORKTREE}; \
+		fi)
