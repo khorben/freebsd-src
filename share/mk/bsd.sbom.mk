@@ -12,7 +12,7 @@
 
 BOMTOOL?=	bomtool
 JSONLDDIR?=	/usr/share/sbom/jsonld
-SBOMDIR?=	${SRCTOP}/release/sbom/pkgconfig
+SBOMDIR?=	${SRCTOP}/share/sbom/pkgconfig
 SPDXDIR?=	/usr/share/sbom/spdx
 SPDXTOOL?=	spdxtool
 
