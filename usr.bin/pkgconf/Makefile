@@ -1,3 +1,5 @@
+.include <src.opts.mk>
+
 PACKAGE=	pkgconf
 
 # from contrib/pkgconf/meson.build:246
@@ -20,5 +22,8 @@ CFLAGS+=	-I${SRCTOP}/lib/libpkgconf -I${PKGCONFDIR}
 
 .PATH:		${PKGCONFDIR}/cli
 .PATH:		${PKGCONFDIR}/man
+
+HAS_TESTS=
+SUBDIR.${MK_TESTS}+= tests
 
 .include <bsd.prog.mk>

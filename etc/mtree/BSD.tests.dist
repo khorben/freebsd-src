@@ -1211,6 +1211,60 @@
         ..
         patch
         ..
+        pkgconf
+            t
+                basic
+                ..
+                bomtool
+                ..
+                cli
+                ..
+                link-abi
+                ..
+                ordering
+                ..
+                parser
+                ..
+                personality
+                ..
+                sbom
+                ..
+                solver
+                ..
+                spdxtool
+                ..
+                symlink
+                ..
+                sysroot
+                ..
+                tuple
+                ..
+            ..
+            tests
+                lib1
+                    child-prefix
+                        pkgconfig
+                        ..
+                    ..
+                ..
+                lib2
+                ..
+                lib3
+                ..
+                lib-relocatable
+                    lib
+                        pkgconfig
+                        ..
+                    ..
+                ..
+                lib-sbom
+                ..
+                lib-sbom-files
+                ..
+                personality-data
+                ..
+            ..
+        ..
         pr
         ..
         printenv
