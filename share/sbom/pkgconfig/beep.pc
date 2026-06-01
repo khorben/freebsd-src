@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: beep
+Copyright: 2021 Hans Petter Selasky <hselasky@freebsd.org>
 Description: Play a beep sound
+License: BSD-2-Clause
+Name: beep
+Source: https://cgit.freebsd.org/src/tree/usr.bin/beep
 URL: https://man.freebsd.org/cgi/man.cgi?query=beep(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/beep
-License: BSD-2-Clause
-Copyright: 2021 Hans Petter Selasky <hselasky@freebsd.org>

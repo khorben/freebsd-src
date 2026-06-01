@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: chgrp
+Copyright: 1988, 1993, 1994 The Regents of the University of California
 Description: Change group
+License: BSD-3-Clause
+Name: chgrp
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/chown
 URL: https://man.freebsd.org/cgi/man.cgi?query=chgrp(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/chown
-License: BSD-3-Clause
-Copyright: 1988, 1993, 1994 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt

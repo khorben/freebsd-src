@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: b64encode
+Copyright: 1983, 1993 The Regents of the University of California, 2022 The FreeBSD Foundation, 2020 Baptiste Daroussin <bapt@FreeBSD.org>
 Description: Encode / decode a binary file
+License: BSD-3-Clause AND BSD-2-Clause
+Name: b64encode
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/bintrans
 URL: https://man.freebsd.org/cgi/man.cgi?query=b64encode(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/bintrans
-License: BSD-3-Clause AND BSD-2-Clause
-Copyright: 1983, 1993 The Regents of the University of California, 2022 The FreeBSD Foundation, 2020 Baptiste Daroussin <bapt@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt

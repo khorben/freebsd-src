@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: vidfont
+Copyright: 2002 Jonathan Belson <jon@witchspace.com>
 Description: System video console keyboard map/font dialog utilities
+License: BSD-2-Clause
+Name: vidfont
+Requires: csu, libbsddialog, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/kbdmap
 URL: https://man.freebsd.org/cgi/man.cgi?query=vidfont(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/kbdmap
-License: BSD-2-Clause
-Copyright: 2002 Jonathan Belson <jon@witchspace.com>
-Requires: csu, libbsddialog, libc, libcompiler_rt

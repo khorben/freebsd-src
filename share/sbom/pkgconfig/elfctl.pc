@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: elfctl
+Copyright: 2019 The FreeBSD Foundation
 Description: Change an ELF binary's feature control note
+License: BSD-2-Clause
+Name: elfctl
+Source: https://cgit.freebsd.org/src/tree/usr.bin/elfctl
 URL: https://man.freebsd.org/cgi/man.cgi?query=elfctl(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/elfctl
-License: BSD-2-Clause
-Copyright: 2019 The FreeBSD Foundation

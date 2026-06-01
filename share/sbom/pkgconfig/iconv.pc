@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: iconv
+Copyright: 2003 Citrus Project
 Description: Codeset conversion utility
+License: BSD-2-Clause
+Name: iconv
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/iconv
 URL: https://man.freebsd.org/cgi/man.cgi?query=iconv(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/iconv
-License: BSD-2-Clause
-Copyright: 2003 Citrus Project
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt

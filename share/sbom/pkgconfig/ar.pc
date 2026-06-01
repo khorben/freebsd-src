@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: ar
+Copyright: 2008 Kai Wang, 2007 Kai Wang, 2007 Tim Kientzle, 2007 Joseph Koshy, 1990, 1993, 1994 The Regents of the University of California, 2003-2007 Tim Kientzle
 Description: Manage archives
+License: BSD-2-Clause AND BSD-3-Clause
+Name: ar
+Requires: csu, libarchive, libc, libcompiler_rt, libelf
+Source: https://cgit.freebsd.org/src/tree/usr.bin/ar
 URL: https://man.freebsd.org/cgi/man.cgi?query=ar(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/ar
-License: BSD-2-Clause AND BSD-3-Clause
-Copyright: 2008 Kai Wang, 2007 Kai Wang, 2007 Tim Kientzle, 2007 Joseph Koshy, 1990, 1993, 1994 The Regents of the University of California, 2003-2007 Tim Kientzle
-Requires: csu, libarchive, libc, libcompiler_rt, libelf

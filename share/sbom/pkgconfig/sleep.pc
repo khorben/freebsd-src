@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: sleep
+Copyright: 1988, 1993, 1994 The Regents of the University of California
 Description: Suspend execution for an interval of time
+License: BSD-3-Clause
+Name: sleep
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, msun
+Source: https://cgit.freebsd.org/src/tree/bin/sleep
 URL: https://man.freebsd.org/cgi/man.cgi?query=sleep(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/bin/sleep
-License: BSD-3-Clause
-Copyright: 1988, 1993, 1994 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, msun

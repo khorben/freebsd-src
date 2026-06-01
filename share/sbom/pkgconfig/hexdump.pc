@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: hexdump
+Copyright: 1989, 1993 The Regents of the University of California, 1990, 1993 The Regents of the University of California
 Description: ASCII, decimal, hexadecimal, octal dump
+License: BSD-3-Clause
+Name: hexdump
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/hexdump
 URL: https://man.freebsd.org/cgi/man.cgi?query=hexdump(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/hexdump
-License: BSD-3-Clause
-Copyright: 1989, 1993 The Regents of the University of California, 1990, 1993 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt

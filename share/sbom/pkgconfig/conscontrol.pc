@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: conscontrol
+Copyright: 2001 Jonathan Lemon <jlemon@FreeBSD.org>
 Description: Control physical system video console devices
+License: BSD-2-Clause
+Name: conscontrol
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/sbin/conscontrol
 URL: https://man.freebsd.org/cgi/man.cgi?query=conscontrol(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/conscontrol
-License: BSD-2-Clause
-Copyright: 2001 Jonathan Lemon <jlemon@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt

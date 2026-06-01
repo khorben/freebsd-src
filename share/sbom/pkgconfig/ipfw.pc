@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: ipfw
+Copyright: 2015-2019 Yandex LLC, 2015-2019 Andrey V. Elsukov <ae@FreeBSD.org>, 2002-2003 Luigi Rizzo, 1996 Alex Nash, Paul Traina, Poul-Henning Kamp, 1994 Ugen, 1993 Daniel Boulet, 2019 Yandex LLC, 2019 Andrey V. Elsukov <ae@FreeBSD.org>, 2019 Boris N. Lytochkin <lytboris@gmail.com>, 2014 Yandex LLC, 2014 Alexander V. Chernikov, 2015-2016 Alexander V. Chernikov <melifaro@FreeBSD.org>, 2002-2003,2010 Luigi Rizzo, 2016 Yandex LLC, 2016 Andrey V. Elsukov <ae@FreeBSD.org>, 2016 Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
 Description: User interface for firewall, traffic shaper, packet scheduler, in-kernel NAT.
+License: BSD-2-Clause
+Name: ipfw
+Requires: csu, libalias, libc, libcompiler_rt, libjail, libutil
+Source: https://cgit.freebsd.org/src/tree/sbin/ipfw
 URL: https://man.freebsd.org/cgi/man.cgi?query=ipfw(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/ipfw
-License: BSD-2-Clause
-Copyright: 2015-2019 Yandex LLC, 2015-2019 Andrey V. Elsukov <ae@FreeBSD.org>, 2002-2003 Luigi Rizzo, 1996 Alex Nash, Paul Traina, Poul-Henning Kamp, 1994 Ugen, 1993 Daniel Boulet, 2019 Yandex LLC, 2019 Andrey V. Elsukov <ae@FreeBSD.org>, 2019 Boris N. Lytochkin <lytboris@gmail.com>, 2014 Yandex LLC, 2014 Alexander V. Chernikov, 2015-2016 Alexander V. Chernikov <melifaro@FreeBSD.org>, 2002-2003,2010 Luigi Rizzo, 2016 Yandex LLC, 2016 Andrey V. Elsukov <ae@FreeBSD.org>, 2016 Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
-Requires: csu, libalias, libc, libcompiler_rt, libjail, libutil

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: ktrdump
+Copyright: 2002 Jake Burkholder, 2004 Robert Watson
 Description: Print kernel ktr trace buffer
+License: BSD-2-Clause
+Name: ktrdump
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libkvm
+Source: https://cgit.freebsd.org/src/tree/usr.bin/ktrdump
 URL: https://man.freebsd.org/cgi/man.cgi?query=ktrdump(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/ktrdump
-License: BSD-2-Clause
-Copyright: 2002 Jake Burkholder, 2004 Robert Watson
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libkvm

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: rwho
+Copyright: 1983, 1993 The Regents of the University of California, 2013 Mariusz Zaborski <oshogbo@FreeBSD.org>
 Description: Who is logged in on local machines
+License: BSD-3-Clause
+Name: rwho
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/rwho
 URL: https://man.freebsd.org/cgi/man.cgi?query=rwho(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/rwho
-License: BSD-3-Clause
-Copyright: 1983, 1993 The Regents of the University of California, 2013 Mariusz Zaborski <oshogbo@FreeBSD.org>
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt

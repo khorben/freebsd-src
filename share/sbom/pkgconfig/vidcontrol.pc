@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: vidcontrol
+Copyright: 1994 Soren Schmidt, 1994-1996 Soren Schmidt
 Description: System video console control and configuration utility
+License: BSD-3-Clause
+Name: vidcontrol
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/vidcontrol
 URL: https://man.freebsd.org/cgi/man.cgi?query=vidcontrol(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/vidcontrol
-License: BSD-3-Clause
-Copyright: 1994 Soren Schmidt, 1994-1996 Soren Schmidt
-Requires: csu, libc, libcompiler_rt

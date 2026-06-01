@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: whoami
+Copyright: 1991, 1993 The Regents of the University of California
 Description: Display effective user id
+License: BSD-3-Clause
+Name: whoami
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/id
 URL: https://man.freebsd.org/cgi/man.cgi?query=whoami(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/id
-License: BSD-3-Clause
-Copyright: 1991, 1993 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt

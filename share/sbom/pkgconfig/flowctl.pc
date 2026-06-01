@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: flowctl
+Copyright: 2004-2005 Gleb Smirnoff <glebius@FreeBSD.org>, 2001-2003 Roman V. Palagin <romanp@unshadow.net>
 Description: Ng_netflow(4) control utility
+License: BSD-2-Clause
+Name: flowctl
+Requires: csu, libc, libcompiler_rt, libnetgraph
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/flowctl
 URL: https://man.freebsd.org/cgi/man.cgi?query=flowctl(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/flowctl
-License: BSD-2-Clause
-Copyright: 2004-2005 Gleb Smirnoff <glebius@FreeBSD.org>, 2001-2003 Roman V. Palagin <romanp@unshadow.net>
-Requires: csu, libc, libcompiler_rt, libnetgraph

@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: lp
 Description: Front-end to the print spooler
+License: BSD-4-Clause-UC AND LicenseRef-scancode-unknown-license-reference
+Name: lp
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/lpr/lp
 URL: https://man.freebsd.org/cgi/man.cgi?query=lp(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/lpr/lp
-License: BSD-4-Clause-UC AND LicenseRef-scancode-unknown-license-reference

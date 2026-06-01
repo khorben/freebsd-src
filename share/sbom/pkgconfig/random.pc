@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: random
+Copyright: 2003 Sean Chittenden <seanc@FreeBSD.org>, 1994 The Regents of the University of California
 Description: Random lines from a file or random numbers
+License: BSD-3-Clause AND BSD-2-Clause
+Name: random
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/random
 URL: https://man.freebsd.org/cgi/man.cgi?query=random(6)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/random
-License: BSD-3-Clause AND BSD-2-Clause
-Copyright: 2003 Sean Chittenden <seanc@FreeBSD.org>, 1994 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: dmesg
+Copyright: 1991, 1993 The Regents of the University of California
 Description: Display the system message buffer
+License: BSD-3-Clause AND BSD-2-Clause
+Name: dmesg
+Requires: csu, libc, libcompiler_rt, libkvm
+Source: https://cgit.freebsd.org/src/tree/sbin/dmesg
 URL: https://man.freebsd.org/cgi/man.cgi?query=dmesg(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/dmesg
-License: BSD-3-Clause AND BSD-2-Clause
-Copyright: 1991, 1993 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt, libkvm

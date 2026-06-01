@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: mt
+Copyright: 2013, 2014, 2015 Spectra Logic Corporation
 Description: Magnetic tape manipulating program
+License: BSD-3-Clause AND LicenseRef-scancode-intel-bsd-2-clause
+Name: mt
+Requires: csu, libc, libcompiler_rt, libexpat, libmt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/mt
 URL: https://man.freebsd.org/cgi/man.cgi?query=mt(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/mt
-License: BSD-3-Clause AND LicenseRef-scancode-intel-bsd-2-clause
-Copyright: 2013, 2014, 2015 Spectra Logic Corporation
-Requires: csu, libc, libcompiler_rt, libexpat, libmt

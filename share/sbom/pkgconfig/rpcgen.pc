@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: rpcgen
+Copyright: 1987, Sun Microsystems, Inc., 1989, Sun Microsystems, Inc., 1984, 1986, 1987, 1988, 1989 AT&T, (c) 1986,1987,1988.1989 Sun Microsystems, Inc, (c) 1983,1984,1985,1986,1987,1988,1989 AT&T., 1987, Sun Microsytsems, Inc., 1987 Sun Microsystems, Inc.
 Description: An RPC protocol compiler
+License: LicenseRef-scancode-sun-rpc
+Name: rpcgen
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/rpcgen
 URL: https://man.freebsd.org/cgi/man.cgi?query=rpcgen(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/rpcgen
-License: LicenseRef-scancode-sun-rpc
-Copyright: 1987, Sun Microsystems, Inc., 1989, Sun Microsystems, Inc., 1984, 1986, 1987, 1988, 1989 AT&T, (c) 1986,1987,1988.1989 Sun Microsystems, Inc, (c) 1983,1984,1985,1986,1987,1988,1989 AT&T., 1987, Sun Microsytsems, Inc., 1987 Sun Microsystems, Inc.
-Requires: csu, libc, libcompiler_rt

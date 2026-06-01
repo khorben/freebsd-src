@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: libcasper.services.cap_grp
 Description: Library for group database operations in capability mode
-Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/libcasper/services/cap_grp
 License: BSD-2-Clause
+Name: libcasper.services.cap_grp
 Requires: csu, libc, libcasper, libcompiler_rt, libnv
+Source: https://cgit.freebsd.org/src/tree/lib/libcasper/services/cap_grp
+Version: 15.0

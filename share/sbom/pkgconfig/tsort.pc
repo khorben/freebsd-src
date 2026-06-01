@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: tsort
+Copyright: 1989, 1993, 1994 The Regents of the University of California
 Description: Topological sort of a directed graph
+License: BSD-3-Clause
+Name: tsort
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/tsort
 URL: https://man.freebsd.org/cgi/man.cgi?query=tsort(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/tsort
-License: BSD-3-Clause
-Copyright: 1989, 1993, 1994 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt

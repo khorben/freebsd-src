@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: su
+Copyright: 2002, 2005 Networks Associates Technologies, Inc., 1988, 1993, 1994 The Regents of the University of California
 Description: Substitute user identity
+License: BSD-2-Clause AND BSD-3-Clause
+Name: su
+Requires: csu, libc, libcompiler_rt, libpam, libutil
+Source: https://cgit.freebsd.org/src/tree/usr.bin/su
 URL: https://man.freebsd.org/cgi/man.cgi?query=su(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/su
-License: BSD-2-Clause AND BSD-3-Clause
-Copyright: 2002, 2005 Networks Associates Technologies, Inc., 1988, 1993, 1994 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt, libpam, libutil

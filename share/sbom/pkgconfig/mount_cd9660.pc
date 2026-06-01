@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: mount_cd9660
+Copyright: 1992, 1993, 1994 The Regents of the University of California
 Description: Mount an ISO-9660 file system
+License: BSD-3-Clause
+Name: mount_cd9660
+Requires: csu, libc, libcompiler_rt, libkiconv
+Source: https://cgit.freebsd.org/src/tree/sbin/mount_cd9660
 URL: https://man.freebsd.org/cgi/man.cgi?query=mount_cd9660(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/mount_cd9660
-License: BSD-3-Clause
-Copyright: 1992, 1993, 1994 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt, libkiconv

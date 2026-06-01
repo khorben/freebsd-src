@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: disklabel
+Copyright: 1994, 1995 Gordon W. Ross, 1994 Theo de Raadt, 1987, 1993 The Regents of the University of California, 1989, 1993 The Regents of the University of California
 Description: Read and write BSD label
+License: BSD-4-Clause AND BSD-3-Clause
+Name: disklabel
+Requires: csu, libc, libcompiler_rt, libgeom
+Source: https://cgit.freebsd.org/src/tree/sbin/bsdlabel
 URL: https://man.freebsd.org/cgi/man.cgi?query=bsdlabel(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/bsdlabel
-License: BSD-4-Clause AND BSD-3-Clause
-Copyright: 1994, 1995 Gordon W. Ross, 1994 Theo de Raadt, 1987, 1993 The Regents of the University of California, 1989, 1993 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt, libgeom

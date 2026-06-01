@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: crashinfo
 Description: Analyze a core dump of the operating system
+License: BSD-3-Clause
+Name: crashinfo
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/crashinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=crashinfo(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/crashinfo
-License: BSD-3-Clause

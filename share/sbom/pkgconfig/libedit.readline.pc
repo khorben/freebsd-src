@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: libedit.readline
 Description: Library missing description
-Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/libedit/readline
 License: NOASSERTION
+Name: libedit.readline
+Source: https://cgit.freebsd.org/src/tree/lib/libedit/readline
+Version: 15.0

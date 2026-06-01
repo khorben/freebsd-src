@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: utx
+Copyright: 2011-2012 Ed Schouten <ed@FreeBSD.org>
 Description: Manage the user accounting database
+License: BSD-2-Clause
+Name: utx
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/utx
 URL: https://man.freebsd.org/cgi/man.cgi?query=utx(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/utx
-License: BSD-2-Clause
-Copyright: 2011-2012 Ed Schouten <ed@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt

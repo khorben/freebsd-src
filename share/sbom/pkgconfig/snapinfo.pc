@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: snapinfo
+Copyright: 2005 Mark Santcroos <marks@freebsd.org>
 Description: Show snapshot location on UFS file systems
+License: BSD-2-Clause
+Name: snapinfo
+Requires: csu, libc, libcompiler_rt, libufs
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/snapinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=snapinfo(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/snapinfo
-License: BSD-2-Clause
-Copyright: 2005 Mark Santcroos <marks@freebsd.org>
-Requires: csu, libc, libcompiler_rt, libufs

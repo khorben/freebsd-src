@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: ldd32
+Copyright: 1993 Paul Kranenburg
 Description: List dynamic object dependencies
+License: BSD-4-Clause
+Name: ldd32
+Requires: csu, libc, libcompiler_rt, libelf
+Source: https://cgit.freebsd.org/src/tree/usr.bin/ldd32
 URL: https://man.freebsd.org/cgi/man.cgi?query=ldd32(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/ldd32
-License: BSD-4-Clause
-Copyright: 1993 Paul Kranenburg
-Requires: csu, libc, libcompiler_rt, libelf

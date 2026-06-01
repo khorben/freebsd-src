@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: logger
+Copyright: 1983, 1993 The Regents of the University of California
 Description: Make entries in the system log
+License: BSD-3-Clause
+Name: logger
+Requires: csu, libc, libcapsicum, libcasper, libcasper.services.cap_syslog, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/logger
 URL: https://man.freebsd.org/cgi/man.cgi?query=logger(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/logger
-License: BSD-3-Clause
-Copyright: 1983, 1993 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcasper.services.cap_syslog, libcompiler_rt

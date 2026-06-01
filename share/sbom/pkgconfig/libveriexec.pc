@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: libveriexec
 Description: Verified execution routines
-Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/libveriexec
 License: BSD-2-Clause
+Name: libveriexec
 Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/lib/libveriexec
+Version: 15.0

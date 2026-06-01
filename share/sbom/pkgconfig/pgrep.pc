@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: pgrep
+Copyright: 2002 The NetBSD Foundation, Inc., 2005 Pawel Jakub Dawidek <pjd@FreeBSD.org>
 Description: Find or signal processes by name
+License: BSD-2-Clause
+Name: pgrep
+Requires: csu, libc, libcompiler_rt, libjail, libkvm
+Source: https://cgit.freebsd.org/src/tree/bin/pkill
 URL: https://man.freebsd.org/cgi/man.cgi?query=pgrep(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/bin/pkill
-License: BSD-2-Clause
-Copyright: 2002 The NetBSD Foundation, Inc., 2005 Pawel Jakub Dawidek <pjd@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt, libjail, libkvm

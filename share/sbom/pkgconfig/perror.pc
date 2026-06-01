@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: perror
+Copyright: 2009 Hudson River Trading LLC
 Description: Print an error number as a string
+License: BSD-2-Clause
+Name: perror
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/perror
 URL: https://man.freebsd.org/cgi/man.cgi?query=perror(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/perror
-License: BSD-2-Clause
-Copyright: 2009 Hudson River Trading LLC
-Requires: csu, libc, libcompiler_rt

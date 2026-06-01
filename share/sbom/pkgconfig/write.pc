@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: write
+Copyright: 1989, 1993 The Regents of the University of California
 Description: Send a message to another user
+License: BSD-3-Clause
+Name: write
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/write
 URL: https://man.freebsd.org/cgi/man.cgi?query=write(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/write
-License: BSD-3-Clause
-Copyright: 1989, 1993 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt

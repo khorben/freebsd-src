@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: users
+Copyright: 2014 Pietro Cerutti <gahr@FreeBSD.org>
 Description: List current users
+License: BSD-3-Clause
+Name: users
+Requires: csu, libc, libc++, libcapsicum, libcasper, libcompiler_rt, libcxxrt, msun
+Source: https://cgit.freebsd.org/src/tree/usr.bin/users
 URL: https://man.freebsd.org/cgi/man.cgi?query=users(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/users
-License: BSD-3-Clause
-Copyright: 2014 Pietro Cerutti <gahr@FreeBSD.org>
-Requires: csu, libc, libc++, libcapsicum, libcasper, libcompiler_rt, libcxxrt, msun

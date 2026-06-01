@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: graid
+Copyright: 2010 Alexander Motin <mav@FreeBSD.org>
 Description: Control utility for software RAID devices
+License: BSD-2-Clause
+Name: graid
+Requires: csu, libc, libcompiler_rt, libgeom, libmd
+Source: https://cgit.freebsd.org/src/tree/lib/geom/raid
 URL: https://man.freebsd.org/cgi/man.cgi?query=graid(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/geom/raid
-License: BSD-2-Clause
-Copyright: 2010 Alexander Motin <mav@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt, libgeom, libmd

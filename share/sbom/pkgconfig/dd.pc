@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: dd
+Copyright: 1991, 1993, 1994 The Regents of the University of California, 1991, 1993 The Regents of the University of California
 Description: Convert and copy a file
+License: BSD-3-Clause
+Name: dd
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libutil
+Source: https://cgit.freebsd.org/src/tree/bin/dd
 URL: https://man.freebsd.org/cgi/man.cgi?query=dd(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/bin/dd
-License: BSD-3-Clause
-Copyright: 1991, 1993, 1994 The Regents of the University of California, 1991, 1993 The Regents of the University of California
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libutil

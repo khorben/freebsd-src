@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: freebsd-update
 Description: Fetch and install binary updates to FreeBSD
+License: BSD-2-Clause
+Name: freebsd-update
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/freebsd-update
 URL: https://man.freebsd.org/cgi/man.cgi?query=freebsd-update(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/freebsd-update
-License: BSD-2-Clause

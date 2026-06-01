@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: hastctl
+Copyright: 2009-2010 The FreeBSD Foundation
 Description: Highly Available Storage control utility
+License: BSD-2-Clause
+Name: hastctl
+Requires: csu, libc, libcompiler_rt, libmd, libutil, zlib
+Source: https://cgit.freebsd.org/src/tree/sbin/hastctl
 URL: https://man.freebsd.org/cgi/man.cgi?query=hastctl(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/hastctl
-License: BSD-2-Clause
-Copyright: 2009-2010 The FreeBSD Foundation
-Requires: csu, libc, libcompiler_rt, libmd, libutil, zlib

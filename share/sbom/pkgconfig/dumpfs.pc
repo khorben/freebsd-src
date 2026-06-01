@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: dumpfs
+Copyright: 2009 Robert N. M. Watson, 2002 Networks Associates Technology, Inc., 1983, 1992, 1993 The Regents of the University of California
 Description: Dump UFS file system information
+License: BSD-3-Clause
+Name: dumpfs
+Requires: csu, libc, libcompiler_rt, libufs
+Source: https://cgit.freebsd.org/src/tree/sbin/dumpfs
 URL: https://man.freebsd.org/cgi/man.cgi?query=dumpfs(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/sbin/dumpfs
-License: BSD-3-Clause
-Copyright: 2009 Robert N. M. Watson, 2002 Networks Associates Technology, Inc., 1983, 1992, 1993 The Regents of the University of California
-Requires: csu, libc, libcompiler_rt, libufs

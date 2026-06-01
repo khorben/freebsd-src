@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: fmt
+Copyright: 1997 Gareth McCaughan
 Description: Simple text formatter
+License: LicenseRef-scancode-other-permissive
+Name: fmt
+Requires: csu, libc, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/fmt
 URL: https://man.freebsd.org/cgi/man.cgi?query=fmt(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/fmt
-License: LicenseRef-scancode-other-permissive
-Copyright: 1997 Gareth McCaughan
-Requires: csu, libc, libcompiler_rt

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: gshsec
+Copyright: 2004-2005 Pawel Jakub Dawidek <pjd@FreeBSD.org>
 Description: Control utility for shared secret devices
+License: BSD-2-Clause
+Name: gshsec
+Requires: csu, libc, libcompiler_rt, libgeom
+Source: https://cgit.freebsd.org/src/tree/lib/geom/shsec
 URL: https://man.freebsd.org/cgi/man.cgi?query=gshsec(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/geom/shsec
-License: BSD-2-Clause
-Copyright: 2004-2005 Pawel Jakub Dawidek <pjd@FreeBSD.org>
-Requires: csu, libc, libcompiler_rt, libgeom

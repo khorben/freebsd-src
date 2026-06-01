@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: ypldap
+Copyright: 2008 Pierre-Yves Ritschard <pyr@openbsd.org>, 2008 Alexander Schrijver <aschrijver@openbsd.org>, 2006, 2007 Marc Balmer <mbalmer@openbsd.org>, 2003-2008 Henning Brauer <henning@openbsd.org>, 2007 Reyk Floeter <reyk@vantronix.net>, 2006, 2007 Claudio Jeker <claudio@openbsd.org>, 2003, 2004 Henning Brauer <henning@openbsd.org>
 Description: YP map server using LDAP backend
+License: ISC AND NTP-0
+Name: ypldap
+Requires: csu, libc, libcompiler_rt, libevent1, libopenbsd, librpcsvc, libutil
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/ypldap
 URL: https://man.freebsd.org/cgi/man.cgi?query=ypldap(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/ypldap
-License: ISC AND NTP-0
-Copyright: 2008 Pierre-Yves Ritschard <pyr@openbsd.org>, 2008 Alexander Schrijver <aschrijver@openbsd.org>, 2006, 2007 Marc Balmer <mbalmer@openbsd.org>, 2003-2008 Henning Brauer <henning@openbsd.org>, 2007 Reyk Floeter <reyk@vantronix.net>, 2006, 2007 Claudio Jeker <claudio@openbsd.org>, 2003, 2004 Henning Brauer <henning@openbsd.org>
-Requires: csu, libc, libcompiler_rt, libevent1, libopenbsd, librpcsvc, libutil

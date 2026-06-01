@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: efibootmgr
+Copyright: 2017-2018 Netflix, Inc.
 Description: Manipulate the EFI Boot Manager
+License: LicenseRef-scancode-bsd-unchanged
+Name: efibootmgr
+Requires: csu, libc, libcompiler_rt, libefivar, libgeom
+Source: https://cgit.freebsd.org/src/tree/usr.sbin/efibootmgr
 URL: https://man.freebsd.org/cgi/man.cgi?query=efibootmgr(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.sbin/efibootmgr
-License: LicenseRef-scancode-bsd-unchanged
-Copyright: 2017-2018 Netflix, Inc.
-Requires: csu, libc, libcompiler_rt, libefivar, libgeom

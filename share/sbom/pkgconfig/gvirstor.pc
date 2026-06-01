@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: gvirstor
+Copyright: 2005 Ivan Voras <ivoras@freebsd.org>
 Description: Control utility for virtual data storage devices
+License: BSD-2-Clause
+Name: gvirstor
+Requires: csu, libc, libcompiler_rt, libgeom
+Source: https://cgit.freebsd.org/src/tree/lib/geom/virstor
 URL: https://man.freebsd.org/cgi/man.cgi?query=gvirstor(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/geom/virstor
-License: BSD-2-Clause
-Copyright: 2005 Ivan Voras <ivoras@freebsd.org>
-Requires: csu, libc, libcompiler_rt, libgeom

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: gpart
+Copyright: 2007, 2008 Marcel Moolenaar
 Description: Control utility for the disk partitioning GEOM class
+License: BSD-2-Clause
+Name: gpart
+Requires: csu, libc, libcompiler_rt, libgeom, libutil
+Source: https://cgit.freebsd.org/src/tree/lib/geom/part
 URL: https://man.freebsd.org/cgi/man.cgi?query=gpart(8)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/geom/part
-License: BSD-2-Clause
-Copyright: 2007, 2008 Marcel Moolenaar
-Requires: csu, libc, libcompiler_rt, libgeom, libutil

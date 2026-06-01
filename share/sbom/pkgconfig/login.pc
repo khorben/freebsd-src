@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: login
+Copyright: Copyright 1995 by Wietse Venema, 2001 FreeBSD, Inc, 1989, 1993 The Regents of the University of California, 1980, 1987, 1988, 1991, 1993, 1994 The Regents of the University of California, 2002 Networks Associates Technologies, Inc., 2005 Apple Computer, Inc.
 Description: Log into the computer
+License: BSD-4-Clause AND BSD-3-Clause AND BSD-2-Clause
+Name: login
+Requires: csu, libc, libcompiler_rt, libpam, libutil
+Source: https://cgit.freebsd.org/src/tree/usr.bin/login
 URL: https://man.freebsd.org/cgi/man.cgi?query=login(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/login
-License: BSD-4-Clause AND BSD-3-Clause AND BSD-2-Clause
-Copyright: Copyright 1995 by Wietse Venema, 2001 FreeBSD, Inc, 1989, 1993 The Regents of the University of California, 1980, 1987, 1988, 1991, 1993, 1994 The Regents of the University of California, 2002 Networks Associates Technologies, Inc., 2005 Apple Computer, Inc.
-Requires: csu, libc, libcompiler_rt, libpam, libutil

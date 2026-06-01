@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: zic
 Description: Time Zone Code
+Name: zic
+Source: https://data.iana.org/time-zones/releases/tzcode2025b.tar.gz
 URL: https://www.iana.org/time-zones
 Version: 2025b
-Source: https://data.iana.org/time-zones/releases/tzcode2025b.tar.gz

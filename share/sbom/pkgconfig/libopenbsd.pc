@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: libopenbsd
 Description: Library missing description
-Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/lib/libopenbsd
 License: BSD-2-Clause
+Name: libopenbsd
+Source: https://cgit.freebsd.org/src/tree/lib/libopenbsd
+Version: 15.0

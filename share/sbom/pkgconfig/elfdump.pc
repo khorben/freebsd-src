@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: BSD-2-Clause AND LicenseRef-FreeBSD-SBOM
 # SPDX-FileCopyrightText: 2026 The FreeBSD Foundation
 #
-Name: elfdump
+Copyright: 2003 David O'Brien, 2001 Jake Burkholder
 Description: Display information about ELF files
+License: BSD-2-Clause
+Name: elfdump
+Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
+Source: https://cgit.freebsd.org/src/tree/usr.bin/elfdump
 URL: https://man.freebsd.org/cgi/man.cgi?query=elfdump(1)
 Version: 15.0
-Source: https://cgit.freebsd.org/src/tree/usr.bin/elfdump
-License: BSD-2-Clause
-Copyright: 2003 David O'Brien, 2001 Jake Burkholder
-Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt
