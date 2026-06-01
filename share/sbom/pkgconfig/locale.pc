@@ -10,4 +10,4 @@ Name: locale
 Requires: csu, libc, libcompiler_rt, libsbuf
 Source: https://cgit.freebsd.org/src/tree/usr.bin/locale
 URL: https://man.freebsd.org/cgi/man.cgi?query=locale(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libcasper
 Requires: csu, libc, libcompiler_rt, libnv
 Source: https://cgit.freebsd.org/src/tree/lib/libcasper/libcasper
-Version: 15.0
+Version: 16.0

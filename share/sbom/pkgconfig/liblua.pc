@@ -8,4 +8,4 @@ License: MIT
 Name: liblua
 Requires: msun
 Source: https://cgit.freebsd.org/src/tree/lib/liblua
-Version: 15.0
+Version: 16.0

@@ -9,4 +9,4 @@ Name: gate-ftp
 Requires: csu, libc, libcompiler_rt, libedit
 Source: https://cgit.freebsd.org/src/tree/contrib/tnftp/
 URL: https://ftp.netbsd.org/pub/NetBSD/misc/tnftp/
-Version: 15.0
+Version: 16.0

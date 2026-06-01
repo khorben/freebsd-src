@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libblocklist
 Requires: csu, libc, libcompiler_rt, libthr
 Source: https://cgit.freebsd.org/src/tree/lib/libblocklist
-Version: 15.0
+Version: 16.0

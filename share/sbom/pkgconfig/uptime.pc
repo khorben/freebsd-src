@@ -10,4 +10,4 @@ Name: uptime
 Requires: csu, libc, libcompiler_rt, libkvm, libsbuf, libutil, libxo
 Source: https://cgit.freebsd.org/src/tree/usr.bin/w
 URL: https://man.freebsd.org/cgi/man.cgi?query=uptime(1)
-Version: 15.0
+Version: 16.0

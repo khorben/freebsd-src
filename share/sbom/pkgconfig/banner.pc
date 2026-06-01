@@ -10,4 +10,4 @@ Name: banner
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/banner
 URL: https://man.freebsd.org/cgi/man.cgi?query=banner(6)
-Version: 15.0
+Version: 16.0

@@ -9,4 +9,4 @@ Name: chat
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/chat
 URL: https://man.freebsd.org/cgi/man.cgi?query=chat(8)
-Version: 15.0
+Version: 16.0

@@ -10,4 +10,4 @@ Name: ggatel
 Requires: csu, libc, libcompiler_rt, libgeom, libutil
 Source: https://cgit.freebsd.org/src/tree/sbin/ggate/ggatel
 URL: https://man.freebsd.org/cgi/man.cgi?query=ggatel(8)
-Version: 15.0
+Version: 16.0

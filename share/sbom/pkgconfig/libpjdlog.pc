@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libpjdlog
 Requires: csu, libc, libcompiler_rt, libutil
 Source: https://cgit.freebsd.org/src/tree/lib/libpjdlog
-Version: 15.0
+Version: 16.0

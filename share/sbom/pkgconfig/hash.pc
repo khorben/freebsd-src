@@ -10,4 +10,4 @@ Name: hash
 Requires: csu, libc, libcompiler_rt, libedit
 Source: https://cgit.freebsd.org/src/tree/bin/sh
 URL: https://man.freebsd.org/cgi/man.cgi?query=sh(1)
-Version: 15.0
+Version: 16.0

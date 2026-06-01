@@ -8,4 +8,4 @@ License: BSD-3-Clause
 Name: libevent1
 Requires: csu, libc, libcompiler_rt
 URL: https://openbsd.org
-Version: 15.0
+Version: 16.0

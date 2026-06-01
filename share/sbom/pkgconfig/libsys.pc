@@ -8,4 +8,4 @@ License: BSD-3-Clause AND BSD-2-Clause
 Name: libsys
 Requires: csu, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libsys
-Version: 15.0
+Version: 16.0

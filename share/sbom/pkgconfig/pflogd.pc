@@ -9,4 +9,4 @@ License: BSD-3-Clause
 Name: pflogd
 Source: https://github.com/openbsd/src/tree/master/sbin/pflogd
 URL: https://openbsd.org
-Version: 15.0
+Version: 16.0

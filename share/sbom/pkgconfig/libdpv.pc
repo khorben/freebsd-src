@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libdpv
 Requires: csu, libc, libcompiler_rt, libfigpar, libutil, msun, libncurses, libtinfo
 Source: https://cgit.freebsd.org/src/tree/lib/libdpv
-Version: 15.0
+Version: 16.0

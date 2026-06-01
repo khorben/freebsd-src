@@ -10,4 +10,4 @@ Name: logger
 Requires: csu, libc, libcapsicum, libcasper, libcasper.services.cap_syslog, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/logger
 URL: https://man.freebsd.org/cgi/man.cgi?query=logger(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: BSD-3-Clause
 Name: crashinfo
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/crashinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=crashinfo(8)
-Version: 15.0
+Version: 16.0

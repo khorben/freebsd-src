@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libugidfw
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libugidfw
-Version: 15.0
+Version: 16.0

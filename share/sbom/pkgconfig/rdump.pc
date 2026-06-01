@@ -10,4 +10,4 @@ Name: rdump
 Requires: csu, libc, libcompiler_rt, libufs
 Source: https://cgit.freebsd.org/src/tree/sbin/dump
 URL: https://man.freebsd.org/cgi/man.cgi?query=rdump(8)
-Version: 15.0
+Version: 16.0

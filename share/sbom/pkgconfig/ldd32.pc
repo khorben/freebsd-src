@@ -10,4 +10,4 @@ Name: ldd32
 Requires: csu, libc, libcompiler_rt, libelf
 Source: https://cgit.freebsd.org/src/tree/usr.bin/ldd32
 URL: https://man.freebsd.org/cgi/man.cgi?query=ldd32(1)
-Version: 15.0
+Version: 16.0

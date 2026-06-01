@@ -10,4 +10,4 @@ Name: ps
 Requires: csu, libc, libcompiler_rt, libjail, libkvm, libxo, msun
 Source: https://cgit.freebsd.org/src/tree/bin/ps
 URL: https://man.freebsd.org/cgi/man.cgi?query=ps(1)
-Version: 15.0
+Version: 16.0

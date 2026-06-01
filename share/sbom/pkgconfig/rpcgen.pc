@@ -10,4 +10,4 @@ Name: rpcgen
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/rpcgen
 URL: https://man.freebsd.org/cgi/man.cgi?query=rpcgen(1)
-Version: 15.0
+Version: 16.0

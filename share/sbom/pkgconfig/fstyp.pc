@@ -10,4 +10,4 @@ Name: fstyp
 Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libgeom, libmd, libufs
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/fstyp
 URL: https://man.freebsd.org/cgi/man.cgi?query=fstyp(8)
-Version: 15.0
+Version: 16.0

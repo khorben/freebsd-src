@@ -10,4 +10,4 @@ Name: setkey
 Requires: csu, libc, libcompiler_rt, libipsec
 Source: https://cgit.freebsd.org/src/tree/sbin/setkey
 URL: https://man.freebsd.org/cgi/man.cgi?query=setkey(8)
-Version: 15.0
+Version: 16.0

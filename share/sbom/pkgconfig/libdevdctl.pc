@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libdevdctl
 Requires: csu, libc, libc++, libcompiler_rt, libcxxrt, msun
 Source: https://cgit.freebsd.org/src/tree/lib/libdevdctl
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: BSD-4-Clause-UC AND LicenseRef-scancode-unknown-license-reference
 Name: lp
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/lpr/lp
 URL: https://man.freebsd.org/cgi/man.cgi?query=lp(1)
-Version: 15.0
+Version: 16.0

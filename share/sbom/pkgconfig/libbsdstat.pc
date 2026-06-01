@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libbsdstat
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libbsdstat
-Version: 15.0
+Version: 16.0

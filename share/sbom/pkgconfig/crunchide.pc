@@ -10,4 +10,4 @@ Name: crunchide
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/crunch/crunchide
 URL: https://man.freebsd.org/cgi/man.cgi?query=crunchide(1)
-Version: 15.0
+Version: 16.0

@@ -10,4 +10,4 @@ Name: newfs_msdos
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/sbin/newfs_msdos
 URL: https://man.freebsd.org/cgi/man.cgi?query=newfs_msdos(8)
-Version: 15.0
+Version: 16.0

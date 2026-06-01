@@ -10,4 +10,4 @@ Name: diskinfo
 Requires: csu, libc, libcompiler_rt, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/diskinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=diskinfo(8)
-Version: 15.0
+Version: 16.0

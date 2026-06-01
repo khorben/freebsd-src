@@ -10,4 +10,4 @@ Name: utx
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/utx
 URL: https://man.freebsd.org/cgi/man.cgi?query=utx(8)
-Version: 15.0
+Version: 16.0

@@ -10,4 +10,4 @@ Name: script
 Requires: csu, libc, libcompiler_rt, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.bin/script
 URL: https://man.freebsd.org/cgi/man.cgi?query=script(1)
-Version: 15.0
+Version: 16.0

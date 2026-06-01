@@ -10,4 +10,4 @@ Name: rup
 Requires: csu, libc, libcompiler_rt, librpcsvc
 Source: https://cgit.freebsd.org/src/tree/usr.bin/rup
 URL: https://man.freebsd.org/cgi/man.cgi?query=rup(1)
-Version: 15.0
+Version: 16.0

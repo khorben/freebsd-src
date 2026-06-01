@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libulog
 Requires: csu, libc, libcompiler_rt, libmd
 Source: https://cgit.freebsd.org/src/tree/lib/libulog
-Version: 15.0
+Version: 16.0

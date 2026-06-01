@@ -10,4 +10,4 @@ Name: locate
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/locate/locate
 URL: https://man.freebsd.org/cgi/man.cgi?query=locate(1)
-Version: 15.0
+Version: 16.0

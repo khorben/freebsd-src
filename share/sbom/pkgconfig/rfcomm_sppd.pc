@@ -10,4 +10,4 @@ Name: rfcomm_sppd
 Requires: csu, libbluetooth, libc, libcompiler_rt, libsdp, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.bin/bluetooth/rfcomm_sppd
 URL: https://man.freebsd.org/cgi/man.cgi?query=rfcomm_sppd(1)
-Version: 15.0
+Version: 16.0

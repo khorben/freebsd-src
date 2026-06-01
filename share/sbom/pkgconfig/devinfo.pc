@@ -10,4 +10,4 @@ Name: devinfo
 Requires: csu, libc, libcompiler_rt, libdevinfo
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/devinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=devinfo(8)
-Version: 15.0
+Version: 16.0

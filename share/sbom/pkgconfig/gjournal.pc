@@ -10,4 +10,4 @@ Name: gjournal
 Requires: csu, libc, libcompiler_rt, libgeom, libmd, libufs
 Source: https://cgit.freebsd.org/src/tree/lib/geom/journal
 URL: https://man.freebsd.org/cgi/man.cgi?query=gjournal(8)
-Version: 15.0
+Version: 16.0

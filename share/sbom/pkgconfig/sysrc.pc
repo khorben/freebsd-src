@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: sysrc
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/sysrc
 URL: https://man.freebsd.org/cgi/man.cgi?query=sysrc(8)
-Version: 15.0
+Version: 16.0

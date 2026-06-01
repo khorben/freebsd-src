@@ -10,4 +10,4 @@ Name: umask
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/mkfifo
 URL: https://man.freebsd.org/cgi/man.cgi?query=mkfifo(1)
-Version: 15.0
+Version: 16.0

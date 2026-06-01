@@ -8,4 +8,4 @@ License: BSD-4-Clause and BSD-2-Clause
 Name: libkiconv
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libkiconv
-Version: 15.0
+Version: 16.0

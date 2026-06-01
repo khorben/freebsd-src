@@ -10,4 +10,4 @@ Name: efibootmgr
 Requires: csu, libc, libcompiler_rt, libefivar, libgeom
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/efibootmgr
 URL: https://man.freebsd.org/cgi/man.cgi?query=efibootmgr(8)
-Version: 15.0
+Version: 16.0

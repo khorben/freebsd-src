@@ -10,4 +10,4 @@ Name: fgrep
 Requires: csu, libbz2, libc, libcompiler_rt, libregex, libz
 Source: https://cgit.freebsd.org/src/tree/usr.bin/grep
 URL: https://man.freebsd.org/cgi/man.cgi?query=fgrep(1)
-Version: 15.0
+Version: 16.0

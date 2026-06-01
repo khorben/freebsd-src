@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libcuse
 Requires: csu, libc, libcompiler_rt, libthr
 Source: https://cgit.freebsd.org/src/tree/lib/libcuse
-Version: 15.0
+Version: 16.0

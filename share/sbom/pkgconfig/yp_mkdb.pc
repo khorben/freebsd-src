@@ -10,4 +10,4 @@ Name: yp_mkdb
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/yp_mkdb
 URL: https://man.freebsd.org/cgi/man.cgi?query=yp_mkdb(8)
-Version: 15.0
+Version: 16.0

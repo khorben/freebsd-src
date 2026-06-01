@@ -10,4 +10,4 @@ Name: ipfstat
 Requires: csu, libc, libcompiler_rt, libkvm, libncurses, libtinfo
 Source: https://cgit.freebsd.org/src/tree/sbin/ipf/ipfstat
 URL: https://man.freebsd.org/cgi/man.cgi?query=ipfstat(8)
-Version: 15.0
+Version: 16.0

@@ -10,4 +10,4 @@ Name: getaddrinfo
 Requires: csu, libc, libcompiler_rt, libnetbsd, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.bin/getaddrinfo
 URL: https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo(1)
-Version: 15.0
+Version: 16.0

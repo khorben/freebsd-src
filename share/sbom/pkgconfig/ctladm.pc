@@ -10,4 +10,4 @@ Name: ctladm
 Requires: csu, libc, libcam, libcompiler_rt, libexpat, libnv, libsbuf, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/ctladm
 URL: https://man.freebsd.org/cgi/man.cgi?query=ctladm(8)
-Version: 15.0
+Version: 16.0

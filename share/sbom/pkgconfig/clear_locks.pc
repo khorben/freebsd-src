@@ -10,4 +10,4 @@ Name: clear_locks
 Requires: csu, libc, libcompiler_rt, librpcsvc
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/clear_locks
 URL: https://man.freebsd.org/cgi/man.cgi?query=clear_locks(8)
-Version: 15.0
+Version: 16.0

@@ -9,4 +9,4 @@ License: BSD-3-Clause
 Name: umbctl
 Source: https://cgit.freebsd.org/src/tree/sbin/umbctl
 URL: https://man.freebsd.org/cgi/man.cgi?query=umbctl(8)
-Version: 15.0
+Version: 16.0

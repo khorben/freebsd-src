@@ -8,4 +8,4 @@ License: BSD-3-Clause AND BSD-2-Clause AND BSD-1-Clause
 Name: libc
 Source: https://cgit.freebsd.org/src/tree/lib/libc
 URL: https://www.FreeBSD.org
-Version: 15.0
+Version: 16.0

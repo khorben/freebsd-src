@@ -10,4 +10,4 @@ Name: devd
 Requires: csu, libc, libc++, libcompiler_rt, libcxxrt, libutil, msun
 Source: https://cgit.freebsd.org/src/tree/sbin/devd
 URL: https://man.freebsd.org/cgi/man.cgi?query=devd(8)
-Version: 15.0
+Version: 16.0

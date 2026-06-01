@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libusb
 Requires: csu, libc, libcompiler_rt, libthr
 Source: https://cgit.freebsd.org/src/tree/lib/libusb
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libcam
 Requires: csu, libc, libcompiler_rt, libsbuf
 Source: https://cgit.freebsd.org/src/tree/lib/libcam
-Version: 15.0
+Version: 16.0

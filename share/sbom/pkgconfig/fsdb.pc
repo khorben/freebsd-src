@@ -10,4 +10,4 @@ Name: fsdb
 Requires: csu, libc, libcompiler_rt, libedit, libufs
 Source: https://cgit.freebsd.org/src/tree/sbin/fsdb
 URL: https://man.freebsd.org/cgi/man.cgi?query=fsdb(8)
-Version: 15.0
+Version: 16.0

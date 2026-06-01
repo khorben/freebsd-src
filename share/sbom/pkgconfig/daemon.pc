@@ -10,4 +10,4 @@ Name: daemon
 Requires: csu, libc, libcompiler_rt, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/daemon
 URL: https://man.freebsd.org/cgi/man.cgi?query=daemon(8)
-Version: 15.0
+Version: 16.0

@@ -10,4 +10,4 @@ Name: route
 Requires: csu, libc, libcompiler_rt, libjail
 Source: https://cgit.freebsd.org/src/tree/sbin/route
 URL: https://man.freebsd.org/cgi/man.cgi?query=route(8)
-Version: 15.0
+Version: 16.0

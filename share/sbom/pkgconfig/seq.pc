@@ -10,4 +10,4 @@ Name: seq
 Requires: csu, libc, libcompiler_rt, msun
 Source: https://cgit.freebsd.org/src/tree/usr.bin/seq
 URL: https://man.freebsd.org/cgi/man.cgi?query=seq(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libvgl
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libvgl
-Version: 15.0
+Version: 16.0

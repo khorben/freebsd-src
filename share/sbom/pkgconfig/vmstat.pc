@@ -10,4 +10,4 @@ Name: vmstat
 Requires: csu, libc, libcompiler_rt, libdevstat, libkvm, libmemstat, libutil, libxo
 Source: https://cgit.freebsd.org/src/tree/usr.bin/vmstat
 URL: https://man.freebsd.org/cgi/man.cgi?query=vmstat(8)
-Version: 15.0
+Version: 16.0

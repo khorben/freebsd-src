@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libproc
 Requires: csu, libc, libcompiler_rt, libelf, libprocstat, librtld_db, libutil, libz
 Source: https://cgit.freebsd.org/src/tree/lib/libproc
-Version: 15.0
+Version: 16.0

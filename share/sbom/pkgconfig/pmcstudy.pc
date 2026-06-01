@@ -10,4 +10,4 @@ Name: pmcstudy
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/pmcstudy
 URL: https://man.freebsd.org/cgi/man.cgi?query=pmcstudy(8)
-Version: 15.0
+Version: 16.0

@@ -7,4 +7,4 @@ Description: NVMe Over Fabrics library
 License: BSD-2-Clause
 Name: libnvmf
 Source: https://cgit.freebsd.org/src/tree/lib/libnvmf
-Version: 15.0
+Version: 16.0

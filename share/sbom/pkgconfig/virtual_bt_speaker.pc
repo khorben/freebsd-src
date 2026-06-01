@@ -9,4 +9,4 @@ License: BSD-2-Clause
 Name: virtual_bt_speaker
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/virtual_oss/virtual_bt_speaker
 URL: https://man.freebsd.org/cgi/man.cgi?query=virtual_bt_speaker(8)
-Version: 15.0
+Version: 16.0

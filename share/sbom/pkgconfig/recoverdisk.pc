@@ -9,4 +9,4 @@ Name: recoverdisk
 Requires: csu, libc, libcompiler_rt, msun
 Source: https://cgit.freebsd.org/src/tree/sbin/recoverdisk
 URL: https://man.freebsd.org/cgi/man.cgi?query=recoverdisk(1)
-Version: 15.0
+Version: 16.0

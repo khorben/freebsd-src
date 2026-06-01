@@ -10,4 +10,4 @@ Name: expand
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/expand
 URL: https://man.freebsd.org/cgi/man.cgi?query=expand(1)
-Version: 15.0
+Version: 16.0

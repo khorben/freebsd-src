@@ -10,4 +10,4 @@ Name: xstr
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/xstr
 URL: https://man.freebsd.org/cgi/man.cgi?query=xstr(1)
-Version: 15.0
+Version: 16.0

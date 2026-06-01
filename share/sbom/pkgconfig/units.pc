@@ -10,4 +10,4 @@ Name: units
 Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libedit
 Source: https://cgit.freebsd.org/src/tree/usr.bin/units
 URL: https://man.freebsd.org/cgi/man.cgi?query=units(1)
-Version: 15.0
+Version: 16.0

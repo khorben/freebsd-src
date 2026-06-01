@@ -8,4 +8,4 @@ License: BSD-4-Clause AND BSD-2-Clause AND Beerware AND RSA-MD
 Name: libmd
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libmd
-Version: 15.0
+Version: 16.0

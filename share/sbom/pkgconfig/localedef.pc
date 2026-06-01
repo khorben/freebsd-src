@@ -10,4 +10,4 @@ Name: localedef
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/localedef
 URL: https://man.freebsd.org/cgi/man.cgi?query=localedef(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libmt
 Requires: csu, libc, libcompiler_rt, libexpat, libsbuf
 Source: https://cgit.freebsd.org/src/tree/lib/libmt
-Version: 15.0
+Version: 16.0

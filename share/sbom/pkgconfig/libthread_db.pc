@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libthread_db
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/libthread_db
-Version: 15.0
+Version: 16.0

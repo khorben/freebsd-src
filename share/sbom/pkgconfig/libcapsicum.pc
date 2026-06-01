@@ -7,4 +7,4 @@ Description: Practical capabilities for UNIX
 License: BSD-2-Clause
 Name: libcapsicum
 Source: https://cgit.freebsd.org/src/tree/lib/libcapsicum
-Version: 15.0
+Version: 16.0

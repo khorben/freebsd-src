@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: zzz
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/zzz
 URL: https://man.freebsd.org/cgi/man.cgi?query=zzz(8)
-Version: 15.0
+Version: 16.0

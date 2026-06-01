@@ -8,4 +8,4 @@ License: CDDL-1.1
 Name: dwatch
 Source: https://cgit.freebsd.org/src/tree/cddl/usr.sbin/dwatch
 URL: https://cgit.freebsd.org/src/tree/cddl/usr.sbin/dwatch
-Version: 15.0
+Version: 16.0

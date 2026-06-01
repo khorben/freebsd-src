@@ -10,4 +10,4 @@ Name: rwall
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/rwall
 URL: https://man.freebsd.org/cgi/man.cgi?query=rwall(1)
-Version: 15.0
+Version: 16.0

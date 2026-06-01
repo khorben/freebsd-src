@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libpmc
 Requires: csu, libc, libc++, libcompiler_rt, libcxxrt, libelf, msun
 Source: https://cgit.freebsd.org/src/tree/lib/libpmc
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: librtld_db
 Requires: csu, libc, libcompiler_rt, libelf, libprocstat, libutil
 Source: https://cgit.freebsd.org/src/tree/lib/librtld_db
-Version: 15.0
+Version: 16.0

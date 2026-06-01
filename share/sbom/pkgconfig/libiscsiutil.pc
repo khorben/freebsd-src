@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libiscsiutil
 Requires: libmd
 Source: https://cgit.freebsd.org/src/tree/lib/libiscsiutil
-Version: 15.0
+Version: 16.0

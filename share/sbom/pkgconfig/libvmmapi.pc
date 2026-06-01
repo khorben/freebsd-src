@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: libvmmapi
 Requires: csu, libc, libcapsicum, libcasper, libcompiler_rt, libutil
 Source: https://cgit.freebsd.org/src/tree/lib/libvmmapi
-Version: 15.0
+Version: 16.0

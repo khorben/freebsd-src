@@ -10,4 +10,4 @@ Name: flowctl
 Requires: csu, libc, libcompiler_rt, libnetgraph
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/flowctl
 URL: https://man.freebsd.org/cgi/man.cgi?query=flowctl(8)
-Version: 15.0
+Version: 16.0

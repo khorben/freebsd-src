@@ -10,4 +10,4 @@ Name: zonectl
 Requires: csu, libc, libcam, libcompiler_rt, libsbuf, libutil
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/zonectl
 URL: https://man.freebsd.org/cgi/man.cgi?query=zonectl(8)
-Version: 15.0
+Version: 16.0

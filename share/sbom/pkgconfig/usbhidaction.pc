@@ -10,4 +10,4 @@ Name: usbhidaction
 Requires: csu, libc, libcompiler_rt, libusbhid
 Source: https://cgit.freebsd.org/src/tree/usr.bin/usbhidaction
 URL: https://man.freebsd.org/cgi/man.cgi?query=usbhidaction(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: NOASSERTION
 Name: librss
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/lib/librss
-Version: 15.0
+Version: 16.0

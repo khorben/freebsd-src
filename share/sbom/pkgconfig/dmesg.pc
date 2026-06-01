@@ -10,4 +10,4 @@ Name: dmesg
 Requires: csu, libc, libcompiler_rt, libkvm
 Source: https://cgit.freebsd.org/src/tree/sbin/dmesg
 URL: https://man.freebsd.org/cgi/man.cgi?query=dmesg(8)
-Version: 15.0
+Version: 16.0

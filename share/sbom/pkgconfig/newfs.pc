@@ -10,4 +10,4 @@ Name: newfs
 Requires: csu, libc, libcompiler_rt, libufs, libutil
 Source: https://cgit.freebsd.org/src/tree/sbin/newfs
 URL: https://man.freebsd.org/cgi/man.cgi?query=newfs(8)
-Version: 15.0
+Version: 16.0

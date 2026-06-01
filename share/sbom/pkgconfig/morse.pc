@@ -10,4 +10,4 @@ Name: morse
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/morse
 URL: https://man.freebsd.org/cgi/man.cgi?query=morse(6)
-Version: 15.0
+Version: 16.0

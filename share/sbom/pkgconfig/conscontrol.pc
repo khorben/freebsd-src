@@ -10,4 +10,4 @@ Name: conscontrol
 Requires: csu, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/sbin/conscontrol
 URL: https://man.freebsd.org/cgi/man.cgi?query=conscontrol(8)
-Version: 15.0
+Version: 16.0

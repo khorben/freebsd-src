@@ -9,4 +9,4 @@ License: BSD-2-Clause
 Name: mkuzip
 Source: https://cgit.freebsd.org/src/tree/usr.bin/mkuzip
 URL: https://www.FreeBSD.org
-Version: 15.0
+Version: 16.0

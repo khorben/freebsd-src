@@ -8,4 +8,4 @@ License: BSD-2-Clause
 Name: libmemstat
 Requires: csu, libc, libcompiler_rt, libkvm
 Source: https://cgit.freebsd.org/src/tree/lib/libmemstat
-Version: 15.0
+Version: 16.0

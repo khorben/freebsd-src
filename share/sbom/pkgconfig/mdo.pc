@@ -9,4 +9,4 @@ License: BSD-2-Clause
 Name: mdo
 Source: https://cgit.freebsd.org/src/tree/usr.bin/mdo
 URL: https://man.freebsd.org/cgi/man.cgi?query=mdo(1)
-Version: 15.0
+Version: 16.0

@@ -8,4 +8,4 @@ License: BSD-3-Clause
 Name: libdevstat
 Requires: csu, libc, libcompiler_rt, libkvm
 Source: https://cgit.freebsd.org/src/tree/lib/libdevstat
-Version: 15.0
+Version: 16.0

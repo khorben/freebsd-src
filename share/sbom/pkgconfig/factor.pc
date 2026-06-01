@@ -10,4 +10,4 @@ Name: factor
 Requires: csu, libc, libcompiler_rt, libthr
 Source: https://cgit.freebsd.org/src/tree/usr.bin/factor
 URL: https://man.freebsd.org/cgi/man.cgi?query=factor(6)
-Version: 15.0
+Version: 16.0

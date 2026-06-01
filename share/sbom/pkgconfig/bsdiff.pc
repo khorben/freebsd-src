@@ -10,4 +10,4 @@ Name: bsdiff
 Requires: csu, bzip2, libc, libcompiler_rt
 Source: https://cgit.freebsd.org/src/tree/usr.bin/bsdiff/bsdiff
 URL: https://man.freebsd.org/cgi/man.cgi?query=bsdiff(1)
-Version: 15.0
+Version: 16.0

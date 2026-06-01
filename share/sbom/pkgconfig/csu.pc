@@ -7,4 +7,4 @@ Description: Library missing description
 License: BSD-4-Clause AND BSD-2-Clause AND BSD-1-Clause
 Name: csu
 Source: https://cgit.freebsd.org/src/tree/lib/csu
-Version: 15.0
+Version: 16.0

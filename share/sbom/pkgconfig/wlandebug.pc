@@ -10,4 +10,4 @@ Name: wlandebug
 Requires: csu, libc, libcompiler_rt, libifconfig, msun
 Source: https://cgit.freebsd.org/src/tree/usr.sbin/wlandebug
 URL: https://man.freebsd.org/cgi/man.cgi?query=wlandebug(8)
-Version: 15.0
+Version: 16.0

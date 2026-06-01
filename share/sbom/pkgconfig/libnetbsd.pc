@@ -7,4 +7,4 @@ Description: Library missing description
 License: BSD-3-Clause AND BSD-2-Clause
 Name: libnetbsd
 Source: https://cgit.freebsd.org/src/tree/lib/libnetbsd
-Version: 15.0
+Version: 16.0

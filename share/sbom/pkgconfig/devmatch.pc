@@ -10,4 +10,4 @@ Name: devmatch
 Requires: csu, libc, libcompiler_rt, libdevinfo
 Source: https://cgit.freebsd.org/src/tree/sbin/devmatch
 URL: https://man.freebsd.org/cgi/man.cgi?query=devmatch(8)
-Version: 15.0
+Version: 16.0
