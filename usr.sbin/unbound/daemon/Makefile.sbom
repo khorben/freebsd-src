@@ -1,0 +1,2 @@
+SBOM_NAME=	${PACKAGE}
+.include "../../../lib/libunbound/Makefile.sbom"
