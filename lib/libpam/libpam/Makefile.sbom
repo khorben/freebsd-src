@@ -1,0 +1,5 @@
+SBOM_DESC=	Modular user authentication facility
+SBOM_VERSION=	20250531
+SBOM_LICENSE=	BSD-3-Clause
+SBOM_URL=	https://openpam.org
+SBOM_SOURCE=	https://git.des.dev/OpenPAM/OpenPAM
