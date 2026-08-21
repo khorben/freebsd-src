@@ -1,0 +1,4 @@
+SBOM_DESC=	OpenBSD packet filter
+SBOM_LICENSE=	BSD-3-Clause
+SBOM_URL=	https://www.openbsd.org
+SBOM_SOURCE=	https://cvsweb.openbsd.org/src

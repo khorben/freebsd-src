@@ -1,0 +1,3 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	Advanced Configuration and Power Interface (ACPI) utilities
+SBOM_LICENSE=	BSD-3-Clause AND BSD-2-Clause

@@ -1,0 +1,2 @@
+SBOM_DESC=	Kernel event handling daemon
+SBOM_LICENSE=	BSD-3-Clause AND BSD-2-Clause

@@ -1,0 +1,3 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	RIP routing protocol
+SBOM_LICENSE=	BSD-3-Clause

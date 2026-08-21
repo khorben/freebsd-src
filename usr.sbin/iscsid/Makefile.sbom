@@ -1,0 +1,2 @@
+.include "../../lib/libiscsiutil/Makefile.sbom"
+SBOM_NAME=	${PACKAGE}

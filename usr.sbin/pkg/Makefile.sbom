@@ -1,0 +1,4 @@
+SBOM_DESC=	Package manager for FreeBSD
+SBOM_LICENSE=	BSD-2-Clause
+SBOM_URL=	https://github.com/FreeBSD/pkg
+SBOM_SOURCE=	${SBOM_URL}
