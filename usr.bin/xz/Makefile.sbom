@@ -1,0 +1,5 @@
+SBOM_DESC=	LZMA2 data compression
+SBOM_VERSION=	5.8.3
+SBOM_LICENSE=	0BSD
+SBOM_URL=	https://tukaani.org/xz/
+SBOM_SOURCE=	https://github.com/tukaani-project/xz

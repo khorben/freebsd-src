@@ -1,0 +1,5 @@
+SBOM_DESC=	Private Lua implementation
+SBOM_VERSION=	5.4.8
+SBOM_LICENSE=	MIT
+SBOM_URL=	https://www.lua.org
+SBOM_SOURCE=	https://www.lua.org/ftp/

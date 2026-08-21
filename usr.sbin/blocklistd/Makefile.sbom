@@ -1,0 +1,5 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	Network blocklist daemon
+SBOM_VERSION=	2026-02-07
+SBOM_URL=	https://www.NetBSD.org
+SBOM_SOURCE=	https://github.com/zoulasc/blocklist

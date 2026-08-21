@@ -1,0 +1,3 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	BSD/SunOS remote status commands
+SBOM_LICENSE=	BSD-3-Clause

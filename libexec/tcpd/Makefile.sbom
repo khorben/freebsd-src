@@ -1,0 +1,2 @@
+.include "../../lib/libwrap/Makefile.sbom"
+SBOM_NAME=	tcp_wrappers
