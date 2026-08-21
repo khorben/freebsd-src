@@ -1,0 +1,4 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	Simple and extensible SNMP daemon
+SBOM_VERSION=	1.14
+SBOM_URL=	https://people.FreeBSD.org/~harti/bsnmp/

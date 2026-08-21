@@ -1,0 +1,2 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	iSCSI initiator

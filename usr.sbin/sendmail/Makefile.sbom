@@ -1,0 +1,5 @@
+SBOM_DESC=	sendmail mail transport agent
+SBOM_VERSION=	8.18.1
+SBOM_LICENSE=	Sendmail
+SBOM_URL=	https://ftp.sendmail.org
+SBOM_SOURCE=	${SBOM_URL}/sendmail.${SBOM_VERSION}.tar.gz

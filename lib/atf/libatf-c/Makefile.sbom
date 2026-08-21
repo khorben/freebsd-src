@@ -1,0 +1,6 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	Automated Testing Framework
+SBOM_VERSION=	0.22
+SBOM_LICENSE=	BSD-3-Clause AND BSD-2-Clause
+SBOM_SOURCE=	https://github.com/FreeBSD/atf
+SBOM_URL=	${SBOM_SOURCE}

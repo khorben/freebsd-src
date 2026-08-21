@@ -1,0 +1,4 @@
+SBOM_DESC=	XML 1.0 parser written in C
+SBOM_VERSION=	2.8.3
+SBOM_LICENSE=	MIT
+SBOM_URL=	https://github.com/libexpat/libexpat

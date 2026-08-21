@@ -1,0 +1,2 @@
+SBOM_DESC=	Retrieve a file from a remote URL
+SBOM_LICENSE=	BSD-3-Clause

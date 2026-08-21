@@ -1,0 +1,4 @@
+SBOM_DESC=	Heimdal is an implementation of ASN.1/DER, PKIX, and Kerberos
+SBOM_VERSION=	1.5.2
+SBOM_LICENSE=	BSD-3-Clause
+SBOM_URL=	https://www.heimdal.software

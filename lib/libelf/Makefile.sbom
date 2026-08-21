@@ -1,0 +1,4 @@
+SBOM_DESC=	BSD licensed ELF toolchain
+SBOM_VERSION=	4912
+SBOM_URL=	https://sourceforge.net/projects/elftoolchain/
+SBOM_SOURCE=	https://sourceforge.net/p/elftoolchain/code/

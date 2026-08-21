@@ -1,0 +1,6 @@
+SBOM_NAME=	${PACKAGE}
+SBOM_DESC=	Program maintenance utility
+SBOM_LICENSE=	BSD-3-Clause
+SBOM_VERSION=	20260704
+SBOM_URL=	https://www.NetBSD.org
+SBOM_SOURCE=	https://cvsweb.NetBSD.org/bsdweb.cgi/src/usr.bin/make/

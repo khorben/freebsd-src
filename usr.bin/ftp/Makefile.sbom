@@ -1,0 +1,4 @@
+SBOM_DESC=	File Transfer Protocol (FTP) client
+SBOM_VERSION=	1.6-beta2
+SBOM_URL=	https://www.NetBSD.org
+SBOM_SOURCE=	https://cvsweb.NetBSD.org/bsdweb.cgi/src/usr.bin/ftp/

@@ -1,0 +1,2 @@
+SBOM_NAME=	libtermcapw
+SBOM_DESC=	ncurses terminal control library
