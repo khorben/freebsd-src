@@ -408,10 +408,10 @@ disc1-installer: disc1
 	tar -cf- -C disc1 . | tar -xf- -C ${.TARGET}
 .if ${.MAKE.OS} == "FreeBSD" && (!defined(NOPKG) || empty(NOPKG))
 # Install packages onto release media.
-	${PKG_INSTALL} deforaos-browser deforaos-integration deforaos-locker \
+	${PKG_INSTALL} cdxgen deforaos-browser deforaos-integration deforaos-locker \
 		deforaos-player dejavu gbsddialog gnome-icon-theme \
-		gsettings-desktop-schemas metacity setxkbmap slim \
-		virtualbox-ose-additions xf86-input-keyboard \
+		gsettings-desktop-schemas metacity npm-node24 setxkbmap slim \
+		trivy virtualbox-ose-additions xf86-input-keyboard \
 		xf86-input-libinput xf86-video-scfb xf86-video-vesa xorg \
 		xterm || true
 	${PKG_CLEAN} || true
