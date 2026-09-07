@@ -1,6 +1,6 @@
 #!/bin/sh
 #-
-# Copyright (c) 2011 Nathan Whitehorn
+# Copyright (c) 2024 The FreeBSD Foundation
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,143 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
-clear
-echo "$OSNAME Installer"
-echo "========================"
-echo "Add Users"
-echo
-chroot $BSDINSTALL_CHROOT adduser 2>&1
+: ${BSDDIALOG_OK:=0}
+: ${DIALOG:="bsddialog"}
+
+error_get_message()
+{
+	case $1 in
+		62)
+			echo "The passwords do not match"
+			;;
+		63)
+			echo "The username must be specified"
+			;;
+		64) #EX_USAGE
+			echo "Command used incorrectly"
+			;;
+		65) #EX_DATAERR
+			echo "Incorrect input data"
+			;;
+		67) #EX_NOUSER
+			echo "User not found"
+			;;
+		70) #EX_SOFTWARE
+			echo "Internal software error"
+			;;
+		71) #EX_OSERR
+			echo "Operating System error detected"
+			;;
+		72) #EX_OSFILE
+			echo "Error in a system file"
+			;;
+		74) #EX_IOERR
+			echo "I/O error"
+			;;
+		77) #EX_NOPERM
+			echo "Insufficient permissions"
+			;;
+		78) #EX_CONFIG
+			echo "Configuration error"
+			;;
+		0)
+			;;
+		*)
+			echo "An unknown error occurred (code $1)"
+			;;
+	esac
+}
+
+errormsg=
+while true; do
+	exec 5>&1
+	output=$(chroot $BSDINSTALL_CHROOT /usr/sbin/pw usernext)
+	uid="${output%%:*}"
+	gid="${output##*:}"
+	output=$($DIALOG --backtitle "$OSNAME Installer" \
+		--title 'Add user' \
+		--mixedform \
+		"User information (leave field empty for default)
+$errormsg" 0 0 0 \
+		'Username' 1 1 '' 1 18 32 32 0 \
+		'Full name' 2 1 '' 2 18 32 32 0 \
+		'Uid' 3 1 "$uid" 3 18 6 6 0 \
+		'Login group' 4 1 '' 4 18 32 32 0 \
+		'Extra groups' 5 1 'wheel' 5 18 32 32 0 \
+		'Login class' 6 1 'default' 6 18 32 32 0 \
+		'Shell' 7 1 '/bin/sh' 7 18 32 32 0 \
+		'Home directory' 8 1 '' 8 18 32 32 0 \
+		'Home permissions' 9 1 '0755' 9 18 32 32 0 \
+		2>&1 1>&5)
+	res=$?
+	exec 5>&-
+	[ $res -eq $BSDDIALOG_OK ] || break
+
+	echo -n "$output" | (read username
+		read fullname
+		read newuid
+		read newgroup
+		read groups
+		read class
+		read shell
+		read homedir
+		read perms
+		[ -n "$username" ] || exit 63
+		[ -n "$newuid" ] || newuid="$uid"
+		[ -n "$newgroup" ] || newgroup="$username"
+		[ -n "$class" ] || class="default"
+		[ -n "$shell" ] || shell="/bin/sh"
+		[ -n "$homedir" ] || homedir="/home/$username"
+		[ -n "$perms" ] || perms="0755"
+
+		# create the group if necessary
+		chroot $BSDINSTALL_CHROOT /usr/sbin/pw group show \
+			"$newgroup" > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			chroot $BSDINSTALL_CHROOT /usr/sbin/pw group add \
+				-n "$newgroup"
+			errormsg=$(error_get_message $?)
+			[ -z "$errormsg" ] || continue
+		fi
+
+		# create the user
+		chroot $BSDINSTALL_CHROOT /usr/sbin/pw useradd -n "$username" \
+			-c "$fullname" -u "$newuid" -g "$newgroup" \
+			-G "$groups" -m -d "$homedir" -L "$class" -s "$shell")
+	errormsg=$(error_get_message $?)
+	[ -z "$errormsg" ] || continue
+
+	read username << EOF
+$output
+EOF
+	while true; do
+		exec 5>&1
+		output=$($DIALOG --backtitle "$OSNAME Installer" \
+			--title "Add user" \
+			--cancel-label "Skip" \
+			--passwordform --insecure \
+			"Set the password for user $username
+$errormsg" \
+			0 0 2 \
+			"Password" 0 0 '' 0 17 32 32 \
+			"Repeat password" 1 0 '' 1 17 32 32 \
+			2>&1 1>&5)
+		res=$?
+		exec 5>&-
+		[ $res -eq $BSDDIALOG_OK ] || break
+
+		echo -n "$output" | (read password1
+			read password2
+			[ "$password1" = "$password2" ] || exit 62
+			echo "$password1" | chroot $BSDINSTALL_CHROOT \
+				/usr/sbin/pw usermod "$username" -h 0
+		)
+		errormsg=$(error_get_message $?)
+		[ -n "$errormsg" ] || break
+	done
+
+	$DIALOG --backtitle "$OSNAME Installer" \
+		--title 'Add user' \
+		--yesno 'Add another user?' 0 0
+	[ $? -eq $BSDDIALOG_OK ] || break
+done

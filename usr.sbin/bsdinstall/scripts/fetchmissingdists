@@ -30,9 +30,12 @@
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
+: ${BSDINSTALL_ARGS=}
+: ${DIALOG="bsddialog"}
+
 error()
 {
-	bsddialog --backtitle "$OSNAME Installer" --title "Error" --msgbox "$1" 0 0
+	$DIALOG --backtitle "$OSNAME Installer" --title "Error" --msgbox "$1" 0 0
 	exit 1
 }
 
@@ -78,14 +81,14 @@ else
 	FETCH_DISTRIBUTIONS="MANIFEST $FETCH_DISTRIBUTIONS"
 
 	# XXX actually verify signature on manifest
-	bsddialog --backtitle "$OSNAME Installer" --title "Warning" --msgbox "Manifest not found on local disk and will be fetched from an unverified source. This is a potential security risk. If you do not wish to proceed, press control-C now." 0 0
+	$DIALOG --backtitle "$OSNAME Installer" --title "Warning" --msgbox "Manifest not found on local disk and will be fetched from an unverified source. This is a potential security risk. If you do not wish to proceed, press control-C now." 0 0
 fi
 
 if [ ! -z "$LOCAL_DISTRIBUTIONS" ]; then
 	# Copy local stuff first
 	env DISTRIBUTIONS="$LOCAL_DISTRIBUTIONS" \
 		BSDINSTALL_DISTSITE="file://$BSDINSTALL_DISTDIR_ORIG" \
-		bsdinstall distfetch || \
+		bsdinstall $BSDINSTALL_ARGS distfetch || \
 		error "Failed to fetch distribution from local media"
 fi
 
@@ -107,7 +110,7 @@ for _DISTRIBUTION in $DISTRIBUTIONS; do
 done
 
 # Fetch the distributions.
-bsdinstall distfetch
+bsdinstall $BSDINSTALL_ARGS distfetch
 rc=$?
 
 if [ $rc -ne 0 ]; then

@@ -38,6 +38,7 @@ elif [ -n "$ROOTPASS_PLAIN" ]; then
 fi
 
 : ${BSDDIALOG_OK:=0}
+: ${DIALOG:="bsddialog"}
 
 error_get_message()
 {
@@ -89,7 +90,7 @@ errormsg=
 username="root"
 while true; do
 	exec 5>&1
-	output=$(bsddialog --backtitle "$OSNAME Installer" \
+	output=$($DIALOG --backtitle "$OSNAME Installer" \
 		--title "Set $username password" \
 		--cancel-label "Skip" \
 		--passwordform --insecure \

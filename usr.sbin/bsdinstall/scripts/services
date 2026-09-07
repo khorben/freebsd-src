@@ -29,6 +29,7 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 
 : ${BSDDIALOG_OK=0}
+: ${DIALOG="bsddialog"}
 
 if [ -f $BSDINSTALL_TMPETC/rc.conf.services ]; then
 	eval "$( sed -E -e 's/\<(YES|AUTO)\>/on/i' -e 's/\<NO\>/off/i' \
@@ -77,7 +78,7 @@ if [ -x "${BSDINSTALL_CHROOT}/etc/rc.d/virtual_oss" ]; then
 fi
 
 exec 5>&1
-DAEMONS=$(eval bsddialog --backtitle \"$OSNAME Installer\" \
+DAEMONS=$(eval $DIALOG --backtitle \"$OSNAME Installer\" \
     --title \"System Configuration\" --no-cancel --separate-output \
     --checklist \"Choose the services you would like to be started at boot:\" \
     0 0 0 \
