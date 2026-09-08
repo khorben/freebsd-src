@@ -78,7 +78,13 @@ publisher="The FreeBSD Project.  https://www.FreeBSD.org/"
 echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > "$BASEBITSDIR/etc/fstab"
 if [ -n "${METALOG}" ]; then
 	metalogfilename=$(mktemp /tmp/metalog.XXXXXX)
-	cat ${METALOG} > ${metalogfilename}
+	awk '{
+    p = index($0, " type=")
+    path = substr($0, 1, p - 1)
+    rest = substr($0, p)
+    gsub(/ /, "\\040", path)
+    print path rest
+}' ${METALOG} > ${metalogfilename}
 	echo "./etc/fstab type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	MAKEFSARG=${metalogfilename}
 fi

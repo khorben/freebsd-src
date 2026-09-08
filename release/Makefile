@@ -409,9 +409,9 @@ disc1-installer: disc1
 .if ${.MAKE.OS} == "FreeBSD" && (!defined(NOPKG) || empty(NOPKG))
 # Install packages onto release media.
 	${PKG_INSTALL} cdxgen deforaos-browser deforaos-integration deforaos-locker \
-		deforaos-player dejavu gbsddialog gnome-icon-theme \
+		deforaos-player dejavu gbsddialog git gnome-icon-theme \
 		gsettings-desktop-schemas metacity npm-node24 setxkbmap slim \
-		trivy virtualbox-ose-additions xf86-input-keyboard \
+		trivy vim virtualbox-ose-additions xf86-input-keyboard \
 		xf86-input-libinput xf86-video-scfb xf86-video-vesa xorg \
 		xterm || true
 	${PKG_CLEAN} || true
@@ -436,7 +436,7 @@ installer.img: disc1-installer
 	cd disc1-installer && sh ${.CURDIR}/${TARGET}/make-installer.sh ./METALOG ../${.TARGET}
 
 installer.iso: disc1-installer
-	cd disc1-installer && sh ${.CURDIR}/${TARGET}/mkisoimages.sh -b ${VOLUME_LABEL}_Install ../${.TARGET} ./METALOG ${XTRADIR}
+	cd disc1-installer && sh ${.CURDIR}/${TARGET}/mkisoimages-installer.sh -b ${VOLUME_LABEL}_Install ../${.TARGET} ./METALOG ${XTRADIR}
 
 memstick: memstick.img
 memstick.img: disc1-memstick

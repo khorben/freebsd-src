@@ -1,13 +1,26 @@
 #!/bin/sh
 #
-# This script generates an "installer image" (image that can be copied to a
-# USB memory stick) from a directory tree.  Note that the script does not
-# clean up after itself very well for error conditions on purpose so the
-# problem can be diagnosed (full filesystem most likely but ...).
-#
-# Usage: make-installer.sh <directory tree or manifest> <image filename>
+# Module: mkisoimages.sh
+# Author: Jordan K Hubbard
+# Date:   22 June 2001
 #
 #
+# This script is used by release/Makefile to build the (optional) ISO images
+# for a FreeBSD release.  It is considered architecture dependent since each
+# platform has a slightly unique way of making bootable CDs.  This script
+# is also allowed to generate any number of images since that is more of
+# publishing decision than anything else.
+#
+# Usage:
+#
+# mkisoimages.sh [-b] image-label image-name base-bits-dir [extra-bits-dir]
+#
+# Where -b is passed if the ISO image should be made "bootable" by
+# whatever standards this architecture supports (may be unsupported),
+# image-label is the ISO image label, image-name is the filename of the
+# resulting ISO image, base-bits-dir contains the image contents and
+# extra-bits-dir, if provided, contains additional files to be merged
+# into base-bits-dir as part of making the image.
 
 set -e
 
@@ -15,17 +28,11 @@ scriptdir=$(dirname $(realpath $0))
 . ${scriptdir}/../scripts/tools.subr
 . ${scriptdir}/../../tools/boot/install-boot.sh
 
-if [ "$(uname -s)" = "FreeBSD" ]; then
-	PATH=/bin:/usr/bin:/sbin:/usr/sbin
-	export PATH
+if [ "$1" = "-b" ]; then
+	MAKEFSARG="$4"
+else
+	MAKEFSARG="$3"
 fi
-
-if [ $# -ne 2 ]; then
-	echo "make-installer.sh /path/to/directory/or/manifest /path/to/image/file"
-	exit 1
-fi
-
-MAKEFSARG=${1}
 
 if [ -f ${MAKEFSARG} ]; then
 	BASEBITSDIR=`dirname ${MAKEFSARG}`
@@ -38,14 +45,39 @@ else
 	exit 1
 fi
 
-if [ -e ${2} ]; then
-	echo "won't overwrite ${2}"
+if [ "$1" = "-b" ]; then
+	# This is highly x86-centric and will be used directly below.
+	bootable="-o bootimage=i386;$BASEBITSDIR/boot/cdboot -o no-emul-boot"
+
+	# Make EFI system partition.
+	espfilename=$(mktemp /tmp/efiboot.XXXXXX)
+	# ESP file size in KB.
+	espsize="2048"
+	if [ -f "${BASEBITSDIR}/boot/loader_ia32.efi" ]; then
+		extra_args="${BASEBITSDIR}/boot/loader_ia32.efi bootia32"
+	fi
+	make_esp_file ${espfilename} ${espsize} ${BASEBITSDIR}/boot/loader.efi bootx64 ${extra_args}
+	bootable="$bootable -o bootimage=i386;${espfilename} -o no-emul-boot -o platformid=efi"
+
+	shift
+else
+	bootable=""
+fi
+
+if [ $# -lt 3 ]; then
+	echo "Usage: $0 [-b] image-label image-name base-bits-dir [extra-bits-dir]"
 	exit 1
 fi
 
-echo '/dev/ufs/FreeBSD_Install / ufs ro,noatime 1 1' > ${BASEBITSDIR}/etc/fstab
+LABEL=`echo "$1" | tr '[:lower:]' '[:upper:]'`; shift
+NAME="$1"; shift
+# MAKEFSARG extracted already
+shift
+
+publisher="The FreeBSD Project.  https://www.FreeBSD.org/"
+echo "/dev/iso9660/$LABEL / cd9660 ro 0 0" > "$BASEBITSDIR/etc/fstab"
 cat > ${BASEBITSDIR}/boot/loader.conf.local << __EOF__
-loader_menu_multi_user_prompt="Graphical Installer"
+loader_menu_multi_user_prompt="CRAMAS Workshop"
 __EOF__
 cat > ${BASEBITSDIR}/etc/rc.conf.local << __EOF__
 root_rw_mount="NO"
@@ -333,6 +365,7 @@ logfile             /var/log/slim.log
 __EOF__
 if [ -n "${METALOG}" ]; then
 	metalogfilename=$(mktemp /tmp/metalog.XXXXXX)
+	#cat ${METALOG} > ${metalogfilename}
 	awk '{
     p = index($0, " type=")
     path = substr($0, 1, p - 1)
@@ -340,38 +373,54 @@ if [ -n "${METALOG}" ]; then
     gsub(/ /, "\\040", path)
     print path rest
 }' ${METALOG} > ${metalogfilename}
+	echo "./boot/loader.conf.local type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	echo "./etc/fstab type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	echo "./etc/rc.conf.local type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	echo "./root/.config/gtk-3.0/settings.ini type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	echo "./root/.xinitrc type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
+	echo "./usr/local/bin/bsdinstall-session type=file uname=root gname=wheel mode=0755" >> ${metalogfilename}
+	echo "./usr/local/etc/xdg/xsessions/bsdinstall.desktop type=file uname=root gname=wheel mode=0644" >> ${metalogfilename}
 	MAKEFSARG=${metalogfilename}
 fi
-${MAKEFS} -D -N ${BASEBITSDIR}/etc -B little -o label=FreeBSD_Install -o version=2 ${2}.part ${MAKEFSARG}
-rm ${BASEBITSDIR}/boot/loader.conf.local
-rm ${BASEBITSDIR}/etc/fstab
-rm ${BASEBITSDIR}/etc/rc.conf.local
-rm ${BASEBITSDIR}/etc/rc.local
-rm ${BASEBITSDIR}/root/.config/gtk-3.0/settings.ini
-rm ${BASEBITSDIR}/root/.xinitrc
-rm ${BASEBITSDIR}/usr/local/bin/bsdinstall-session
-rm ${BASEBITSDIR}/usr/local/etc/xdg/xsessions/bsdinstall.desktop
+$MAKEFS -D -N ${BASEBITSDIR}/etc -t cd9660 $bootable -o rockridge -o label="$LABEL" -o publisher="$publisher" "$NAME" "$MAKEFSARG" "$@"
+rm -f "$BASEBITSDIR/boot/loader.conf.local"
+rm -f "$BASEBITSDIR/etc/fstab"
+rm -f "$BASEBITSDIR/etc/rc.conf.local"
+rm -f "$BASEBITSDIR/etc/rc.local"
+rm -f "$BASEBITSDIR/root/.config/gtk-3.0/settings.ini"
+rm -f "$BASEBITSDIR/root/.xinitrc"
+rm -f ${espfilename}
 if [ -n "${METALOG}" ]; then
 	rm ${metalogfilename}
 fi
 
-# Make an ESP in a file.
-espfilename=$(mktemp /tmp/efiboot.XXXXXX)
-if [ -f "${BASEBITSDIR}/boot/loader_ia32.efi" ]; then
-	extra_args="${BASEBITSDIR}/boot/loader_ia32.efi bootia32"
+if [ "$bootable" != "" ]; then
+	# Look for the EFI System Partition image we dropped in the ISO image.
+	for entry in `$ETDUMP --format shell $NAME`; do
+		eval $entry
+		if [ "$et_platform" = "efi" ]; then
+			espstart=`expr $et_lba \* 2048`
+			espsize=`expr $et_sectors \* 512`
+			espparam="-p efi::$espsize:$espstart"
+			break
+		fi
+	done
+
+	# Create a GPT image containing the partitions we need for hybrid boot.
+	hybridfilename=$(mktemp /tmp/hybrid.img.XXXXXX)
+	if [ "$(uname -s)" = "Linux" ]; then
+		imgsize=`stat -c %s "$NAME"`
+	else
+		imgsize=`stat -f %z "$NAME"`
+	fi
+	$MKIMG -s gpt \
+	    --capacity $imgsize \
+	    -b "$BASEBITSDIR/boot/pmbr" \
+	    -p freebsd-boot:="$BASEBITSDIR/boot/isoboot" \
+	    $espparam \
+	    -o $hybridfilename
+
+	# Drop the PMBR, GPT, and boot code into the System Area of the ISO.
+	dd if=$hybridfilename of="$NAME" bs=32k count=1 conv=notrunc
+	rm -f $hybridfilename
 fi
-make_esp_file ${espfilename} ${fat32min} ${BASEBITSDIR}/boot/loader.efi bootx64 ${extra_args}
-
-${MKIMG} -s mbr \
-    -b ${BASEBITSDIR}/boot/mbr \
-    -p efi:=${espfilename} \
-    -p freebsd:-"${MKIMG} -s bsd -b ${BASEBITSDIR}/boot/boot -p freebsd-ufs:=${2}.part" \
-    -a 2 \
-    -o ${2}
-rm ${espfilename}
-rm ${2}.part
-
