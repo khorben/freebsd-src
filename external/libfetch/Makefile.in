@@ -1,0 +1,22 @@
+include @builddir@/mk/defs.mk
+LIB=	fetch
+SRCS=	common.c \
+	fetch.c \
+	http.c
+
+LOCAL_CFLAGS=	-I$(top_srcdir)/compat \
+		-I$(top_srcdir) \
+		-I$(top_builddir) \
+		-Wno-unused-parameter \
+		-Wno-pointer-sign \
+		-DWITH_SSL \
+		-DINET6 \
+		-DOPENSSL_API_COMPAT=0x10100000L
+
+@if PKG_OPENSSL_CFLAGS
+CFLAGS+=	@PKG_OPENSSL_CFLAGS@
+@endif
+
+VPATH=	$(top_srcdir)/external/fetch
+
+include $(MK)/static-lib.mk

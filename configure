@@ -1,0 +1,963 @@
+#!/bin/sh
+
+# SPDX-License-Identifier: ISC
+#
+# Copyright (c) 2026 Baptiste Daroussin <bapt@FreeBSD.org>
+
+# bbuild configure - POSIX shell build configuration framework
+# https://codeberg.org/bapt/bbuild
+#
+# Usage: copy this file into your project root and write an configure.def
+# that calls the functions below.
+
+set -e
+
+# ---- internal state ----
+case "$0" in
+	*/*) _srcdir="$(cd "${0%/*}" && pwd)" ;;
+	*)   _srcdir="$(pwd)" ;;
+esac
+_builddir="$(pwd)"
+_tmpdir=""
+_defines=""     # file holding KEY=VALUE pairs
+_options=""     # file holding declared options
+_log=""         # config.log
+
+# cc_with state: extra cflags/libs for the current scope
+_cc_with_cflags=""
+_cc_with_libs=""
+_cc_with_includes=""
+
+cleanup() {
+	rm -rf "$_tmpdir"
+}
+trap cleanup EXIT
+
+_tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/configure.XXXXXX")
+_defines="$_tmpdir/defines"
+_options="$_tmpdir/options"
+_log="$_builddir/config.log"
+
+: > "$_defines"
+: > "$_options"
+: > "$_log"
+
+# ==================================================================
+# Logging
+# ==================================================================
+
+msg() {
+	printf '%s\n' "$*"
+}
+
+log() {
+	printf '%s\n' "$*" >> "$_log"
+}
+
+user_error() {
+	printf 'Error: %s\n' "$*" >&2
+	exit 1
+}
+
+user_notice() {
+	printf 'Notice: %s\n' "$*"
+}
+
+# ==================================================================
+# Write-if-changed helper
+# ==================================================================
+# Usage: write_if_changed target tmpfile
+# Replaces target with tmpfile only if the content differs.
+# Preserves timestamps on unchanged files to avoid unnecessary rebuilds.
+
+write_if_changed() {
+	_wic_target="$1"
+	_wic_tmpfile="$2"
+	_wic_msg="${3:-Creating $_wic_target}"
+	if [ -f "$_wic_target" ] && cmp -s "$_wic_target" "$_wic_tmpfile"; then
+		msg "$_wic_target is unchanged"
+		rm -f "$_wic_tmpfile"
+	else
+		msg "$_wic_msg"
+		mv "$_wic_tmpfile" "$_wic_target"
+	fi
+}
+
+# ==================================================================
+# Variable store (define / get_define)
+# ==================================================================
+# Variables are stored in a flat file as KEY<tab>VALUE lines.
+# Keys may contain hyphens, underscores, and alphanumeric characters.
+
+define() {
+	_key="$1"; shift
+	_val="$*"
+	_tmp="$_tmpdir/defines.tmp"
+	awk -v k="$_key" -F'\t' '$1 != k' "$_defines" > "$_tmp" 2>/dev/null || true
+	printf '%s\t%s\n' "$_key" "$_val" >> "$_tmp"
+	mv "$_tmp" "$_defines"
+}
+
+define_append() {
+	_key="$1"; shift
+	_val="$*"
+	_old=$(get_define "$_key")
+	if [ -n "$_old" ]; then
+		define "$_key" "$_old $_val"
+	else
+		define "$_key" "$_val"
+	fi
+}
+
+undefine() {
+	_tmp="$_tmpdir/defines.tmp"
+	awk -v k="$1" -F'\t' '$1 != k' "$_defines" > "$_tmp" 2>/dev/null || true
+	mv "$_tmp" "$_defines"
+}
+
+get_define() {
+	_val=$(awk -v k="$1" -F'\t' '$1 == k { print substr($0, length(k)+2); exit }' "$_defines" 2>/dev/null)
+	printf '%s' "$_val"
+}
+
+is_defined() {
+	awk -v k="$1" -F'\t' '$1 == k { found=1; exit } END { exit !found }' "$_defines" 2>/dev/null
+}
+
+is_true() {
+	_val=$(get_define "$1")
+	case "$_val" in
+		""|0) return 1 ;;
+		*)    return 0 ;;
+	esac
+}
+
+define_feature() {
+	_feat="$1"
+	_val="${2:-1}"
+	_FEAT=$(echo "$_feat" | tr '[:lower:]-' '[:upper:]_')
+	define "HAVE_${_FEAT}" "$_val"
+}
+
+# ==================================================================
+# Options framework
+# ==================================================================
+# Each SPEC is "name[=default|:default] => description"
+# Names starting with "with-" or "enable-" become --with-X / --enable-X.
+# Names with ":" define string-valued options.
+
+options() {
+	for _spec in "$@"; do
+		_name="${_spec%%=>*}"
+		_name=$(echo "$_name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+		_desc="${_spec#*=>}"
+		_desc=$(echo "$_desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+		_default=""
+		case "$_name" in
+			*:*)
+				_default="${_name#*:}"
+				_name="${_name%%:*}"
+				;;
+			*=*)
+				_default="${_name#*=}"
+				_name="${_name%%=*}"
+				;;
+		esac
+		printf '%s\t%s\t%s\n' "$_name" "${_default:-0}" "$_desc" >> "$_options"
+		if [ -n "$_default" ] && [ "$_default" != "0" ]; then
+			define "opt-$_name" "$_default"
+		else
+			define "opt-$_name" 0
+		fi
+	done
+}
+
+opt_bool() {
+	is_true "opt-$1"
+}
+
+# Get string value of an option. Returns true if set to a non-default value.
+opt_str() {
+	_val=$(get_define "opt-$1")
+	case "$_val" in
+		""|0) return 1 ;;
+		*)    printf '%s' "$_val"; return 0 ;;
+	esac
+}
+
+# ==================================================================
+# Help text
+# ==================================================================
+
+show_help() {
+	cat <<'HELPEOF'
+Usage: configure [options]
+
+Standard options:
+  --prefix=DIR          Installation prefix [/usr/local]
+  --exec-prefix=DIR     Executable prefix [PREFIX]
+  --includedir=DIR      Headers [PREFIX/include]
+  --libdir=DIR          Libraries [PREFIX/lib]
+  --bindir=DIR          User executables [PREFIX/bin]
+  --sbindir=DIR         System executables [PREFIX/sbin]
+  --mandir=DIR          Man pages [PREFIX/man]
+  --datadir=DIR         Read-only data [PREFIX/share]
+  --datarootdir=DIR     Read-only arch-independent data [PREFIX/share]
+  --sysconfdir=DIR      System configuration [PREFIX/etc]
+
+  --help                Display this help
+
+HELPEOF
+	if [ -s "$_options" ]; then
+		echo "Project options:"
+		while IFS='	' read -r _name _default _desc; do
+			case "$_name" in
+				with-*)
+					printf '  --%-28s %s\n' "$_name" "$_desc"
+					;;
+				enable-*)
+					if [ "$_default" = "1" ]; then
+						printf '  --%-28s %s (default: enabled)\n' "disable-${_name#enable-}" "$_desc"
+					else
+						printf '  --%-28s %s (default: disabled)\n' "$_name" "$_desc"
+					fi
+					;;
+				*)
+					printf '  --%-28s %s\n' "$_name=VALUE" "$_desc"
+					;;
+			esac
+		done < "$_options"
+	fi
+	exit 0
+}
+
+# ==================================================================
+# Command-line parsing
+# ==================================================================
+
+_saved_args=""
+save_args() {
+	_saved_args="$*"
+}
+
+apply_args() {
+	eval set -- "$_saved_args"
+	for _arg in "$@"; do
+		case "$_arg" in
+			--prefix=*)      define prefix "${_arg#--prefix=}" ;;
+			--exec-prefix=*) define exec_prefix "${_arg#--exec-prefix=}" ;;
+			--includedir=*)  define includedir "${_arg#--includedir=}" ;;
+			--libdir=*)      define libdir "${_arg#--libdir=}" ;;
+			--bindir=*)      define bindir "${_arg#--bindir=}" ;;
+			--sbindir=*)     define sbindir "${_arg#--sbindir=}" ;;
+			--mandir=*)      define mandir "${_arg#--mandir=}" ;;
+			--datadir=*)     define datadir "${_arg#--datadir=}" ;;
+			--sysconfdir=*)  define sysconfdir "${_arg#--sysconfdir=}" ;;
+			--datarootdir=*) define datarootdir "${_arg#--datarootdir=}" ;;
+			--with-*)
+				_optname="${_arg#--}"
+				case "$_optname" in
+					*=*)
+						_optval="${_optname#*=}"
+						_optname="${_optname%%=*}"
+						define "opt-$_optname" "$_optval"
+						;;
+					*)
+						_optname="${_optname%%=*}"
+						define "opt-$_optname" 1
+						;;
+				esac
+				;;
+			--without-*)
+				_optname="with-${_arg#--without-}"
+				define "opt-$_optname" 0
+				;;
+			--enable-*)
+				_optname="${_arg#--}"
+				_optname="${_optname%%=*}"
+				define "opt-$_optname" 1
+				;;
+			--disable-*)
+				_optname="enable-${_arg#--disable-}"
+				define "opt-$_optname" 0
+				;;
+			--help|-h)
+				_want_help=1
+				;;
+			--*=*)
+				_optname="${_arg#--}"
+				_optval="${_optname#*=}"
+				_optname="${_optname%%=*}"
+				define "opt-$_optname" "$_optval"
+				;;
+			[A-Z]*=*)
+				_var="${_arg%%=*}"
+				_val="${_arg#*=}"
+				define "$_var" "$_val"
+				;;
+			*)
+				echo "Warning: unknown option: $_arg" >&2
+				;;
+		esac
+	done
+}
+
+# ==================================================================
+# Host and compiler detection
+# ==================================================================
+
+detect_host() {
+	if is_defined host; then
+		return 0
+	fi
+	_host=""
+	if [ -x "$_srcdir/config.guess" ]; then
+		_host=$("$_srcdir/config.guess" 2>/dev/null) || true
+	fi
+	if [ -z "$_host" ]; then
+		_os=$(uname -s | tr '[:upper:]' '[:lower:]')
+		_mach=$(uname -m)
+		_rel=$(uname -r | sed 's/-.*//')
+		_host="${_mach}-unknown-${_os}${_rel}"
+	fi
+	define host "$_host"
+	msg "Host: $_host"
+}
+
+detect_shared() {
+	_host=$(get_define host)
+	case "$_host" in
+		*-darwin*)
+			define SHOBJ_CFLAGS "-dynamic -fno-common"
+			define SH_LDFLAGS ""
+			define SH_SOEXT ".dylib"
+			define SH_SOPREFIX "-dynamiclib -Wl,-install_name,"
+			define SH_SOEXTVER "%s.dylib"
+			;;
+		*)
+			define SHOBJ_CFLAGS "-fPIC"
+			define SH_LDFLAGS "-shared"
+			define SH_SOEXT ".so"
+			define SH_SOPREFIX "-Wl,-soname,"
+			define SH_SOEXTVER ".so.%s"
+			;;
+	esac
+}
+
+find_cc() {
+	if is_defined CC; then
+		return 0
+	fi
+	for _cc in cc gcc clang; do
+		if command -v "$_cc" >/dev/null 2>&1; then
+			define CC "$_cc"
+			msg "Found C compiler: $_cc"
+			return 0
+		fi
+	done
+	user_error "No C compiler found"
+}
+
+# ==================================================================
+# Compile / link test primitives
+# ==================================================================
+
+cc_try_compile() {
+	_src="$1"
+	_cc=$(get_define CC)
+	_cflags=$(get_define CFLAGS)
+	printf '%s' "$_src" > "$_tmpdir/conftest.c"
+	log "cc_try_compile: $_cc $_cflags $_cc_with_cflags -c -o conftest.o conftest.c"
+	log "--- source ---"
+	log "$_src"
+	if $_cc $_cflags $_cc_with_cflags -c -o "$_tmpdir/conftest.o" "$_tmpdir/conftest.c" >> "$_log" 2>&1; then
+		log "=> success"
+		return 0
+	fi
+	log "=> failed"
+	return 1
+}
+
+cc_try_link() {
+	_src="$1"; shift
+	_extra_ldflags="$*"
+	_cc=$(get_define CC)
+	_cflags=$(get_define CFLAGS)
+	_ldflags=$(get_define LDFLAGS)
+	printf '%s' "$_src" > "$_tmpdir/conftest.c"
+	log "cc_try_link: $_cc $_cflags $_cc_with_cflags -o conftest conftest.c $_ldflags $_cc_with_libs $_extra_ldflags"
+	log "--- source ---"
+	log "$_src"
+	if $_cc $_cflags $_cc_with_cflags -o "$_tmpdir/conftest" "$_tmpdir/conftest.c" $_ldflags $_cc_with_libs $_extra_ldflags >> "$_log" 2>&1; then
+		log "=> success"
+		return 0
+	fi
+	log "=> failed"
+	return 1
+}
+
+# ==================================================================
+# cc_with: temporarily set extra compiler/linker flags
+# ==================================================================
+# Usage: cc_with "-libs -lfoo -includes header.h" command args...
+
+cc_with() {
+	_spec="$1"; shift
+	_saved_cc_with_cflags="$_cc_with_cflags"
+	_saved_cc_with_libs="$_cc_with_libs"
+	_saved_cc_with_includes="$_cc_with_includes"
+
+	_parsing=""
+	for _token in $_spec; do
+		case "$_token" in
+			-libs)     _parsing=libs ;;
+			-includes) _parsing=includes ;;
+			-cflags)   _parsing=cflags ;;
+			*)
+				case "$_parsing" in
+					libs)     _cc_with_libs="$_cc_with_libs $_token" ;;
+					includes) _cc_with_includes="$_cc_with_includes $_token" ;;
+					cflags)   _cc_with_cflags="$_cc_with_cflags $_token" ;;
+				esac
+				;;
+		esac
+	done
+
+	"$@"
+	_ret=$?
+
+	_cc_with_cflags="$_saved_cc_with_cflags"
+	_cc_with_libs="$_saved_cc_with_libs"
+	_cc_with_includes="$_saved_cc_with_includes"
+
+	return $_ret
+}
+
+# ==================================================================
+# Feature checks
+# ==================================================================
+
+cc_check_tools() {
+	for _tool in "$@"; do
+		_TOOL=$(echo "$_tool" | tr '[:lower:]' '[:upper:]')
+		if is_defined "$_TOOL"; then
+			continue
+		fi
+		if command -v "$_tool" >/dev/null 2>&1; then
+			define "$_TOOL" "$_tool"
+			msg "Found tool: $_tool"
+		else
+			msg "Warning: tool not found: $_tool"
+		fi
+	done
+}
+
+# Always returns 0 (safe under set -e). Use have_func() to test results.
+cc_check_functions() {
+	for _func in "$@"; do
+		_FUNC=$(echo "$_func" | tr '[:lower:]' '[:upper:]')
+		printf 'Checking for function %s... ' "$_func"
+		_src="
+extern char ${_func}();
+int main(void) { ${_func}(); return 0; }
+"
+		if cc_try_link "$_src"; then
+			echo "yes"
+			define "HAVE_${_FUNC}" 1
+		else
+			echo "no"
+			define "HAVE_${_FUNC}" 0
+		fi
+	done
+	return 0
+}
+
+have_func() {
+	_FUNC=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+	[ "$(get_define "HAVE_${_FUNC}")" = "1" ]
+}
+
+# Returns 0 if ALL headers found, 1 otherwise.
+cc_check_includes() {
+	_chk_ret=0
+	for _hdr in "$@"; do
+		_HDR=$(echo "$_hdr" | tr '[:lower:]/.' '[:upper:]__')
+		printf 'Checking for header %s... ' "$_hdr"
+		_src="
+#include <${_hdr}>
+int main(void) { return 0; }
+"
+		if cc_try_compile "$_src"; then
+			echo "yes"
+			define "HAVE_${_HDR}" 1
+		else
+			echo "no"
+			define "HAVE_${_HDR}" 0
+			_chk_ret=1
+		fi
+	done
+	return $_chk_ret
+}
+
+cc_check_members() {
+	for _member in "$@"; do
+		_struct="${_member%.*}"
+		_field="${_member##*.}"
+		_MEMBER=$(echo "$_member" | tr '[:lower:]. ' '[:upper:]__')
+		printf 'Checking for %s... ' "$_member"
+		_inc=""
+		for _h in $_cc_with_includes; do
+			_inc="${_inc}#include <${_h}>
+"
+		done
+		_src="${_inc}
+int main(void) { ${_struct} s; (void)s.${_field}; return 0; }
+"
+		if cc_try_compile "$_src"; then
+			echo "yes"
+			define "HAVE_${_MEMBER}" 1
+		else
+			echo "no"
+			define "HAVE_${_MEMBER}" 0
+		fi
+	done
+}
+
+# Always returns 0 (safe under set -e).
+cc_check_decls() {
+	for _decl in "$@"; do
+		_DECL=$(echo "$_decl" | tr '[:lower:]' '[:upper:]')
+		printf 'Checking for declaration %s... ' "$_decl"
+		_inc=""
+		for _h in $_cc_with_includes; do
+			_inc="${_inc}#include <${_h}>
+"
+		done
+		_src="${_inc}
+int main(void) {
+#ifndef ${_decl}
+	(void)${_decl};
+#endif
+	return 0;
+}
+"
+		if cc_try_compile "$_src"; then
+			echo "yes"
+			define "HAVE_DECL_${_DECL}" 1
+		else
+			echo "no"
+			define "HAVE_DECL_${_DECL}" 0
+		fi
+	done
+	return 0
+}
+
+cc_check_types() {
+	for _type in "$@"; do
+		_TYPE=$(echo "$_type" | tr '[:lower:] ' '[:upper:]_')
+		printf 'Checking for type %s... ' "$_type"
+		_inc=""
+		for _h in $_cc_with_includes; do
+			_inc="${_inc}#include <${_h}>
+"
+		done
+		_src="${_inc}
+int main(void) { ${_type} x; (void)x; return 0; }
+"
+		if cc_try_compile "$_src"; then
+			echo "yes"
+			define "HAVE_${_TYPE}" 1
+		else
+			echo "no"
+			define "HAVE_${_TYPE}" 0
+		fi
+	done
+}
+
+# Compile and link arbitrary code. Returns 0 on success.
+cctest() {
+	_code="$1"
+	_inc=""
+	for _h in $_cc_with_includes; do
+		_inc="${_inc}#include <${_h}>
+"
+	done
+	_src="${_inc}
+int main(void) {
+${_code}
+}
+"
+	cc_try_link "$_src"
+}
+
+# Returns 0 if found, 1 if not.
+cc_check_progs() {
+	_chk_ret=1
+	for _prog in "$@"; do
+		_PROG=$(echo "$_prog" | tr '[:lower:]-' '[:upper:]_')
+		printf 'Checking for program %s... ' "$_prog"
+		if command -v "$_prog" >/dev/null 2>&1; then
+			echo "yes"
+			define "HAVE_${_PROG}" 1
+			_chk_ret=0
+			break
+		else
+			echo "no"
+		fi
+	done
+	return $_chk_ret
+}
+
+cc_path_progs() {
+	for _prog in "$@"; do
+		_PROG=$(echo "$_prog" | tr '[:lower:]-' '[:upper:]_')
+		printf 'Checking for program %s... ' "$_prog"
+		_path=$(command -v "$_prog" 2>/dev/null) || true
+		if [ -n "$_path" ]; then
+			echo "$_path"
+			define "$_PROG" "$_path"
+			return 0
+		else
+			echo "not found"
+			return 1
+		fi
+	done
+}
+
+msg_checking() {
+	printf '%s' "$*"
+}
+
+msg_result() {
+	printf '%s\n' "$*"
+}
+
+# ==================================================================
+# pkg-config support
+# ==================================================================
+
+_have_pkg_config=0
+
+pkg_config_init() {
+	if [ "$_have_pkg_config" -eq 1 ]; then
+		return 0
+	fi
+	if command -v pkg-config >/dev/null 2>&1; then
+		_have_pkg_config=1
+		return 0
+	fi
+	if command -v pkgconf >/dev/null 2>&1; then
+		_have_pkg_config=1
+		return 0
+	fi
+	return 1
+}
+
+# Usage: pkg_config "libfoo" or pkg_config "libfoo >= 2.0"
+# Defines PKG_LIBFOO_CFLAGS, PKG_LIBFOO_LDFLAGS, PKG_LIBFOO_LIBS
+pkg_config() {
+	_pkg_spec="$1"
+	_pkg_name=$(echo "$_pkg_spec" | awk '{print $1}')
+	_PKG=$(echo "$_pkg_name" | tr '[:lower:]-' '[:upper:]_')
+	printf 'Checking for package %s... ' "$_pkg_spec"
+	if [ "$_have_pkg_config" -eq 0 ]; then
+		echo "no (pkg-config not available)"
+		return 1
+	fi
+	if pkg-config --exists "$_pkg_spec" 2>/dev/null; then
+		_cflags=$(pkg-config --cflags "$_pkg_name" 2>/dev/null)
+		_ldflags=$(pkg-config --libs-only-L "$_pkg_name" 2>/dev/null)
+		_libs=$(pkg-config --libs-only-l "$_pkg_name" 2>/dev/null)
+		echo "yes"
+		define "PKG_${_PKG}_CFLAGS" "$_cflags"
+		define "PKG_${_PKG}_LDFLAGS" "$_ldflags"
+		define "PKG_${_PKG}_LIBS" "$_libs"
+		return 0
+	else
+		echo "no"
+		return 1
+	fi
+}
+
+# ==================================================================
+# Compatibility shim
+# ==================================================================
+
+use() {
+	log "use: $*"
+}
+
+# ==================================================================
+# Config header generation
+# ==================================================================
+# Usage: make_config_header FILE [-auto PATTERN ...] [-bare PATTERN ...]
+#
+# HAVE_* defines are always emitted (auto format).
+# -auto PATTERNS: also emit matching keys (0 → #undef, int → bare, else → quoted)
+# -bare PATTERNS: emit matching keys with value as-is (no quoting)
+
+make_config_header() {
+	_outfile="$1"; shift
+	_auto_patterns=""
+	_bare_patterns=""
+	while [ $# -gt 0 ]; do
+		case "$1" in
+			-auto)
+				shift
+				while [ $# -gt 0 ]; do
+					case "$1" in
+						-*) break ;;
+						*)  _auto_patterns="$_auto_patterns $1"; shift ;;
+					esac
+				done
+				continue
+				;;
+			-bare)
+				shift
+				while [ $# -gt 0 ]; do
+					case "$1" in
+						-*) break ;;
+						*)  _bare_patterns="$_bare_patterns $1"; shift ;;
+					esac
+				done
+				continue
+				;;
+			*) shift ;;
+		esac
+	done
+
+	_guard=$(echo "$_outfile" | tr '[:lower:]/.' '[:upper:]__' | sed 's/^_*//')
+	_guard="_${_guard}_"
+
+	case "$_outfile" in
+		*/*) [ -d "${_outfile%/*}" ] || mkdir -p "${_outfile%/*}" ;;
+	esac
+
+	_mch_tmp="$_tmpdir/config_header.tmp"
+
+	{
+		echo "/* Auto-generated by configure - do not edit */"
+		echo "#ifndef $_guard"
+		echo "#define $_guard"
+		echo ""
+
+		while IFS='	' read -r _key _val; do
+			_emit=""
+			case "$_key" in
+				HAVE_*) _emit="auto" ;;
+			esac
+			for _pat in $_auto_patterns; do
+				case "$_key" in
+					$_pat*) _emit="auto" ;;
+				esac
+			done
+			for _pat in $_bare_patterns; do
+				case "$_key" in
+					$_pat*) _emit="bare" ;;
+				esac
+			done
+
+			case "$_key" in
+				HAVE_DECL_*) _emit="decl" ;;
+			esac
+
+			case "$_emit" in
+				decl)
+					echo "#define $_key $_val"
+					;;
+				bare)
+					case "$_val" in
+						0)  echo "/* #undef $_key */" ;;
+						*)  echo "#define $_key $_val" ;;
+					esac
+					;;
+				auto)
+					case "$_val" in
+						0)
+							echo "/* #undef $_key */"
+							;;
+						[0-9]|[0-9][0-9]|[0-9][0-9][0-9]|[0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9][0-9][0-9]|[0-9][0-9][0-9][0-9][0-9][0-9][0-9])
+							echo "#define $_key $_val"
+							;;
+						*)
+							echo "#define $_key \"$_val\""
+							;;
+					esac
+					;;
+			esac
+		done < "$_defines"
+
+		echo ""
+		echo "#endif /* $_guard */"
+	} > "$_mch_tmp"
+
+	write_if_changed "$_outfile" "$_mch_tmp" "Creating $_outfile"
+}
+
+# ==================================================================
+# Template processing
+# ==================================================================
+# Usage: make_template input [output]
+#   If output is omitted, strip .in or .bb suffix.
+#
+# Substitutions:
+#   @VAR@      → replaced with the defined value of VAR
+#   @if VAR    → include following lines if VAR is defined and non-zero
+#   @else      → else branch
+#   @endif     → end conditional
+
+make_template() {
+	_infile="$1"
+	_outfile="${2:-}"
+
+	if [ ! -f "$_infile" ]; then
+		_infile="$_srcdir/$_infile"
+	fi
+	if [ ! -f "$_infile" ]; then
+		user_error "Template not found: $1"
+	fi
+
+	if [ -z "$_outfile" ]; then
+		_outfile="${1%.in}"
+		_outfile="${_outfile%.bb}"
+	fi
+
+	case "$_outfile" in
+		*/*) [ -d "${_outfile%/*}" ] || mkdir -p "${_outfile%/*}" ;;
+	esac
+
+	_sedscript="$_tmpdir/template.sed"
+	: > "$_sedscript"
+	while IFS='	' read -r _key _val; do
+		_escaped_val=$(printf '%s' "$_val" | sed 's/[&/\\]/\\&/g')
+		printf 's|@%s@|%s|g\n' "$_key" "$_escaped_val" >> "$_sedscript"
+	done < "$_defines"
+
+	_mt_tmp="$_tmpdir/template.tmp"
+
+	awk -v deffile="$_defines" '
+BEGIN {
+	while ((getline line < deffile) > 0) {
+		idx = index(line, "\t")
+		if (idx > 0) {
+			key = substr(line, 1, idx - 1)
+			val = substr(line, idx + 1)
+			defs[key] = val
+		}
+	}
+	close(deffile)
+	depth = 0
+	stack[0] = 1
+}
+
+/^@if / {
+	varname = $2
+	depth++
+	if (stack[depth - 1] == 1) {
+		if (varname in defs && defs[varname] != "" && defs[varname] != "0") {
+			stack[depth] = 1
+		} else {
+			stack[depth] = 0
+		}
+	} else {
+		stack[depth] = 0
+	}
+	next
+}
+
+/^@else$/ || /^@else / {
+	if (depth > 0 && stack[depth - 1] == 1) {
+		stack[depth] = (stack[depth] == 1) ? 0 : 1
+	}
+	next
+}
+
+/^@endif$/ || /^@endif / {
+	if (depth > 0) depth--
+	next
+}
+
+{
+	if (stack[depth] == 1) print
+}
+' "$_infile" | sed -f "$_sedscript" > "$_mt_tmp"
+
+	write_if_changed "$_outfile" "$_mt_tmp" "Creating $_outfile from $1"
+}
+
+# ==================================================================
+# Main entry point
+# ==================================================================
+
+_want_help=0
+_quoted_args=""
+for _a in "$@"; do
+	_quoted_args="$_quoted_args '$(printf '%s' "$_a" | sed "s/'/'\\\\''/g")'"
+done
+save_args "$_quoted_args"
+
+for _a in "$@"; do
+	case "$_a" in
+		--help|-h) _want_help=1 ;;
+	esac
+done
+
+define srcdir "$_srcdir"
+define abs_top_srcdir "$_srcdir"
+define abs_top_builddir "$_builddir"
+define builddir "$_builddir"
+
+# Import toolchain variables from environment early, so that find_cc
+# and detect_host can respect user overrides.
+for _envvar in CC CXX CPP AR RANLIB NM STRIP CFLAGS CXXFLAGS CPPFLAGS LDFLAGS; do
+	eval "_envval=\"\${$_envvar:-}\""
+	if [ -n "$_envval" ]; then
+		define "$_envvar" "$_envval"
+	fi
+done
+# Early pass: apply VAR=value arguments from command line before detection.
+for _a in "$@"; do
+	case "$_a" in
+		[A-Z]*=*)
+			_var="${_a%%=*}"
+			_val="${_a#*=}"
+			define "$_var" "$_val"
+			;;
+	esac
+done
+
+find_cc
+detect_host
+detect_shared
+
+# Called from configure.def after options() to apply command-line overrides.
+_configure_apply() {
+	apply_args
+
+	_prefix=$(get_define prefix)
+	[ -n "$_prefix" ] || _prefix="/usr/local"
+	define prefix "$_prefix"
+
+	is_defined exec_prefix || define exec_prefix "$_prefix"
+	is_defined includedir  || define includedir "$_prefix/include"
+	is_defined libdir      || define libdir "$_prefix/lib"
+	is_defined bindir      || define bindir "$_prefix/bin"
+	is_defined sbindir     || define sbindir "$_prefix/sbin"
+	is_defined mandir      || define mandir "$_prefix/man"
+	is_defined sysconfdir  || define sysconfdir "$_prefix/etc"
+	is_defined datarootdir || define datarootdir "$_prefix/share"
+	is_defined datadir     || define datadir "$_prefix/share"
+	is_defined pkgconfigdir|| define pkgconfigdir "$_prefix/libdata/pkgconfig"
+
+	if [ "$_want_help" -eq 1 ]; then
+		show_help
+	fi
+}
+
+msg "Configuring from $_srcdir"
+msg ""
+
+. "$_srcdir/configure.def"
+
+msg ""
+msg "Configuration complete. You can now run 'make'."

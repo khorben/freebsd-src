@@ -1,0 +1,728 @@
+/*-
+ * SPDX-License-Identifier: LicenseRef-scancode-bsd-unchanged
+ *
+ * Copyright (c) 2024 The FreeBSD Foundation
+ *
+ * This software was developed by Isaac Freund <ifreund@freebsdfoundation.org>
+ * under sponsorship from the FreeBSD Foundation.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer
+ *    in this position and unchanged.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+#include <assert.h>
+
+#include "pkg.h"
+#include "pkg/vec.h"
+#include "private/event.h"
+#include "private/pkg.h"
+#include "private/pkg_jobs.h"
+#include "xmalloc.h"
+
+#define dbg(x, ...) pkg_dbg(PKG_DBG_SCHEDULER, x, __VA_ARGS__)
+
+extern struct pkg_ctx ctx;
+
+static const char *
+pkg_jobs_schedule_job_type_string(struct pkg_solved *job)
+{
+	static const char *names[] = {
+		[PKG_SOLVED_INSTALL]         = "install",
+		[PKG_SOLVED_DELETE]          = "delete",
+		[PKG_SOLVED_UPGRADE]         = "upgrade",
+		[PKG_SOLVED_UPGRADE_INSTALL] = "split upgrade install",
+		[PKG_SOLVED_UPGRADE_REMOVE]  = "split upgrade delete",
+	};
+	assert((size_t)job->type < sizeof(names)/sizeof(names[0]));
+	return (names[job->type]);
+}
+
+/*
+ * Returns true if pkg a directly depends on pkg b.
+ *
+ * Checking only direct dependencies is sufficient to define the edges in a
+ * graph that models indirect dependencies as well as long as all of the
+ * intermediate dependencies are also nodes in the graph.
+ */
+static bool pkg_jobs_schedule_direct_depends(struct pkg *a, struct pkg *b)
+{
+	struct pkg_dep *dep = NULL;
+	while (pkg_deps(a, &dep) == EPKG_OK) {
+		if (STREQ(b->uid, dep->uid)) {
+			return (true);
+		}
+	}
+	return (false);
+}
+
+/*
+ * Returns true if pkg a depends on pkg b through the provides/requires
+ * tables, that is if a requires a shared library or a named provide of b.
+ *
+ * These are resolved separately from the regular dependencies.  On a
+ * pkgbase system the base libraries are provided by packages (for example
+ * libc.so.7 by FreeBSD-clibs) so they must be taken into account when
+ * ordering jobs.
+ */
+static bool pkg_jobs_schedule_depends_provides(struct pkg *a, struct pkg *b)
+{
+	vec_foreach(a->shlibs_required, i) {
+		if (charv_search(&b->shlibs_provided,
+		    a->shlibs_required.d[i]) != NULL) {
+			return (true);
+		}
+	}
+	vec_foreach(a->requires, i) {
+		if (charv_search(&b->provides, a->requires.d[i]) != NULL) {
+			return (true);
+		}
+	}
+	return (false);
+}
+
+enum pkg_jobs_schedule_graph_edge_type {
+	PKG_SCHEDULE_EDGE_NONE,
+	PKG_SCHEDULE_EDGE_NEW_DEP_NEW,
+	PKG_SCHEDULE_EDGE_OLD_DEP_OLD,
+	PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW,
+	PKG_SCHEDULE_EDGE_SPLIT_UPGRADE,
+};
+
+/*
+ * Extract old and new pkg pointers from a solved job.
+ */
+static void
+pkg_solved_extract_pkg(struct pkg_solved *s, struct pkg **out_new,
+    struct pkg **out_old)
+{
+	*out_new = NULL;
+	*out_old = NULL;
+	switch (s->type) {
+	case PKG_SOLVED_INSTALL:
+	case PKG_SOLVED_UPGRADE_INSTALL:
+		*out_new = s->items[0]->pkg;
+		break;
+	case PKG_SOLVED_DELETE:
+	case PKG_SOLVED_UPGRADE_REMOVE:
+		*out_old = s->items[0]->pkg;
+		break;
+	case PKG_SOLVED_UPGRADE:
+		*out_new = s->items[0]->pkg;
+		*out_old = s->items[1]->pkg;
+		break;
+	default:
+		assert(false);
+	}
+}
+
+/*
+ * Jobs are nodes in a directed graph. Edges represent job scheduling order
+ * requirements. The existence of an edge from node A to node B indicates
+ * that job A must be executed before job B.
+ *
+ * There is a directed edge from node A to node B if and only if
+ * one of the following conditions holds:
+ *
+ * 1. B's new package depends on A's new package
+ * 2. A's old package depends on B's old package
+ * 3. A's old package conflicts with B's new package
+ * 4. A and B are the two halves of a split upgrade job
+ *    and A is the delete half.
+ *
+ * There is one exception made to rule 2 in order to avoid splitting in
+ * the common case of upgrading packages X and Y where Xold depends on Yold
+ * and Xnew depends on Ynew. In this case, rule 2 is ignored and there is no
+ * edge from X to Y.
+ */
+static enum pkg_jobs_schedule_graph_edge_type
+pkg_jobs_schedule_graph_edge(struct pkg_solved *a, struct pkg_solved *b)
+{
+	if (a == b) {
+		return (PKG_SCHEDULE_EDGE_NONE);
+	}
+
+	if (a->xlink == b || b->xlink == a) {
+		assert(a->xlink == b && b->xlink == a);
+		assert(a->type == PKG_SOLVED_UPGRADE_INSTALL ||
+		       a->type == PKG_SOLVED_UPGRADE_REMOVE);
+		assert(b->type == PKG_SOLVED_UPGRADE_INSTALL ||
+		       b->type == PKG_SOLVED_UPGRADE_REMOVE);
+		assert(a->type != b->type);
+		if (a->type == PKG_SOLVED_UPGRADE_REMOVE) {
+			return (PKG_SCHEDULE_EDGE_SPLIT_UPGRADE);
+		}
+		return (PKG_SCHEDULE_EDGE_NONE);
+	}
+
+	struct pkg *a_new = NULL, *a_old = NULL;
+	struct pkg *b_new = NULL, *b_old = NULL;
+	pkg_solved_extract_pkg(a, &a_new, &a_old);
+	pkg_solved_extract_pkg(b, &b_new, &b_old);
+
+	if (a_new != NULL && b_new != NULL && a->scc != b->scc &&
+	    (pkg_jobs_schedule_direct_depends(b_new, a_new) ||
+	     pkg_jobs_schedule_depends_provides(b_new, a_new))) {
+		return (PKG_SCHEDULE_EDGE_NEW_DEP_NEW);
+	}
+	if (a_old != NULL && b_new != NULL) {
+		struct pkg_conflict *conflict = NULL;
+		while (pkg_conflicts(a_old, &conflict) == EPKG_OK) {
+			if (STREQ(b_new->uid, conflict->uid)) {
+				return (PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW);
+			}
+		}
+	}
+	if (a_old != NULL && b_old != NULL &&
+	    pkg_jobs_schedule_direct_depends(a_old, b_old)) {
+		if (!(a_new != NULL && b_new != NULL &&
+		    pkg_jobs_schedule_direct_depends(a_new, b_new))) {
+			return (PKG_SCHEDULE_EDGE_OLD_DEP_OLD);
+		}
+	}
+
+	return (PKG_SCHEDULE_EDGE_NONE);
+}
+
+static void
+pkg_jobs_schedule_dbg_job(pkg_solved_list *jobs, struct pkg_solved *job)
+{
+	if (ctx.debug_level < 4) {
+		return;
+	}
+
+	dbg(4, "job: %s %s", pkg_jobs_schedule_job_type_string(job),
+	    job->items[0]->pkg->uid);
+
+	vec_foreach(*jobs, i) {
+		struct pkg_solved *other = jobs->d[i];
+		if (jobs->d[i] == NULL)
+			continue;
+		switch (pkg_jobs_schedule_graph_edge(job, other)) {
+		case PKG_SCHEDULE_EDGE_NONE:
+			break;
+		case PKG_SCHEDULE_EDGE_NEW_DEP_NEW:
+			dbg(4, "  edge to %s %s, new depends on new",
+			    pkg_jobs_schedule_job_type_string(other),
+			    other->items[0]->pkg->uid);
+			break;
+		case PKG_SCHEDULE_EDGE_OLD_DEP_OLD:
+			dbg(4, "  edge to %s %s, old depends on old",
+			    pkg_jobs_schedule_job_type_string(other),
+			    other->items[0]->pkg->uid);
+			break;
+		case PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW:
+			dbg(4, "  edge to %s %s, old conflicts with new",
+			    pkg_jobs_schedule_job_type_string(other),
+			    other->items[0]->pkg->uid);
+			break;
+		case PKG_SCHEDULE_EDGE_SPLIT_UPGRADE:
+			dbg(4, "  edge to %s %s, split upgrade",
+			    pkg_jobs_schedule_job_type_string(other),
+			    other->items[0]->pkg->uid);
+			break;
+		default:
+			assert(false);
+		}
+	}
+}
+
+static void
+pkg_job_schedule_fprint_node_id(FILE *file, struct pkg_solved *node)
+{
+	fprintf(file, "\"%s %s\"", pkg_jobs_schedule_job_type_string(node),
+		node->items[0]->pkg->uid);
+}
+
+static void
+pkg_jobs_schedule_debug_dot_file(pkg_solved_list *nodes)
+{
+	const char *path = pkg_object_string(pkg_config_get("DEBUG_SCHEDULER_DOT_FILE"));
+	if (path == NULL) {
+		return;
+	}
+	FILE *file = fopen(path, "we");
+	if (file == NULL) {
+		pkg_emit_errno("fopen", path);
+		return;
+	}
+	fprintf(file, "digraph {\n");
+	for (size_t i = 0; i < vec_len(nodes); i++) {
+		for (size_t j = 0; j < vec_len(nodes); j++) {
+			enum pkg_jobs_schedule_graph_edge_type edge =
+				pkg_jobs_schedule_graph_edge(nodes->d[i], nodes->d[j]);
+			if (edge == PKG_SCHEDULE_EDGE_NONE) {
+				continue;
+			}
+			pkg_job_schedule_fprint_node_id(file, nodes->d[i]);
+			fprintf(file, " -> ");
+			pkg_job_schedule_fprint_node_id(file, nodes->d[j]);
+			fprintf(file, "\n");
+			switch (edge) {
+			case PKG_SCHEDULE_EDGE_NEW_DEP_NEW:
+				fprintf(file, " [label=\"new dep new\"]\n");
+				break;
+			case PKG_SCHEDULE_EDGE_OLD_DEP_OLD:
+				fprintf(file, " [label=\"old dep old\"]\n");
+				break;
+			case PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW:
+				fprintf(file, " [label=\"old conflict new\"]\n");
+				break;
+			case PKG_SCHEDULE_EDGE_SPLIT_UPGRADE:
+				fprintf(file, " [label=\"split upgrade\"]\n");
+				break;
+			case PKG_SCHEDULE_EDGE_NONE:
+			default:
+				assert(false);
+			}
+		}
+	}
+	fprintf(file, "}\n");
+	fclose(file);
+}
+
+
+/*
+ * Prioritizing the install jobs and deprioritizing the delete jobs of split
+ * upgrades reduces the distance between the two halves of the split job in the
+ * final execution order.
+ */
+static int
+pkg_jobs_schedule_priority(struct pkg_solved *node)
+{
+	switch (node->type) {
+	case PKG_SOLVED_UPGRADE_INSTALL:
+		return 1;
+	case PKG_SOLVED_UPGRADE_REMOVE:
+		return -1;
+	default:
+		return 0;
+	}
+}
+
+/* This comparison function is used as a tiebreaker in the topological sort. */
+static int
+pkg_jobs_schedule_cmp_available(struct pkg_solved *a, struct pkg_solved *b)
+{
+	int ret = pkg_jobs_schedule_priority(a) - pkg_jobs_schedule_priority(b);
+	if (ret == 0) {
+		/* Falling back to lexicographical ordering ensures that job execution
+		 * order is always consistent and makes testing easier. */
+		return strcmp(b->items[0]->pkg->uid, a->items[0]->pkg->uid);
+	} else {
+		return ret;
+	}
+}
+
+/*
+ * Topological sort based on Kahn's algorithm with a tiebreaker.  All the jobs
+ * of a strongly connected component are scheduled as a single unit, so that
+ * jobs of other components are never interleaved between them.
+ */
+static void
+pkg_jobs_schedule_topological_sort(pkg_solved_list *jobs, size_t ngroups)
+{
+	pkg_solved_list result = vec_init();
+	size_t n = jobs->len;
+	int *indeg, *best;
+	bool *done;
+	size_t i, j;
+	int chosen;
+	bool remaining;
+
+	if (n == 0) {
+		vec_free(jobs);
+		*jobs = result;
+		return;
+	}
+
+	indeg = xcalloc(ngroups, sizeof(int));
+	best = xcalloc(ngroups, sizeof(int));
+	done = xcalloc(n, sizeof(bool));
+
+	/* In-degree of every component in the condensation of the graph. */
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < n; j++) {
+			if (jobs->d[i]->scc == jobs->d[j]->scc)
+				continue;
+			if (pkg_jobs_schedule_graph_edge(jobs->d[i],
+			    jobs->d[j]) != PKG_SCHEDULE_EDGE_NONE)
+				indeg[jobs->d[j]->scc]++;
+		}
+	}
+
+	do {
+		remaining = false;
+		for (i = 0; i < n; i++) {
+			if (!done[i]) {
+				remaining = true;
+				break;
+			}
+		}
+		if (!remaining)
+			break;
+
+		/* Find the best not yet scheduled job of every component. */
+		for (i = 0; i < ngroups; i++)
+			best[i] = -1;
+		for (i = 0; i < n; i++) {
+			if (done[i])
+				continue;
+			j = jobs->d[i]->scc;
+			if (best[j] == -1 ||
+			    pkg_jobs_schedule_cmp_available(jobs->d[i],
+			    jobs->d[best[j]]) > 0)
+				best[j] = i;
+		}
+
+		/* Pick the component with no pending predecessor whose best
+		 * job has the highest priority. */
+		chosen = -1;
+		for (i = 0; i < ngroups; i++) {
+			if (best[i] == -1 || indeg[i] != 0)
+				continue;
+			if (chosen == -1 ||
+			    pkg_jobs_schedule_cmp_available(jobs->d[best[i]],
+			    jobs->d[best[chosen]]) > 0)
+				chosen = i;
+		}
+
+		/* The graph is acyclic, so a component is always available as
+		 * long as some job remains; all cycles must have been
+		 * eliminated by splitting upgrade jobs before this point. */
+		assert(chosen != -1);
+
+		/* Schedule every job of the component, best first, and unblock
+		 * its successors. */
+		for (;;) {
+			int b = -1;
+			for (i = 0; i < n; i++) {
+				if (done[i] || jobs->d[i]->scc != chosen)
+					continue;
+				if (b == -1 ||
+				    pkg_jobs_schedule_cmp_available(jobs->d[i],
+				    jobs->d[b]) > 0)
+					b = i;
+			}
+			if (b == -1)
+				break;
+			done[b] = true;
+			vec_push(&result, jobs->d[b]);
+			for (i = 0; i < n; i++) {
+				if (done[i] || jobs->d[i]->scc == chosen)
+					continue;
+				if (pkg_jobs_schedule_graph_edge(jobs->d[b],
+				    jobs->d[i]) != PKG_SCHEDULE_EDGE_NONE)
+					indeg[jobs->d[i]->scc]--;
+			}
+		}
+	} while (true);
+
+	for (i = 0; i < n; i++)
+		assert(done[i]);
+
+	vec_free(jobs);
+	*jobs = result;
+	free(indeg);
+	free(best);
+	free(done);
+}
+
+/*
+ * This is a depth-first search that keeps track of the path taken to the
+ * current node in the graph. If a node on this path is encountered a
+ * second time a cycle has been found.
+ */
+static struct pkg_solved *
+pkg_jobs_schedule_find_cycle(pkg_solved_list *jobs,
+    struct pkg_solved **path, struct pkg_solved *node)
+{
+	/* Push node to path */
+	assert(node->mark == PKG_SOLVED_CYCLE_MARK_NONE);
+	node->mark = PKG_SOLVED_CYCLE_MARK_PATH;
+	assert(node->path_prev == NULL);
+	node->path_prev = *path;
+	*path = node;
+
+	vec_foreach(*jobs, i) {
+		if (pkg_jobs_schedule_graph_edge(node, jobs->d[i]) != PKG_SCHEDULE_EDGE_NONE) {
+			switch (jobs->d[i]->mark){
+			case PKG_SOLVED_CYCLE_MARK_NONE:;
+				struct pkg_solved *cycle =
+				    pkg_jobs_schedule_find_cycle(jobs, path, jobs->d[i]);
+				if (cycle != NULL) {
+					return (cycle);
+				}
+				break;
+			case PKG_SOLVED_CYCLE_MARK_DONE:
+				break;
+			case PKG_SOLVED_CYCLE_MARK_PATH:
+				return (jobs->d[i]); /* Found a cycle */
+			default:
+				assert(false);
+			}
+		}
+	}
+
+	/* Pop node from path */
+	assert(node->mark == PKG_SOLVED_CYCLE_MARK_PATH);
+	node->mark = PKG_SOLVED_CYCLE_MARK_DONE;
+	*path = node->path_prev;
+	node->path_prev = NULL;
+
+	return (NULL);
+}
+
+/*
+ * Returns the new package of a solved job, or NULL if the job installs
+ * nothing (a plain delete or the remove half of a split upgrade).
+ */
+static struct pkg *
+pkg_solved_new_pkg(struct pkg_solved *s)
+{
+	switch (s->type) {
+	case PKG_SOLVED_INSTALL:
+	case PKG_SOLVED_UPGRADE_INSTALL:
+	case PKG_SOLVED_UPGRADE:
+		return (s->items[0]->pkg);
+	default:
+		return (NULL);
+	}
+}
+
+/*
+ * Returns true if the install of the new package of job b must happen after
+ * the install of the new package of job a.  This holds when b's new package
+ * depends on a's new package either through a regular dependency or through
+ * a shared library provided by a.
+ */
+static bool
+pkg_jobs_schedule_install_edge(struct pkg_solved *a, struct pkg_solved *b)
+{
+	struct pkg *a_new, *b_new;
+
+	if (a == b)
+		return (false);
+	a_new = pkg_solved_new_pkg(a);
+	b_new = pkg_solved_new_pkg(b);
+	if (a_new == NULL || b_new == NULL)
+		return (false);
+	return (pkg_jobs_schedule_direct_depends(b_new, a_new) ||
+	    pkg_jobs_schedule_depends_provides(b_new, a_new));
+}
+
+/*
+ * Install dependencies can be cyclic.  For example FreeBSD-runtime provides
+ * libraries required by FreeBSD-libarchive and in turn requires a library
+ * provided by it.  Such a cycle cannot be broken by splitting upgrade jobs,
+ * so the ordering only constrains jobs that belong to different strongly
+ * connected components of the install graph.  The components are computed
+ * with Tarjan's algorithm.
+ */
+struct pkg_jobs_schedule_scc {
+	pkg_solved_list *jobs;
+	int *index;
+	int *low;
+	int *comp;
+	bool *onstack;
+	int *stack;
+	size_t sp;
+	int next_index;
+	int next_comp;
+};
+
+static void
+pkg_jobs_schedule_scc_visit(struct pkg_jobs_schedule_scc *ctx, int v)
+{
+	ctx->index[v] = ctx->low[v] = ctx->next_index++;
+	ctx->stack[ctx->sp++] = v;
+	ctx->onstack[v] = true;
+
+	for (int w = 0; w < (int)ctx->jobs->len; w++) {
+		if (!pkg_jobs_schedule_install_edge(ctx->jobs->d[v],
+		    ctx->jobs->d[w]))
+			continue;
+		if (ctx->index[w] < 0) {
+			pkg_jobs_schedule_scc_visit(ctx, w);
+			if (ctx->low[w] < ctx->low[v])
+				ctx->low[v] = ctx->low[w];
+		} else if (ctx->onstack[w] && ctx->index[w] < ctx->low[v]) {
+			ctx->low[v] = ctx->index[w];
+		}
+	}
+
+	if (ctx->low[v] == ctx->index[v]) {
+		int w;
+		do {
+			w = ctx->stack[--ctx->sp];
+			ctx->onstack[w] = false;
+			ctx->comp[w] = ctx->next_comp;
+		} while (w != v);
+		ctx->next_comp++;
+	}
+}
+
+static size_t
+pkg_jobs_schedule_scc(pkg_solved_list *jobs)
+{
+	struct pkg_jobs_schedule_scc ctx = { .jobs = jobs };
+	size_t n = jobs->len;
+
+	if (n == 0)
+		return (0);
+
+	ctx.index = xcalloc(n, sizeof(int));
+	ctx.low = xcalloc(n, sizeof(int));
+	ctx.comp = xcalloc(n, sizeof(int));
+	ctx.onstack = xcalloc(n, sizeof(bool));
+	ctx.stack = xcalloc(n, sizeof(int));
+
+	for (size_t i = 0; i < n; i++)
+		ctx.index[i] = -1;
+	for (size_t i = 0; i < n; i++) {
+		if (ctx.index[i] < 0)
+			pkg_jobs_schedule_scc_visit(&ctx, i);
+	}
+	for (size_t i = 0; i < n; i++)
+		jobs->d[i]->scc = ctx.comp[i];
+
+	free(ctx.index);
+	free(ctx.low);
+	free(ctx.comp);
+	free(ctx.onstack);
+	free(ctx.stack);
+
+	return (ctx.next_comp);
+}
+
+int pkg_jobs_schedule(struct pkg_jobs *j)
+{
+	size_t ngroups;
+
+	pkg_jobs_schedule_scc(&j->jobs);
+	pkg_jobs_schedule_debug_dot_file(&j->jobs);
+
+	while (true) {
+		dbg(3, "checking job scheduling graph for cycles...");
+
+		vec_foreach(j->jobs, i) {
+			j->jobs.d[i]->mark = PKG_SOLVED_CYCLE_MARK_NONE;
+			j->jobs.d[i]->path_prev = NULL;
+
+			pkg_jobs_schedule_dbg_job(&j->jobs, j->jobs.d[i]);
+		}
+
+		/* The graph may not be connected, in which case it is necessary to
+		 * run multiple searches for cycles from different start nodes. */
+		struct pkg_solved *path = NULL;
+		struct pkg_solved *cycle = NULL;
+		vec_foreach(j->jobs, i) {
+			switch (j->jobs.d[i]->mark) {
+			case PKG_SOLVED_CYCLE_MARK_NONE:
+				cycle = pkg_jobs_schedule_find_cycle(&j->jobs, &path, j->jobs.d[i]);
+				break;
+			case PKG_SOLVED_CYCLE_MARK_DONE:
+				break;
+			case PKG_SOLVED_CYCLE_MARK_PATH:
+			default:
+				assert(false);
+			}
+			if (cycle != NULL) {
+				break;
+			}
+		}
+
+		if (cycle == NULL) {
+			dbg(3, "no job scheduling graph cycles found");
+			assert(path == NULL);
+			break;
+		}
+
+		dbg(3, "job scheduling graph cycle found");
+		assert(path != NULL);
+		assert(path->path_prev != NULL);
+		assert(path != cycle);
+
+		/* Close the path into a cycle to eliminate some edge cases in the loop. */
+		cycle->path_prev = path;
+
+		/* Not all upgrade jobs would break the cycle if split.
+		 * It is helpful to think of each upgrade job as two separate
+		 * nodes, the remove half and the install half. If a cycle only
+		 * involved one half of the upgrade job, splitting the upgrade
+		 * job would not break the cycle or even change its length.
+		 *
+		 * Furthermore, since there is an edge from the remove half of
+		 * an upgrade job to the install half, the install half must
+		 * come *before* the remove half in the cycle. Otherwise
+		 * splitting the upgrade job will only make the cycle one node
+		 * longer.
+		 */
+		enum pkg_jobs_schedule_graph_edge_type out =
+		    pkg_jobs_schedule_graph_edge(path, cycle);
+		assert(out != PKG_SCHEDULE_EDGE_NONE);
+		enum pkg_jobs_schedule_graph_edge_type in =
+		    pkg_jobs_schedule_graph_edge(path->path_prev, path);
+		assert(in != PKG_SCHEDULE_EDGE_NONE);
+		while (true) {
+			if (path->type == PKG_SOLVED_UPGRADE) {
+				assert(out != PKG_SCHEDULE_EDGE_SPLIT_UPGRADE);
+				assert(in != PKG_SCHEDULE_EDGE_SPLIT_UPGRADE);
+				if ((out == PKG_SCHEDULE_EDGE_OLD_DEP_OLD ||
+				     out == PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW) &&
+				    (in == PKG_SCHEDULE_EDGE_NEW_DEP_NEW ||
+				     in == PKG_SCHEDULE_EDGE_OLD_CONFLICT_NEW)) {
+					/* Found an upgrade job that would break
+					 * the cycle if split. */
+					break;
+				}
+			}
+			if (path == cycle) {
+				pkg_emit_error("failed to break job scheduling cycle");
+			 	return (EPKG_FATAL);
+			}
+			path = path->path_prev;
+			assert(path != NULL);
+			out = in;
+			in = pkg_jobs_schedule_graph_edge(path->path_prev, path);
+			assert(in != PKG_SCHEDULE_EDGE_NONE);
+		}
+
+		/* path is now the upgrade job chosen to be split */
+		dbg(2, "splitting upgrade %s job", path->items[0]->pkg->uid);
+
+		struct pkg_solved *new = xcalloc(1, sizeof(struct pkg_solved));
+		new->type = PKG_SOLVED_UPGRADE_REMOVE;
+		new->items[0] = path->items[1];
+		new->xlink = path;
+		path->type = PKG_SOLVED_UPGRADE_INSTALL;
+		path->items[1] = NULL;
+		path->xlink = new;
+		vec_push(&j->jobs, new);
+	}
+
+	/* Splitting upgrade jobs added jobs, so recompute the components
+	 * before scheduling the jobs of each component together. */
+	ngroups = pkg_jobs_schedule_scc(&j->jobs);
+	pkg_jobs_schedule_topological_sort(&j->jobs, ngroups);
+
+	dbg(3, "finished job scheduling");
+
+	return (EPKG_OK);
+}

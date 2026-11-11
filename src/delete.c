@@ -1,0 +1,316 @@
+/*-
+ * SPDX-License-Identifier: LicenseRef-scancode-bsd-unchanged
+ *
+ * Copyright (c) 2011-2012 Baptiste Daroussin <bapt@FreeBSD.org>
+ * Copyright (c) 2011-2012 Julien Laffaye <jlaffaye@FreeBSD.org>
+ * Copyright (c) 2011-2012 Marin Atanasov Nikolov <dnaeon@gmail.com>
+ * Copyright (c) 2013-2014 Matthew Seaman <matthew@FreeBSD.org>
+ * Copyright (c) 2016 Vsevolod Stakhov <vsevolod@FreeBSD.org>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer
+ *    in this position and unchanged.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <err.h>
+#include <fnmatch.h>
+#include <getopt.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <pkg.h>
+#include <xmalloc.h>
+
+#include "pkgcli.h"
+
+void
+usage_delete(void)
+{
+	fprintf(stderr, "Usage: pkg delete [-DfnqRy] [--autoremove] [-Cgix] [-G glob] <pkg-name> ...\n");
+	fprintf(stderr, "       pkg delete [-Dnqy] [--autoremove] [-G glob] -a\n\n");
+	fprintf(stderr, "For more information see 'pkg help delete'.\n");
+}
+
+int
+exec_delete(int argc, char **argv)
+{
+	struct pkg_jobs	*jobs = NULL;
+	struct pkgdb	*db = NULL;
+	match_t		 match = MATCH_EXACT;
+	pkg_flags	 f = PKG_FLAG_NONE;
+	bool		 recursive_flag = false, rc = false;
+	bool		 autoremove_flag = false;
+	int		 retcode = EXIT_FAILURE;
+	int		 ch;
+	charv_t		 excludes = vec_init();
+	int		 i;
+	int		 lock_type = PKGDB_LOCK_ADVISORY;
+	int		 locked_pkgs = 0;
+	int		 nbactions = 0;
+	int		 scriptnoexec = 0;
+	int		 autoremove = 0;
+
+	struct option longopts[] = {
+		{ "all",			no_argument,	NULL,	'a' },
+		{ "autoremove",			no_argument,	&autoremove,	1 },
+		{ "case-sensitive",		no_argument,	NULL,	'C' },
+		{ "no-scripts",			no_argument,	NULL,	'D' },
+		{ "script-no-exec",		no_argument,	&scriptnoexec,	1 },
+		{ "exclude-glob",		required_argument, NULL, 'G' },
+		{ "force",			no_argument,	NULL,	'f' },
+		{ "glob",			no_argument,	NULL,	'g' },
+		{ "case-insensitive",		no_argument,	NULL,	'i' },
+		{ "dry-run",			no_argument,	NULL,	'n' },
+		{ "quiet",			no_argument,	NULL,	'q' },
+		{ "recursive",			no_argument,	NULL,	'R' },
+		{ "regex",			no_argument,	NULL,	'x' },
+		{ "yes",			no_argument,	NULL,	'y' },
+		{ NULL,				0,		NULL,	0   },
+	};
+
+
+	while ((ch = getopt_long(argc, argv, "+aCDfG:ginqRxy", longopts, NULL)) != -1) {
+		switch (ch) {
+		case 'a':
+			match = MATCH_ALL;
+			break;
+		case 'C':
+			pkgdb_set_case_sensitivity(true);
+			break;
+		case 'D':
+			f |= PKG_FLAG_NOSCRIPT;
+			break;
+		case 'f':
+			f |= PKG_FLAG_FORCE;
+			force = true;
+			break;
+		case 'G':
+			vec_push(&excludes, optarg);
+			break;
+		case 'g':
+			match = MATCH_GLOB;
+			break;
+		case 'i':
+			pkgdb_set_case_sensitivity(false);
+			break;
+		case 'n':
+			f |= PKG_FLAG_DRY_RUN;
+			lock_type = PKGDB_LOCK_READONLY;
+			dry_run = true;
+			break;
+		case 'q':
+			quiet = true;
+			break;
+		case 'R':
+			recursive_flag = true;
+			break;
+		case 'x':
+			match = MATCH_REGEX;
+			break;
+		case 'y':
+			yes = true;
+			break;
+		case 0:
+			if (scriptnoexec)
+				f |= PKG_FLAG_NOEXEC;
+			if (autoremove)
+				autoremove_flag = true;
+			break;
+		default:
+			usage_delete();
+			return (EXIT_FAILURE);
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 1 && match != MATCH_ALL) {
+		usage_delete();
+		return (EXIT_FAILURE);
+	}
+
+	if (dry_run)
+		retcode = pkgdb_access(PKGDB_MODE_READ, PKGDB_DB_LOCAL);
+	else
+		retcode = pkgdb_access(PKGDB_MODE_READ|PKGDB_MODE_WRITE,
+				       PKGDB_DB_LOCAL);
+
+	if (retcode == EPKG_ENODB) {
+		warnx("No packages installed.  Nothing to do!");
+		return (EXIT_SUCCESS);
+	} else if (retcode == EPKG_ENOACCESS) {
+		warnx("Insufficient privileges to delete packages");
+		return (EXIT_FAILURE);
+	} else if (retcode != EPKG_OK) {
+		warnx("Error accessing the package database");
+		return (EXIT_FAILURE);
+	}
+
+	if (pkgdb_open(&db, PKGDB_DEFAULT) != EPKG_OK)
+		return (EXIT_FAILURE);
+
+	if (!pkgdb_lock_or_fail(db, lock_type))
+		return (EXIT_FAILURE);
+
+
+	if (pkg_jobs_new(&jobs, PKG_JOBS_DEINSTALL, db) != EPKG_OK) {
+		pkgdb_close(db);
+		return (EXIT_FAILURE);
+	}
+
+	/*
+	 * By default delete packages recursively.
+	 * If force mode is enabled then we try to remove packages non-recursively.
+	 * However, if -f and -R flags are both enabled then we return to
+	 * recursive deletion.
+	 */
+	if (!force || recursive_flag)
+		f |= PKG_FLAG_RECURSIVE;
+
+	pkg_jobs_set_flags(jobs, f);
+
+	if (match == MATCH_EXACT) {
+		for (i = 0; i < argc; i++) {
+			if (strchr(argv[i], '*') != NULL) {
+				match = MATCH_GLOB;
+				break;
+			}
+		}
+	}
+
+	/*
+	 * When exclude globs are given, query all packages and filter
+	 * out the excluded ones, then pass the remaining names to the
+	 * solver instead of MATCH_ALL.
+	 */
+	charv_t filtered = vec_init();
+	if (excludes.len > 0) {
+		struct pkgdb_it *eit;
+		struct pkg *epkg = NULL;
+		const char *name;
+
+		eit = pkgdb_query(db, NULL, MATCH_ALL);
+		if (eit == NULL)
+			goto cleanup;
+		while (pkgdb_it_next(eit, &epkg, PKG_LOAD_BASIC) == EPKG_OK) {
+			bool excluded = false;
+			pkg_get(epkg, PKG_ATTR_NAME, &name);
+			vec_foreach(excludes, ei) {
+				if (fnmatch(excludes.d[ei], name, 0) == 0) {
+					excluded = true;
+					break;
+				}
+			}
+			if (!excluded)
+				vec_push(&filtered, xstrdup(name));
+		}
+		pkgdb_it_free(eit);
+		pkg_free(epkg);
+
+		if (filtered.len == 0) {
+			if (!quiet)
+				printf("All packages excluded. Nothing to do.\n");
+			retcode = EXIT_SUCCESS;
+			vec_free_and_free(&filtered, free);
+			goto cleanup;
+		}
+		if (pkg_jobs_add(jobs, MATCH_EXACT, filtered.d,
+		    (int)filtered.len) == EPKG_FATAL) {
+			vec_free_and_free(&filtered, free);
+			goto cleanup;
+		}
+		vec_free_and_free(&filtered, free);
+	} else if (pkg_jobs_add(jobs, match, argv, argc) == EPKG_FATAL)
+		goto cleanup;
+
+	if (pkg_jobs_solve(jobs) != EPKG_OK) {
+		fprintf(stderr, "Cannot perform request\n");
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	if (pkg_jobs_has_lockedpkgs(jobs)) {
+		printf("The following package(s) are locked or vital and may not ");
+		printf("be removed:\n\n");
+		pkg_jobs_iter_lockedpkgs(jobs, print_pkg, &locked_pkgs);
+		putchar('\n');
+	}
+
+	/* check if we have something to deinstall */
+	if ((nbactions = pkg_jobs_count(jobs)) == 0) {
+		if (argc == 0) {
+			if (!quiet)
+				printf("Nothing to do.\n");
+
+			retcode = EXIT_SUCCESS;
+			goto cleanup;
+		}
+		if (!quiet) {
+			printf("%d packages requested for removal: "
+			    "%d locked, %d missing\n",
+			    argc, locked_pkgs, argc - locked_pkgs);
+		}
+		if (locked_pkgs > 0) {
+			retcode = EPKG_LOCKED;
+		} else {
+			retcode = EXIT_FAILURE;
+		}
+		goto cleanup;
+	}
+
+	if (!quiet || dry_run) {
+		if (!quiet) {
+			print_jobs_summary(jobs,
+				"Deinstallation has been requested for the following %d packages "
+				"(of %d packages in the universe):\n\n", nbactions,
+				pkg_jobs_total(jobs));
+		}
+		if (dry_run) {
+			retcode = EXIT_SUCCESS;
+			goto cleanup;
+		}
+		rc = query_yesno(false,
+		            "\nProceed with deinstalling packages? ");
+	}
+	else
+		rc = yes;
+
+	if (!rc || (retcode = pkg_jobs_apply(jobs)) != EPKG_OK)
+		goto cleanup;
+
+	if (messages && messages->len > 0 && !quiet) {
+		printf("%s", sb_str(messages));
+	}
+	pkgdb_compact(db);
+	pkgcli_autoremove(db, autoremove_flag);
+
+	retcode = EXIT_SUCCESS;
+
+cleanup:
+	vec_free(&excludes);
+	pkgdb_release_lock(db, lock_type);
+	pkg_jobs_free(jobs);
+	pkgdb_close(db);
+
+	return (retcode);
+}
