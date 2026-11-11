@@ -1,0 +1,15 @@
+syntax(2)
+
+test_suite("pkg")
+
+atf_test_program{name='pkg_validation'}
+atf_test_program{name='pkg_printf'}
+atf_test_program{name='plist'}
+atf_test_program{name='pkg_add_dir_to_del'}
+atf_test_program{name='merge'}
+atf_test_program{name='checksum'}
+atf_test_program{name='deps_formula'}
+atf_test_program{name='pkg_jobs_dryrun'}
+atf_test_program{name='pkg_sandbox'}
+
+include('frontend/Kyuafile')

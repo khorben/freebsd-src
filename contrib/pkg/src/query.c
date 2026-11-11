@@ -1,0 +1,1302 @@
+/*-
+ * SPDX-License-Identifier: LicenseRef-scancode-bsd-unchanged
+ *
+ * Copyright (c) 2011-2012 Baptiste Daroussin <bapt@FreeBSD.org>
+ * Copyright (c) 2011-2012 Marin Atanasov Nikolov <dnaeon@gmail.com>
+ * Copyright (c) 2012 Bryan Drewery <bryan@shatow.net>
+ * Copyright (c) 2013-2014 Matthew Seaman <matthew@FreeBSD.org>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer
+ *    in this position and unchanged.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <sys/types.h>
+
+#include <ctype.h>
+#include <err.h>
+#include <getopt.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <pkg.h>
+#include "pkgcli.h"
+
+static const struct query_flags accepted_query_flags[] = {
+	{ 'd', "nov",		1, PKG_LOAD_DEPS },
+	{ 'r', "nov",		1, PKG_LOAD_RDEPS },
+	{ 'C', "",		1, PKG_LOAD_CATEGORIES },
+	{ 'F', "psugmftl",	1, PKG_LOAD_FILES },
+	{ 'O', "kvdD",		1, PKG_LOAD_OPTIONS },
+	{ 'D', "",		1, PKG_LOAD_DIRS },
+	{ 'S', "pugmf",		1, PKG_LOAD_DIRS }, /* sub directories - directory with options */
+	{ 'L', "",		1, PKG_LOAD_LICENSES },
+	{ 'U', "",		1, PKG_LOAD_USERS },
+	{ 'G', "",		1, PKG_LOAD_GROUPS },
+	{ 'B', "",		1, PKG_LOAD_SHLIBS_REQUIRED },
+	{ 'b', "",		1, PKG_LOAD_SHLIBS_PROVIDED },
+	{ 'y', "",		1, PKG_LOAD_PROVIDES },
+	{ 'Y', "",		1, PKG_LOAD_REQUIRES },
+	{ 'A', "tv",            1, PKG_LOAD_ANNOTATIONS },
+	{ '?', "drCFODLUGBbAyY",	1, PKG_LOAD_BASIC },	/* dbflags handled in analyse_query_string() */
+	{ '#', "drCFODLUGBbAyY",	1, PKG_LOAD_BASIC },	/* dbflags handled in analyse_query_string() */
+	{ 's', "hb",		0, PKG_LOAD_BASIC },
+	{ 'Q', "",		0, PKG_LOAD_BASIC },
+	{ 'n', "",		0, PKG_LOAD_BASIC },
+	{ 'v', "",		0, PKG_LOAD_BASIC },
+	{ 'o', "",		0, PKG_LOAD_BASIC },
+	{ 'p', "",		0, PKG_LOAD_BASIC },
+	{ 'm', "",		0, PKG_LOAD_BASIC },
+	{ 'c', "",		0, PKG_LOAD_BASIC },
+	{ 'e', "",		0, PKG_LOAD_BASIC },
+	{ 'w', "",		0, PKG_LOAD_BASIC },
+	{ 'l', "",		0, PKG_LOAD_BASIC },
+	{ 'q', "",		0, PKG_LOAD_BASIC },
+	{ 'a', "",		0, PKG_LOAD_BASIC },
+	{ 'k', "",		0, PKG_LOAD_BASIC },
+	{ 'M', "",		0, PKG_LOAD_BASIC },
+	{ 't', "",		0, PKG_LOAD_BASIC },
+	{ 'R', "",              0, PKG_LOAD_ANNOTATIONS },
+	{ 'V', "",		0, PKG_LOAD_BASIC },
+	{ 'X', "",		0, PKG_LOAD_BASIC | PKG_LOAD_SCRIPTS | PKG_LOAD_LUA_SCRIPTS },
+};
+
+static inline void
+pkg_sb_cat(sb_t *d, int attr, struct pkg *pkg)
+{
+	const char *s;
+	pkg_get(pkg, attr, &s);
+	if (s != NULL)
+		sb_cat(d, s);
+}
+
+static void
+format_str(struct pkg *pkg, sb_t *dest, const char *qstr, const void *data)
+{
+	bool automatic = false;
+	bool locked = false;
+	bool vital = false;
+
+	sb_reset(dest);
+
+	while (qstr[0] != '\0') {
+		if (qstr[0] == '%') {
+			qstr++;
+			switch (qstr[0]) {
+			case 'n':
+				pkg_sb_cat(dest, PKG_ATTR_NAME, pkg);
+				break;
+			case 'v':
+				pkg_sb_cat(dest, PKG_ATTR_VERSION, pkg);
+				break;
+			case 'o':
+				pkg_sb_cat(dest, PKG_ATTR_ORIGIN, pkg);
+				break;
+			case 'R':
+				pkg_sb_cat(dest, PKG_ATTR_REPONAME, pkg);
+				break;
+			case 'p':
+				pkg_sb_cat(dest, PKG_ATTR_PREFIX, pkg);
+				break;
+			case 'm':
+				pkg_sb_cat(dest, PKG_ATTR_MAINTAINER, pkg);
+				break;
+			case 'c':
+				pkg_sb_printf(dest, "%c", pkg);
+				break;
+			case 'w':
+				pkg_sb_cat(dest, PKG_ATTR_WWW, pkg);
+				break;
+			case 'a':
+				pkg_get(pkg, PKG_ATTR_AUTOMATIC, &automatic);
+				sb_printf(dest, "%d", automatic);
+				break;
+			case 'k':
+				pkg_get(pkg, PKG_ATTR_LOCKED, &locked);
+				sb_printf(dest, "%d", locked);
+				break;
+			case 't':
+				pkg_sb_printf(dest, "%t", pkg);
+				break;
+			case 's':
+				qstr++;
+				if (qstr[0] == 'h')
+					pkg_sb_printf(dest, "%#sB", pkg);
+				else if (qstr[0] == 'b')
+					pkg_sb_printf(dest, "%s", pkg);
+				break;
+			case 'e':
+				pkg_sb_cat(dest, PKG_ATTR_DESC, pkg);
+				break;
+			case '?':
+				qstr++;
+				switch (qstr[0]) {
+				case 'd':
+					pkg_sb_printf(dest, "%?d", pkg);
+					break;
+				case 'r':
+					pkg_sb_printf(dest, "%?r", pkg);
+					break;
+				case 'C':
+					pkg_sb_printf(dest, "%?C", pkg);
+					break;
+				case 'F':
+					pkg_sb_printf(dest, "%?F", pkg);
+					break;
+				case 'O':
+					pkg_sb_printf(dest, "%?O", pkg);
+					break;
+				case 'D':
+				case 'S':
+					pkg_sb_printf(dest, "%?D", pkg);
+					break;
+				case 'L':
+					pkg_sb_printf(dest, "%?L", pkg);
+					break;
+				case 'U':
+					pkg_sb_printf(dest, "%?U", pkg);
+					break;
+				case 'G':
+					pkg_sb_printf(dest, "%?G", pkg);
+					break;
+				case 'B':
+					pkg_sb_printf(dest, "%?B", pkg);
+					break;
+				case 'b':
+					pkg_sb_printf(dest, "%?b", pkg);
+					break;
+				case 'y':
+					pkg_sb_printf(dest, "%?y", pkg);
+					break;
+				case 'Y':
+					pkg_sb_printf(dest, "%?Y", pkg);
+					break;
+				case 'A':
+					pkg_sb_printf(dest, "%?A", pkg);
+					break;
+				}
+				break;
+			case '#':
+				qstr++;
+				switch (qstr[0]) {
+				case 'd':
+					pkg_sb_printf(dest, "%#d", pkg);
+					break;
+				case 'r':
+					pkg_sb_printf(dest, "%#r", pkg);
+					break;
+				case 'C':
+					pkg_sb_printf(dest, "%#C", pkg);
+					break;
+				case 'F':
+					pkg_sb_printf(dest, "%#F", pkg);
+					break;
+				case 'O':
+					pkg_sb_printf(dest, "%#O", pkg);
+					break;
+				case 'D':
+					pkg_sb_printf(dest, "%#D", pkg);
+					break;
+				case 'L':
+					pkg_sb_printf(dest, "%#L", pkg);
+					break;
+				case 'U':
+					pkg_sb_printf(dest, "%#U", pkg);
+					break;
+				case 'G':
+					pkg_sb_printf(dest, "%#G", pkg);
+					break;
+				case 'B':
+					pkg_sb_printf(dest, "%#B", pkg);
+					break;
+				case 'b':
+					pkg_sb_printf(dest, "%#b", pkg);
+					break;
+				case 'y':
+					pkg_sb_printf(dest, "%#y", pkg);
+					break;
+				case 'Y':
+					pkg_sb_printf(dest, "%#Y", pkg);
+					break;
+				case 'A':
+					pkg_sb_printf(dest, "%#A", pkg);
+					break;
+				}
+				break;
+			case 'Q':
+				pkg_sb_cat(dest, PKG_ATTR_ARCH, pkg);
+				break;
+			case 'q':
+				pkg_sb_cat(dest, PKG_ATTR_ABI, pkg);
+				break;
+			case 'l':
+				pkg_sb_printf(dest, "%l", pkg);
+				break;
+			case 'd':
+				qstr++;
+				if (qstr[0] == 'n')
+					pkg_sb_printf(dest, "%dn", data);
+				else if (qstr[0] == 'o')
+					pkg_sb_printf(dest, "%do", data);
+				else if (qstr[0] == 'v')
+					pkg_sb_printf(dest, "%dv", data);
+				break;
+			case 'r':
+				qstr++;
+				if (qstr[0] == 'n')
+					pkg_sb_printf(dest, "%rn", data);
+				else if (qstr[0] == 'o')
+					pkg_sb_printf(dest, "%ro", data);
+				else if (qstr[0] == 'v')
+					pkg_sb_printf(dest, "%rv", data);
+				break;
+			case 'C':
+				pkg_sb_printf(dest, "%Cn", data);
+				break;
+			case 'F':
+				qstr++;
+				if (qstr[0] == 'p')
+					pkg_sb_printf(dest, "%Fn", data);
+				else if (qstr[0] == 's')
+					pkg_sb_printf(dest, "%Fs", data);
+				else if (qstr[0] == 'u')
+					pkg_sb_printf(dest, "%Fu", data);
+				else if (qstr[0] == 'g')
+					pkg_sb_printf(dest, "%Fg", data);
+				else if (qstr[0] == 'm')
+					pkg_sb_printf(dest, "%Fp", data);
+				else if (qstr[0] == 'f')
+					pkg_sb_printf(dest, "%Ff", data);
+				else if (qstr[0] == 't')
+					pkg_sb_printf(dest, "%Ft", data);
+				else if (qstr[0] == 'l')
+					pkg_sb_printf(dest, "%Fl", data);
+				break;
+			case 'O':
+				qstr++;
+				if (qstr[0] == 'k')
+					pkg_sb_printf(dest, "%On", data);
+				else if (qstr[0] == 'v')
+					pkg_sb_printf(dest, "%Ov", data);
+				break;
+			case 'D':
+				pkg_sb_printf(dest, "%Dn", data);
+				break;
+			case 'S':
+				qstr++;
+				if (qstr[0] == 'p')
+					pkg_sb_printf(dest, "%Dn", data);
+				else if (qstr[0] == 'u')
+					pkg_sb_printf(dest, "%Du", data);
+				else if (qstr[0] == 'g')
+					pkg_sb_printf(dest, "%Dg", data);
+				else if (qstr[0] == 'm')
+					pkg_sb_printf(dest, "%Dp", data);
+				else if (qstr[0] == 'f')
+					pkg_sb_printf(dest, "%Df", data);
+				break;
+			case 'L':
+				pkg_sb_printf(dest, "%Ln", data);
+				break;
+			case 'U':
+				pkg_sb_printf(dest, "%Un", data);
+				break;
+			case 'G':
+				pkg_sb_printf(dest, "%Gn", data);
+				break;
+			case 'B':
+				pkg_sb_printf(dest, "%Bn", data);
+				break;
+			case 'b':
+				pkg_sb_printf(dest, "%bn", data);
+				break;
+			case 'y':
+			case 'Y':
+				sb_printf(dest, "%s", data == NULL ? "" : (const char *)data);
+				break;
+			case 'A':
+				qstr++;
+				if (qstr[0] == 't')
+					pkg_sb_printf(dest, "%An", data);
+				else if (qstr[0] == 'v')
+					pkg_sb_printf(dest, "%Av", data);
+				break;
+			case 'M':
+				if (pkg_has_message(pkg))
+					pkg_sb_cat(dest, PKG_ATTR_MESSAGE, pkg);
+				break;
+			case 'V':
+				pkg_get(pkg, PKG_ATTR_VITAL, &vital);
+				sb_printf(dest, "%d", vital);
+				break;
+			case 'X':
+				pkg_sb_cat(dest, PKG_ATTR_DIGEST, pkg);
+				break;
+			case '%':
+				sb_cat_c(dest, '%');
+				break;
+			}
+		} else  if (qstr[0] == '\\') {
+			qstr++;
+			switch (qstr[0]) {
+			case 'n':
+				sb_cat_c(dest, '\n');
+				break;
+			case 'a':
+				sb_cat_c(dest, '\a');
+				break;
+			case 'b':
+				sb_cat_c(dest, '\b');
+				break;
+			case 'f':
+				sb_cat_c(dest, '\f');
+				break;
+			case 'r':
+				sb_cat_c(dest, '\r');
+				break;
+			case '\\':
+				sb_cat_c(dest, '\\');
+				break;
+			case 't':
+				sb_cat_c(dest, '\t');
+				break;
+			}
+		} else {
+			sb_cat_c(dest, qstr[0]);
+		}
+		qstr++;
+	}
+
+}
+
+static bool
+query_has_nonmultiline(const char *qstr)
+{
+	while (*qstr) {
+		if (*qstr == '%') {
+			qstr++;
+			for (unsigned int i = 0; i < NELEM(accepted_query_flags); i++) {
+				if (*qstr == accepted_query_flags[i].flag &&
+				    accepted_query_flags[i].multiline == 0) {
+					return (true);
+				}
+			}
+		}
+		if (*qstr)
+			qstr++;
+	}
+	return (false);
+}
+
+void
+print_query(struct pkg *pkg, char *qstr, char multiline)
+{
+	sb_t output = sb_init();
+	struct pkg_dep		*dep    = NULL;
+	struct pkg_kv		*option = NULL;
+	struct pkg_file		*file   = NULL;
+	struct pkg_dir		*dir    = NULL;
+	const char		*str = NULL;
+	struct pkg_kv		*kv = NULL;
+	struct pkg_stringlist	*sl = NULL;
+	struct pkg_stringlist_iterator	*slit;
+	struct pkg_kvlist	*kl = NULL;
+	struct pkg_kvlist_iterator	*kit;
+
+	if (multiline == '{') {
+		pkg_fprintf_pkg(stdout, qstr, pkg);
+		putchar('\n');
+		return;
+	}
+
+	bool printed = false;
+
+	switch (multiline) {
+	case 'd':
+		while (pkg_deps(pkg, &dep) == EPKG_OK) {
+			format_str(pkg, &output, qstr, dep);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		break;
+	case 'r':
+		while (pkg_rdeps(pkg, &dep) == EPKG_OK) {
+			format_str(pkg, &output, qstr, dep);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		break;
+	case 'C':
+	case 'L':
+	case 'U':
+	case 'G':
+	case 'B':
+	case 'b':
+	case 'y':
+	case 'Y':;
+		int attr;
+		switch (multiline) {
+		case 'C': attr = PKG_ATTR_CATEGORIES; break;
+		case 'L': attr = PKG_ATTR_LICENSES; break;
+		case 'U': attr = PKG_ATTR_USERS; break;
+		case 'G': attr = PKG_ATTR_GROUPS; break;
+		case 'B': attr = PKG_ATTR_SHLIBS_REQUIRED; break;
+		case 'b': attr = PKG_ATTR_SHLIBS_PROVIDED; break;
+		case 'y': attr = PKG_ATTR_PROVIDES; break;
+		case 'Y': attr = PKG_ATTR_REQUIRES; break;
+		default: __unreachable();
+		}
+		pkg_get(pkg, attr, &sl);
+		slit = pkg_stringlist_iterator(sl);
+		while ((str = pkg_stringlist_next(slit))) {
+			format_str(pkg, &output, qstr, str);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		free(slit);
+		free(sl);
+		break;
+	case 'O':
+		while (pkg_options(pkg, &option) == EPKG_OK) {
+			format_str(pkg, &output, qstr, option);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		break;
+	case 'F':
+		while (pkg_files(pkg, &file) == EPKG_OK) {
+			format_str(pkg, &output, qstr, file);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		break;
+	case 'D':
+	case 'S':
+		while (pkg_dirs(pkg, &dir) == EPKG_OK) {
+			format_str(pkg, &output, qstr, dir);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		break;
+	case 'A':
+		pkg_get(pkg, PKG_ATTR_ANNOTATIONS, &kl);
+		kit = pkg_kvlist_iterator(kl);
+		while ((kv = pkg_kvlist_next(kit))) {
+			format_str(pkg, &output, qstr, kv);
+			printf("%s\n", sb_str(&output));
+			printed = true;
+		}
+		free(kit);
+		free(kl);
+		break;
+	default:
+		format_str(pkg, &output, qstr, dep);
+		printf("%s\n", sb_str(&output));
+		printed = true;
+		break;
+	}
+	if (!printed && query_has_nonmultiline(qstr)) {
+		format_str(pkg, &output, qstr, NULL);
+		printf("%s\n", sb_str(&output));
+	}
+	sb_fini(&output);
+}
+
+typedef enum {
+	NONE,
+	NEXT_IS_INT,
+	OPERATOR_INT,
+	INT,
+	NEXT_IS_STRING,
+	OPERATOR_STRING,
+	STRING,
+	QUOTEDSTRING,
+	SQUOTEDSTRING,
+	POST_EXPR,
+} state_t;
+
+int
+format_sql_condition(const char *str, sb_t *sqlcond, bool for_remote)
+{
+	state_t state = NONE;
+	unsigned int bracket_level = 0;
+	const char *sqlop;
+	bool collate_nocase = false;
+	bool multiline_subquery = false;
+	const char *pending_subquery = NULL;
+
+	sb_printf(sqlcond, " WHERE ");
+	while (str[0] != '\0') {
+		if (state == NONE) {
+			if (str[0] == '%') {
+				str++;
+				switch (str[0]) {
+				case 'n':
+					sb_printf(sqlcond, "p.name");
+					state = OPERATOR_STRING;
+					break;
+				case 'o':
+					sb_printf(sqlcond, "origin");
+					state = OPERATOR_STRING;
+					break;
+				case 'p':
+					sb_printf(sqlcond, "prefix");
+					state = OPERATOR_STRING;
+					break;
+				case 'm':
+					sb_printf(sqlcond, "maintainer");
+					state = OPERATOR_STRING;
+					break;
+				case 'c':
+					sb_printf(sqlcond, "comment");
+					state = OPERATOR_STRING;
+					break;
+				case 'w':
+					sb_printf(sqlcond, "www");
+					state = OPERATOR_STRING;
+					break;
+				case 's':
+					sb_printf(sqlcond, "flatsize");
+					state = OPERATOR_INT;
+					break;
+				case 'a':
+					if (for_remote)
+						goto bad_option;
+					sb_printf(sqlcond, "automatic");
+					state = OPERATOR_INT;
+					break;
+				case 'q':
+					sb_printf(sqlcond, "arch");
+					state = OPERATOR_STRING;
+					break;
+				case 'k':
+					if (for_remote)
+						goto bad_option;
+					sb_printf(sqlcond, "locked");
+					state = OPERATOR_INT;
+					break;
+				case 'M':
+					if (for_remote)
+						goto bad_option;
+					sb_printf(sqlcond, "message");
+					state = OPERATOR_STRING;
+					break;
+				case 't':
+					if (for_remote)
+						goto bad_option;
+					sb_printf(sqlcond, "time");
+					state = OPERATOR_INT;
+					break;
+				case 'e':
+					sb_printf(sqlcond, "desc");
+					state = OPERATOR_STRING;
+					break;
+				case 'V':
+					if (for_remote)
+						goto bad_option;
+					sb_printf(sqlcond, "(vital OR p.name IN "
+					    "(SELECT name FROM pkg_local WHERE "
+					    "key = 'vital' AND value <> '0'))");
+					state = OPERATOR_INT;
+					break;
+				case '#': /* FALLTHROUGH */
+				case '?':
+					sqlop = (str[0] == '#' ? "COUNT(*)" : "COUNT(*) > 0");
+					str++;
+					switch (str[0]) {
+						case 'd':
+							sb_printf(sqlcond, "(SELECT %s FROM deps AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'r':
+							sb_printf(sqlcond, "(SELECT %s FROM deps AS d WHERE d.name=p.name)", sqlop);
+							break;
+						case 'C':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_categories AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'F':
+							if (for_remote)
+								goto bad_option;
+							sb_printf(sqlcond, "(SELECT %s FROM files AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'O':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_option AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'D':
+						case 'S':
+							if (for_remote)
+								goto bad_option;
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_directories AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'L':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_licenses AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'U':
+							if (for_remote)
+								goto bad_option;
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_users AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'G':
+							if (for_remote)
+								goto bad_option;
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_groups AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'B':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_shlibs_required AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'b':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_shlibs_provided AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'y':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_provides AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'Y':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_requires AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						case 'A':
+							sb_printf(sqlcond, "(SELECT %s FROM pkg_annotation AS d WHERE d.package_id=p.id)", sqlop);
+							break;
+						default:
+							goto bad_option;
+					}
+					state = OPERATOR_INT;
+					break;
+				case 'd':
+					str++;
+					if (str[0] == 'n')
+						pending_subquery = "SELECT * FROM deps AS d WHERE d.package_id=p.id AND name";
+					else if (str[0] == 'o')
+						pending_subquery = "SELECT * FROM deps AS d WHERE d.package_id=p.id AND origin";
+					else if (str[0] == 'v')
+						pending_subquery = "SELECT * FROM deps AS d WHERE d.package_id=p.id AND version";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'r':
+					str++;
+					if (str[0] == 'n')
+						pending_subquery = "SELECT * FROM packages AS p2 JOIN deps AS d ON d.package_id=p2.id WHERE d.name=p.name AND p2.name";
+					else if (str[0] == 'o')
+						pending_subquery = "SELECT * FROM packages AS p2 JOIN deps AS d ON d.package_id=p2.id WHERE d.name=p.name AND p2.origin";
+					else if (str[0] == 'v')
+						pending_subquery = "SELECT * FROM packages AS p2 JOIN deps AS d ON d.package_id=p2.id WHERE d.name=p.name AND p2.version";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'C':
+					pending_subquery = "SELECT * FROM categories AS c JOIN pkg_categories AS pc ON c.id=pc.category_id WHERE pc.package_id=p.id AND c.name";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'L':
+					pending_subquery = "SELECT * FROM licenses AS l JOIN pkg_licenses AS pl ON l.id=pl.license_id WHERE pl.package_id=p.id AND l.name";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'B':
+					pending_subquery = "SELECT * FROM shlibs AS s JOIN pkg_shlibs_required AS ps ON s.id=ps.shlib_id WHERE ps.package_id=p.id AND s.name";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'b':
+					pending_subquery = "SELECT * FROM shlibs AS s JOIN pkg_shlibs_provided AS ps ON s.id=ps.shlib_id WHERE ps.package_id=p.id AND s.name";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'y':
+					pending_subquery = "SELECT * FROM provides AS s JOIN pkg_provides AS ps ON s.id=ps.provide_id WHERE ps.package_id=p.id AND s.provide";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'Y':
+					pending_subquery = "SELECT * FROM requires AS s JOIN pkg_requires AS ps ON s.id=ps.require_id WHERE ps.package_id=p.id AND s.require";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				case 'A':
+					str++;
+					if (str[0] == 't')
+						pending_subquery = "SELECT * FROM annotation AS a JOIN pkg_annotation AS pa ON a.annotation_id=pa.tag_id WHERE pa.package_id=p.id AND a.annotation";
+					else if (str[0] == 'v')
+						pending_subquery = "SELECT * FROM annotation AS a JOIN pkg_annotation AS pa ON a.annotation_id=pa.value_id WHERE pa.package_id=p.id AND a.annotation";
+					multiline_subquery = true;
+					state = OPERATOR_STRING;
+					break;
+				default:
+bad_option:
+					fprintf(stderr, "malformed evaluation string\n");
+					return (EPKG_FATAL);
+				}
+			} else {
+				switch (str[0]) {
+				case '(':
+					bracket_level++;
+					sb_printf(sqlcond, "%c", str[0]);
+					break;
+				case ' ':
+				case '\t':
+					break;
+				default:
+					fprintf(stderr, "unexpected character: %c\n", str[0]);
+					return (EPKG_FATAL);
+				}
+			}
+		} else if (state == POST_EXPR) {
+			switch (str[0]) {
+			case ')':
+				if (bracket_level == 0) {
+					fprintf(stderr, "too many closing brackets.\n");
+					return (EPKG_FATAL);
+				}
+				bracket_level--;
+				sb_printf(sqlcond, "%c", str[0]);
+				break;
+			case ' ':
+			case '\t':
+				break;
+			case '|':
+				if (str[1] == '|') {
+					str++;
+					state = NONE;
+					sb_printf(sqlcond, " OR ");
+					break;
+				} else {
+					fprintf(stderr, "unexpected character %c\n", str[1]);
+					return (EPKG_FATAL);
+				}
+			case '&':
+				if (str[1] == '&') {
+					str++;
+					state = NONE;
+					sb_printf(sqlcond, " AND ");
+					break;
+				} else {
+					fprintf(stderr, "unexpected character %c\n", str[1]);
+					return (EPKG_FATAL);
+				}
+			default:
+				fprintf(stderr, "unexpected character %c\n", str[0]);
+				return (EPKG_FATAL);
+			}
+		} else if (state == OPERATOR_STRING || state == OPERATOR_INT) {
+			/* only operators or space are allowed here */
+			if (isspace(str[0])) {
+				/* do nothing */
+			} else if (str[0] == '~' ) {
+				if (state != OPERATOR_STRING) {
+					fprintf(stderr, "~ expected only for string testing\n");
+					return (EPKG_FATAL);
+				}
+				if (pending_subquery) {
+					sb_printf(sqlcond, "EXISTS (%s", pending_subquery);
+					pending_subquery = NULL;
+				}
+				state = NEXT_IS_STRING;
+				sb_printf(sqlcond, " GLOB ");
+			} else if (str[0] == '>' || str[0] == '<') {
+				if (state != OPERATOR_INT) {
+					fprintf(stderr, "> expected only for integers\n");
+					return (EPKG_FATAL);
+				}
+				if (pending_subquery) {
+					sb_printf(sqlcond, "EXISTS (%s", pending_subquery);
+					pending_subquery = NULL;
+				}
+				state = NEXT_IS_INT;
+				sb_printf(sqlcond, "%c", str[0]);
+				if (str[1] == '=') {
+					str++;
+					sb_printf(sqlcond, "%c", str[0]);
+				}
+			} else if (str[0] == '=') {
+				if (state == OPERATOR_STRING) {
+					state = NEXT_IS_STRING;
+				} else {
+					state = NEXT_IS_INT;
+				}
+				if (pending_subquery) {
+					sb_printf(sqlcond, "EXISTS (%s", pending_subquery);
+					pending_subquery = NULL;
+				}
+				sb_printf(sqlcond, "%c", str[0]);
+				if (str[1] == '=') {
+					str++;
+				} else if (str[1] == '~' && state == NEXT_IS_STRING) {
+					str++;
+					collate_nocase = true;
+				}
+			} else if (str[0] == '!') {
+				if (pending_subquery) {
+					sb_printf(sqlcond, "NOT EXISTS (%s", pending_subquery);
+					pending_subquery = NULL;
+					if (str[1] == '=') {
+						sb_printf(sqlcond, "%c", str[1]);
+					} else if (str[1] == '~') {
+						sb_printf(sqlcond, " GLOB ");
+					} else {
+						fprintf(stderr, "expecting = or ~ after !\n");
+						return (EPKG_FATAL);
+					}
+				} else {
+					if (str[1] == '=') {
+						sb_printf(sqlcond, "%c", str[0]);
+						sb_printf(sqlcond, "%c", str[1]);
+					} else if (str[1] == '~') {
+						sb_printf(sqlcond, " NOT GLOB ");
+					} else {
+						fprintf(stderr, "expecting = or ~ after !\n");
+						return (EPKG_FATAL);
+					}
+				}
+				str++;
+				if (state == OPERATOR_STRING) {
+					state = NEXT_IS_STRING;
+				} else {
+					state = NEXT_IS_INT;
+				}
+				if (str[0] == '~' && state == NEXT_IS_STRING) {
+					str++;
+					collate_nocase = true;
+				}
+			} else {
+				fprintf(stderr, "an operator is expected, got %c\n", str[0]);
+				return (EPKG_FATAL);
+			}
+		} else if (state == NEXT_IS_STRING || state == NEXT_IS_INT) {
+			if (isspace(str[0])) {
+				/* do nothing */
+			} else {
+				if (state == NEXT_IS_STRING) {
+					if (str[0] == '"') {
+						state = QUOTEDSTRING;
+					} else if (str[0] == '\'') {
+						state = SQUOTEDSTRING;
+					} else {
+						state = STRING;
+						str--;
+					}
+					sb_printf(sqlcond, "%c", '\'');
+				} else {
+					if (!isdigit(str[0])) {
+						fprintf(stderr, "a number is expected, got: %c\n", str[0]);
+						return (EPKG_FATAL);
+					}
+					state = INT;
+					sb_printf(sqlcond, "%c", str[0]);
+				}
+			}
+		} else if (state == INT) {
+			if (!isdigit(str[0])) {
+				state = POST_EXPR;
+				if (multiline_subquery) {
+					sb_printf(sqlcond, ")");
+					multiline_subquery = false;
+				}
+				str--;
+			} else {
+				sb_printf(sqlcond, "%c", str[0]);
+			}
+		} else if (state == STRING || state == QUOTEDSTRING || state == SQUOTEDSTRING) {
+			if ((state == STRING && isspace(str[0])) ||
+			    (state == QUOTEDSTRING && str[0] == '"') ||
+			    (state == SQUOTEDSTRING && str[0] == '\'')) {
+				sb_printf(sqlcond, "%c", '\'');
+				state = POST_EXPR;
+				if (collate_nocase) {
+					sb_printf(sqlcond, " COLLATE NOCASE ");
+					collate_nocase = false;
+				}
+				if (multiline_subquery) {
+					sb_printf(sqlcond, ")");
+					multiline_subquery = false;
+				}
+			} else {
+				sb_printf(sqlcond, "%c", str[0]);
+				if (str[0] == '\'')
+					sb_printf(sqlcond, "%c", str[0]);
+				else if (str[0] == '%' && for_remote)
+					sb_printf(sqlcond, "%c", str[0]);
+			}
+		}
+		str++;
+	}
+	if (state == STRING) {
+		sb_printf(sqlcond, "%c", '\'');
+		state = POST_EXPR;
+		if (collate_nocase) {
+			sb_printf(sqlcond, " COLLATE NOCASE ");
+			collate_nocase = false;
+		}
+		if (multiline_subquery) {
+			sb_printf(sqlcond, ")");
+			multiline_subquery = false;
+		}
+	}
+
+	if (state != POST_EXPR && state != INT) {
+		fprintf(stderr, "unexpected end of expression\n");
+		return (EPKG_FATAL);
+	} else if (bracket_level > 0) {
+		fprintf(stderr, "unexpected end of expression (too many open brackets)\n");
+		return (EPKG_FATAL);
+	}
+
+	return (EPKG_OK);
+}
+
+int
+analyse_query_string(char *qstr, struct query_flags *q_flags, const unsigned int q_flags_len, int *flags, char *multiline)
+{
+	unsigned int i, j, k;
+	unsigned int valid_flag = 0;
+	unsigned int valid_opts = 0;
+	size_t len;
+
+	j = 0; /* shut up scanbuild */
+
+	if (strchr(qstr, '%') == NULL) {
+		fprintf(stderr, "Invalid query: query should contain a format string\n");
+		return (EPKG_FATAL);
+	}
+
+	while (qstr[0] != '\0') {
+		if (qstr[0] == '%') {
+			qstr++;
+			valid_flag = 0;
+
+			for (i = 0; i < q_flags_len; i++) {
+				/* found the flag */
+				if (qstr[0] == q_flags[i].flag) {
+					valid_flag = 1;
+
+					/* if the flag is followed by additional options */
+					if (q_flags[i].options[0] != '\0') {
+						qstr++;
+						valid_opts = 0;
+
+						len = strlen(q_flags[i].options);
+						for (j = 0; j < len; j++) {
+							if (qstr[0] == q_flags[i].options[j]) {
+								valid_opts = 1;
+								break;
+							}
+						}
+
+						if (valid_opts == 0) {
+							fprintf(stderr, "Invalid query: '%%%c' should be followed by:", q_flags[i].flag);
+
+							len = strlen(q_flags[i].options);
+							for (j = 0; j < len; j++)
+								fprintf(stderr, " %c%c", q_flags[i].options[j],
+										q_flags[i].options[j + 1] == '\0' ?
+										'\n' : ',');
+
+							return (EPKG_FATAL);
+						}
+					}
+
+					/* if this is a multiline flag */
+					if (q_flags[i].multiline == 1) {
+						if (*multiline != 0 && *multiline != q_flags[i].flag) {
+							fprintf(stderr, "Invalid query: '%%%c' and '%%%c' cannot be queried at the same time\n",
+									*multiline, q_flags[i].flag);
+							return (EPKG_FATAL);
+						} else {
+							*multiline = q_flags[i].flag;
+						}
+					}
+
+					/* handle the '?' flag cases */
+					if (q_flags[i].flag == '?' || q_flags[i].flag == '#') {
+						for (k = 0; k < q_flags_len; k++)
+							if (q_flags[k].flag == q_flags[i].options[j]) {
+								*flags |= q_flags[k].dbflags;
+								break;
+							}
+					} else {
+						*flags |= q_flags[i].dbflags;
+					}
+
+					break; /* don't iterate over the rest of the flags */
+				}
+			}
+
+			if (valid_flag == 0) {
+				fprintf(stderr, "Unknown query format key: '%%%c'\n", qstr[0]);
+				return (EPKG_FATAL);
+			}
+		}
+
+		qstr++;
+	}
+
+	return (EPKG_OK);
+}
+
+void
+usage_query(void)
+{
+	fprintf(stderr, "Usage: pkg query <query-format> <pkg-name>\n");
+	fprintf(stderr, "       pkg query [-a] <query-format>\n");
+	fprintf(stderr, "       pkg query -F <pkg-name> <query-format>\n");
+	fprintf(stderr, "       pkg query -e <evaluation> <query-format>\n");
+	fprintf(stderr, "       pkg query [-Cgix] <query-format> <pattern> <...>\n\n");
+	fprintf(stderr, "For more information see 'pkg help query.'\n");
+}
+
+int
+exec_query(int argc, char **argv)
+{
+	struct pkgdb		*db = NULL;
+	struct pkgdb_it		*it = NULL;
+	struct pkg		*pkg = NULL;
+	char			*pkgname = NULL;
+	int			 query_flags = PKG_LOAD_BASIC;
+	match_t			 match = MATCH_EXACT;
+	int			 ch;
+	int			 ret;
+	int			 retcode = EXIT_SUCCESS;
+	int			 i;
+	char			 multiline = 0;
+	int			 nprinted = 0;
+	char			*condition = NULL;
+	const char 		*condition_sql = NULL;
+	sb_t sqlcond = sb_init();
+	const unsigned int	 q_flags_len = NELEM(accepted_query_flags);
+
+	struct option longopts[] = {
+		{ "all",		no_argument,		NULL,	'a' },
+		{ "case-sensitive",	no_argument,		NULL,	'C' },
+		{ "evaluate",		required_argument,	NULL,	'e' },
+		{ "file",		required_argument,	NULL,	'F' },
+		{ "glob",		no_argument,		NULL,	'g' },
+		{ "case-insensitive",	no_argument,		NULL,	'i' },
+		{ "regex",		no_argument,		NULL,	'x' },
+		{ NULL,			0,			NULL,	0   },
+	};
+
+	while ((ch = getopt_long(argc, argv, "+aCe:F:gix", longopts, NULL)) != -1) {
+		switch (ch) {
+		case 'a':
+			match = MATCH_ALL;
+			break;
+		case 'C':
+			pkgdb_set_case_sensitivity(true);
+			break;
+		case 'e':
+			condition = optarg;
+			break;
+		case 'F':
+			pkgname = optarg;
+			break;
+		case 'g':
+			match = MATCH_GLOB;
+			break;
+		case 'i':
+			pkgdb_set_case_sensitivity(false);
+			break;
+		case 'x':
+			match = MATCH_REGEX;
+			break;
+		default:
+			usage_query();
+			return (EXIT_FAILURE);
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if ((match == MATCH_ALL || pkgname != NULL)
+	    && argc > 1) {
+		usage_query();
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	if (argc == 0) {
+		usage_query();
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	/* Default to all packages if no pkg provided */
+	if (argc == 1 && pkgname == NULL && match == MATCH_EXACT) {
+		match = MATCH_ALL;
+	} else if (((argc == 1) ^ (match == MATCH_ALL)) && pkgname == NULL
+			&& condition == NULL) {
+		usage_query();
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	if (strstr(argv[0], "%{") != NULL) {
+		/*
+		 * Format string uses pkg_printf %{..%} syntax.
+		 * Delegate entirely to pkg_fprintf_pkg and extract
+		 * PKG_LOAD flags from the main format characters.
+		 */
+		multiline = '{';
+		for (const char *p = argv[0]; *p != '\0'; p++) {
+			if (*p != '%')
+				continue;
+			p++;
+			/* skip %{, %|, %}, %% */
+			if (*p == '{' || *p == '|' || *p == '}' ||
+			    *p == '%' || *p == '\0')
+				continue;
+			/* skip field width/modifiers */
+			while (*p == '#' || *p == '?' || *p == '-' ||
+			    (*p >= '0' && *p <= '9'))
+				p++;
+			switch (*p) {
+			case 'A': query_flags |= PKG_LOAD_ANNOTATIONS; break;
+			case 'B': query_flags |= PKG_LOAD_SHLIBS_REQUIRED; break;
+			case 'C': query_flags |= PKG_LOAD_CATEGORIES; break;
+			case 'D': query_flags |= PKG_LOAD_DIRS; break;
+			case 'F': query_flags |= PKG_LOAD_FILES; break;
+			case 'G': query_flags |= PKG_LOAD_GROUPS; break;
+			case 'L': query_flags |= PKG_LOAD_LICENSES; break;
+			case 'O': query_flags |= PKG_LOAD_OPTIONS; break;
+			case 'U': query_flags |= PKG_LOAD_USERS; break;
+			case 'd': query_flags |= PKG_LOAD_DEPS; break;
+			case 'r': query_flags |= PKG_LOAD_RDEPS; break;
+			case 'b': query_flags |= PKG_LOAD_SHLIBS_PROVIDED; break;
+			case 'y': query_flags |= PKG_LOAD_PROVIDES; break;
+			case 'Y': query_flags |= PKG_LOAD_REQUIRES; break;
+			case 'X': query_flags |= PKG_LOAD_BASIC |
+			    PKG_LOAD_SCRIPTS | PKG_LOAD_LUA_SCRIPTS; break;
+			}
+		}
+	} else if (analyse_query_string(argv[0], accepted_query_flags,
+	    q_flags_len, &query_flags, &multiline) != EPKG_OK) {
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	if (pkgname != NULL) {
+		/* Use a manifest or compact manifest if possible. */
+		int open_flags = 0;
+		if ((query_flags & ~(PKG_LOAD_DEPS|
+				     PKG_LOAD_OPTIONS|
+				     PKG_LOAD_CATEGORIES|
+				     PKG_LOAD_LICENSES|
+				     PKG_LOAD_USERS|
+				     PKG_LOAD_GROUPS|
+				     PKG_LOAD_SHLIBS_REQUIRED|
+				     PKG_LOAD_SHLIBS_PROVIDED|
+				     PKG_LOAD_ANNOTATIONS|
+				     PKG_LOAD_CONFLICTS|
+				     PKG_LOAD_PROVIDES|
+				     PKG_LOAD_REQUIRES)) == 0) {
+			open_flags = PKG_OPEN_MANIFEST_COMPACT;
+		} else if ((query_flags & PKG_LOAD_FILES) == 0) {
+			open_flags = PKG_OPEN_MANIFEST_ONLY;
+		}
+		if (pkg_open(&pkg, pkgname, open_flags) != EPKG_OK) {
+			retcode = EXIT_FAILURE;
+			goto cleanup;
+		}
+
+		print_query(pkg, argv[0], multiline);
+		retcode = EXIT_SUCCESS;
+		goto cleanup;
+	}
+
+	if (condition != NULL) {
+		if (format_sql_condition(condition, &sqlcond, false) != EPKG_OK) {
+			retcode = EXIT_FAILURE;
+			goto cleanup;
+		}
+	}
+
+	ret = pkgdb_access(PKGDB_MODE_READ, PKGDB_DB_LOCAL);
+	if (ret == EPKG_ENOACCESS) {
+		warnx("Insufficient privileges to query the package database");
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	} else if (ret == EPKG_ENODB) {
+		if (!quiet)
+			warnx("No packages installed");
+		retcode = EXIT_SUCCESS;
+		goto cleanup;
+	} else if (ret != EPKG_OK) {
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	ret = pkgdb_open(&db, PKGDB_DEFAULT_READONLY);
+	if (ret != EPKG_OK) {
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	pkg_drop_privileges();
+	if (pkgdb_obtain_lock(db, PKGDB_LOCK_READONLY) != EPKG_OK) {
+		warnx("Cannot get a read lock on a database, it is locked by another process");
+		retcode = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	if (sqlcond.len > 0)
+		condition_sql = sb_str(&sqlcond);
+	i = 1;
+	do {
+		pkgname = i < argc ? argv[i] : NULL;
+
+		if ((it = pkgdb_query_cond(db, condition_sql, pkgname, match)) == NULL) {
+			warnx("DEBUG: %s/%s\n", condition_sql ? condition_sql : "-", pkgname ? pkgname : "-");
+			retcode = EXIT_FAILURE;
+			break;
+		}
+
+		while ((ret = pkgdb_it_next(it, &pkg, query_flags)) == EPKG_OK) {
+			nprinted++;
+			print_query(pkg, argv[0], multiline);
+		}
+
+		if (ret != EPKG_END) {
+			retcode = EXIT_FAILURE;
+			break;
+		}
+
+		pkgdb_it_free(it);
+		i++;
+	} while (i < argc);
+
+	if (nprinted == 0 && match != MATCH_ALL && retcode == EXIT_SUCCESS) {
+		/* ensure to return a non-zero status when no package
+		 were found. */
+		retcode = EXIT_FAILURE;
+	}
+
+cleanup:
+	sb_fini(&sqlcond);
+
+	pkg_free(pkg);
+
+	pkgdb_release_lock(db, PKGDB_LOCK_READONLY);
+	pkgdb_close(db);
+
+	return (retcode);
+}

@@ -1,0 +1,378 @@
+# vim:se syn=sh:
+#
+# Sourced by ./configure (POSIX shell)
+
+# Version
+_maj_ver=2
+_med_ver=9
+_min_ver=0
+_dev_ver=0
+_pkg_api=$(( _maj_ver * 1000000 + _med_ver * 1000 + _min_ver ))
+if [ "$_dev_ver" -ne 0 ]; then
+	_version="${_maj_ver}.${_med_ver}.${_min_ver}.${_dev_ver}"
+else
+	_version="${_maj_ver}.${_med_ver}.${_min_ver}"
+fi
+define PACKAGE_NAME "pkg"
+define PKG_API "$_pkg_api"
+define VERSION "$_version"
+
+options \
+	"pkgconfigdir	      => path to the directory where to install pc files" \
+	"with-ldns            => add support for libldns" \
+	"with-libarchive.pc   => build with libarchive via pkg-config" \
+	"with-coverage        => build with llvm coverage support" \
+	"with-asan            => build with Clang AddressSanitizer (non-prod use)" \
+	"with-lsan            => build with Clang LeakSanitizer (non-prod use)" \
+	"with-ubsan           => build with Clang UndefinedBehaviorSanitizer (non-prod use)" \
+	"with-tests           => build tests" \
+	"with-tsan            => build with Clang ThreadSanitizer (non-prod use)" \
+	"with-openssl.pc      => build with openssl via pkg-config" \
+	"default-format:tzst  => Default compression format: tzst (default), txz, tbz, tar"
+
+# Apply command-line arguments now that options are declared
+_configure_apply
+
+# pkgconfigdir
+_pkgconfigdir=$(opt_str pkgconfigdir) || true
+if [ -n "$_pkgconfigdir" ]; then
+	define pkgconfigdir "$_pkgconfigdir"
+else
+	_host=$(get_define host)
+	case "$_host" in
+		*-freebsd*) define pkgconfigdir "$(get_define prefix)/libdata/pkgconfig" ;;
+		*)          define pkgconfigdir "$(get_define prefix)/lib/pkgconfig" ;;
+	esac
+fi
+
+# default compression format
+_fmt=$(opt_str default-format) || true
+case "$_fmt" in
+	tzst) define DEFAULT_COMPRESSION TZS ;;
+	txz)  define DEFAULT_COMPRESSION TXZ ;;
+	tbz)  define DEFAULT_COMPRESSION TBZ ;;
+	tgz)  define DEFAULT_COMPRESSION TGZ ;;
+	tar)  define DEFAULT_COMPRESSION TAR ;;
+	"")   define DEFAULT_COMPRESSION TZS ;;
+	*)    user_error "Invalid format $_fmt" ;;
+esac
+
+cc_check_tools ar ranlib strip
+
+define EXTRA_LIBS ""
+define LIBVERSION 4
+_soextver=$(get_define SH_SOEXTVER)
+_libversion=$(get_define LIBVERSION)
+# Format: replace %s with version number
+_libsoext=$(printf "$_soextver" "$_libversion")
+define LIBSOEXT "$_libsoext"
+
+# Git hash
+define GITHASH ""
+if cc_check_progs git 2>/dev/null && [ -e "$_srcdir/.git" ]; then
+	_gitrev=$(git -C "$_srcdir" rev-parse --short HEAD 2>/dev/null) || true
+	_gitdirty=$(git -C "$_srcdir" diff-index -m --name-only HEAD 2>/dev/null) || true
+	if [ -n "$_gitrev" ]; then
+		if [ -n "$_gitdirty" ]; then
+			define GITHASH "-${_gitrev}-dirty"
+		else
+			define GITHASH "-${_gitrev}"
+		fi
+	fi
+fi
+
+_host=$(get_define host)
+
+# Platform-specific: Linux needs libbsd
+case "$_host" in
+	*-linux*)
+		cc_with "-libs -lbsd" cc_check_functions getprogname
+		if [ "$(get_define HAVE_GETPROGNAME)" = "1" ]; then
+			define_append EXTRA_LIBS -lbsd
+			define_feature libbsd
+		else
+			user_error "Unable to find libbsd"
+		fi
+		;;
+	*)
+		define_feature static
+		;;
+esac
+
+# libarchive (direct linking unless pkg-config requested)
+if ! opt_bool with-libarchive.pc; then
+	cc_with "-libs -larchive" cc_check_functions archive_read_open
+	if [ "$(get_define HAVE_ARCHIVE_READ_OPEN)" != "1" ]; then
+		user_error "Unable to find libarchive"
+	fi
+fi
+
+# zlib
+cc_with "-libs -lz" cc_check_functions zlibVersion
+if [ "$(get_define HAVE_ZLIBVERSION)" != "1" ]; then
+	user_error "Unable to find zlib"
+fi
+
+# bzip2
+cc_with "-libs -lbz2" cc_check_functions BZ2_bzReadOpen
+if [ "$(get_define HAVE_BZ2_BZREADOPEN)" != "1" ]; then
+	user_error "Unable to find bzip2"
+fi
+
+# liblzma
+cc_with "-libs -llzma" cc_check_functions lzma_version_string
+if [ "$(get_define HAVE_LZMA_VERSION_STRING)" != "1" ]; then
+	user_error "Unable to find liblzma"
+fi
+
+# FreeBSD: libmd
+case "$_host" in
+	*-freebsd*)
+		define pkgos_freebsd 1
+		cc_with "-libs -lmd" cc_check_functions SHA256_Data
+		if [ "$(get_define HAVE_SHA256_DATA)" != "1" ]; then
+			user_error "Unable to find libmd"
+		else
+			define_feature libmd
+		fi
+		;;
+esac
+
+# zstd in libarchive
+cc_with "-libs -larchive" cc_check_functions archive_write_add_filter_zstd
+
+# privatezstd
+define ZSTDLIB ""
+cc_with "-libs -lprivatezstd" cc_check_functions ZSTD_versionNumber
+if [ "$(get_define HAVE_ZSTD_VERSIONNUMBER)" = "1" ]; then
+	define ZSTDLIB "-lprivatezstd"
+fi
+
+# Struct members
+cc_with "-includes sys/stat.h" cc_check_members "struct stat.st_flags"
+
+# pkg function checks
+cc_check_functions arc4random arc4random_stir chflagsat \
+	closefrom fopencookie funopen getprogname \
+	strtofflags strtonum __res_setservers \
+	fflagstostr strchrnul copy_file_range \
+	newlocale strptime_l strftime_l
+
+# per locale date parsing and formatting, see the bundled libfetch
+cc_check_includes xlocale.h || true
+
+# humanize_number declaration
+cc_with "-includes libutil.h" cc_check_decls humanize_number
+
+# fts_open
+cc_check_functions fts_open
+if ! have_func fts_open; then
+	cc_with "-libs -lfts" cc_check_functions fts_open
+	if have_func fts_open; then
+		define_feature LIBFTS
+	fi
+fi
+
+# humanize_number function (if declaration found)
+if [ "$(get_define HAVE_DECL_HUMANIZE_NUMBER)" = "1" ]; then
+	cc_with "-libs -lutil" cc_check_functions humanize_number
+	if have_func humanize_number; then
+		define_feature LIBUTIL
+	fi
+fi
+
+# dlclose
+cc_check_functions dlclose
+if ! have_func dlclose; then
+	cc_with "-libs -ldl" cc_check_functions dlclose
+	if have_func dlclose; then
+		define_feature LIBDL
+	fi
+fi
+
+# The Mach-O linker does not know --as-needed
+printf 'Checking for the linker --as-needed option... '
+if cc_try_link 'int main(void) { return (0); }' "-Wl,--as-needed"; then
+	echo "yes"
+	define as-needed "-Wl,--as-needed"
+else
+	echo "no"
+	define as-needed ""
+fi
+
+# Darwin / libelf
+case "$_host" in
+	*-darwin*)
+		define pkgos_darwin 1
+		define waflags ""
+		define nowaflags ""
+		define libelf-internal 1
+		;;
+	*)
+		define waflags "-Wl,-whole-archive"
+		define nowaflags "-Wl,-no-whole-archive"
+
+		if cc_check_includes gelf.h libelf.h; then
+			cc_with "-libs -lelf" cc_check_functions gelf_getehdr
+			if [ "$(get_define HAVE_GELF_GETEHDR)" = "1" ]; then
+				define_feature libelf
+				define libelf-external 1
+				define_append EXTRA_LIBS -lelf
+				cc_with "-includes gelf.h" cc_check_types Elf_Note
+			else
+				define libelf-internal 1
+				define_feature libelf 0
+			fi
+		else
+			define_feature libelf 0
+			define libelf-internal 1
+		fi
+		;;
+esac
+
+# libjail
+cc_with "-libs -ljail" cc_check_functions jail_getid
+if [ "$(get_define HAVE_JAIL_GETID)" = "1" ]; then
+	define_feature libjail
+	define_append EXTRA_LIBS -ljail
+fi
+
+# Sanitizers
+if opt_bool with-asan; then
+	define_append ASAN_CFLAGS -O0 -g -fsanitize=address
+	define_append ASAN_LDFLAGS -fsanitize=address
+	case "$_host" in
+		*-linux*) define_append ASAN_LDFLAGS -ldl ;;
+	esac
+	define asan 1
+	undefine HAVE_STATIC
+
+	msg "Enabling ASAN"
+fi
+if opt_bool with-lsan; then
+	define_append LSAN_CFLAGS -O0 -g -fsanitize=leak
+	define_append LSAN_LDFLAGS -fsanitize=leak
+	case "$_host" in
+		*-linux*) define_append LSAN_LDFLAGS -ldl ;;
+	esac
+	define lsan 1
+
+	msg "Enabling LSAN"
+fi
+if opt_bool with-ubsan; then
+	define_append UBSAN_CFLAGS -D_MUM_UNALIGNED_ACCESS=0
+	define_append UBSAN_CFLAGS -O0 -g -fsanitize=undefined
+	define_append UBSAN_LDFLAGS -fsanitize=undefined
+	define ubsan 1
+
+	msg "Enabled UBSAN"
+fi
+if opt_bool with-tsan; then
+	define_append TSAN_CFLAGS -O1 -g -fsanitize=thread
+	define_append TSAN_LDFLAGS -fsanitize=thread
+	define tsan 1
+
+	msg "Enabled TSAN"
+fi
+if opt_bool with-coverage; then
+	define_append COVERAGE_CFLAGS -O0 -g --coverage -fprofile-instr-generate -fcoverage-mapping -DCOVERAGE=1
+	define_append COVERAGE_LDFLAGS --coverage -fprofile-instr-generate
+	define coverage 1
+
+	msg "Enabled runtime code coverage"
+fi
+
+# pkg-config based dependencies
+if pkg_config_init; then
+	# tests
+	if opt_bool with-tests; then
+		if ! pkg_config atf-c; then
+			user_error "Cannot find ATF libraries"
+		elif ! cc_check_progs kyua; then
+			user_error "Cannot find kyua"
+		else
+			define TESTS 1
+			msg "test suite will be built"
+		fi
+		user_notice "ATF_C_CFLAGS=$(get_define PKG_ATF_C_CFLAGS)"
+		user_notice "ATF_C_LDFLAGS=$(get_define PKG_ATF_C_LDFLAGS)"
+		user_notice "ATF_C_LIBS=$(get_define PKG_ATF_C_LIBS)"
+	else
+		msg "Skipping test suite"
+	fi
+	# libldns
+	if opt_bool with-ldns; then
+		if ! pkg_config libldns; then
+			user_error "Unable to find libldns"
+		else
+			define PKG_LIBDNS_LIBS_STATIC "$(pkg-config --static --libs-only-l libldns)"
+		fi
+	fi
+	# libarchive via pkg-config
+	if opt_bool with-libarchive.pc; then
+		if ! pkg_config libarchive; then
+			user_error "Unable to find libarchive"
+		else
+			define PKG_LIBARCHIVE_LIBS_STATIC "$(pkg-config --static --libs-only-l libarchive)"
+			cc_with "-libs -larchive" cc_check_functions archive_write_add_filter_zstd
+		fi
+		user_notice "LIBARCHIVE_CFLAGS=$(get_define PKG_LIBARCHIVE_CFLAGS)"
+		user_notice "LIBARCHIVE_LDLAGS=$(get_define PKG_LIBARCHIVE_LDFLAGS)"
+		user_notice "LIBARCHIVE_LIBS=$(get_define PKG_LIBARCHIVE_LIBS)"
+	fi
+	# openssl via pkg-config
+	if opt_bool with-openssl.pc; then
+		if ! pkg_config openssl; then
+			user_error "Unable to find openssl"
+		fi
+		user_notice "OPENSSL_CFLAGS=$(get_define PKG_OPENSSL_CFLAGS)"
+		user_notice "OPENSSL_LDLAGS=$(get_define PKG_OPENSSL_LDFLAGS)"
+		user_notice "OPENSSL_LIBS=$(get_define PKG_OPENSSL_LIBS)"
+	fi
+fi
+
+# Repositories
+for _repo in binary; do
+	define_append REPOS "$_repo"
+	define_append REPOS_LDFLAGS "-L\$(top_builddir)/libpkg/repo/${_repo} -lrepo-${_repo}_pic"
+	define_append REPOS_STATIC_LIBS "\$(top_builddir)/libpkg/repo/${_repo}/librepo-${_repo}.a"
+done
+
+# ccache
+_ccache=$(get_define CCACHE)
+if [ -n "$_ccache" ] && [ "$_ccache" != "none" ]; then
+	define CC "$_ccache $(get_define CC)"
+fi
+
+# Generate config headers
+make_config_header pkg_config.h -bare DEFAULT_
+make_config_header external/libsqlite/sqlite_generated.h
+
+# Generate templates
+define CONF_GEN_FILES ""
+for _in in mk/defs.mk.in libpkg/pkg.h.in libpkg/pkg.pc.in \
+	tests/frontend/test_environment.sh.in; do
+	make_template "$_in"
+	define_append CONF_GEN_FILES "$_in"
+done
+
+make_template Makefile.in
+define_append CONF_GEN_FILES Makefile.in
+
+for _dir in external/libblake2 external/libpicosat \
+	external/liblinenoise external/libsqlite external/libfetch \
+	external compat libpkg libpkg/repo libpkg/repo/binary src \
+	external/libucl external/libelf tests docs tests/fuzz \
+	external/liblua external/libyxml scripts external/libder \
+	external/libecc; do
+	make_template "$_dir/Makefile.in"
+	define_append CONF_GEN_FILES "$_dir/Makefile.in"
+done
+
+# Save configure command for re-runs
+printf '%s/configure %s\n' "$_srcdir" "$*" > configure_call
+
+# Create directories needed by the build
+for _d in external/libucl/src scripts/periodic scripts/completion tests/lib tests/frontend; do
+	[ -d "$_d" ] || mkdir -p "$_d"
+done

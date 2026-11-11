@@ -1,0 +1,213 @@
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.Dd March 4, 2026
+.Dt PKG-TRIGGERS 5
+.Os
+.Sh NAME
+.Nm triggers
+.Nd trigger file format
+.Sh DESCRIPTION
+Package triggers define commands to be executed when particular files are
+installed, modified, or removed by
+.Xr pkg 8 .
+Triggers can be used, for example, to update a database or index of files
+based on files installed by other packages.
+.Pp
+There are two kinds of triggers:
+.Bl -tag -width "Per-package"
+.It Sy Per-transaction
+Executed once at the end of the transaction, after all packages have been
+processed and all file changes committed to disk.
+Even if multiple packages match the same trigger, it is executed only once
+and receives the combined list of matched paths.
+.It Sy Per-package
+Executed individually for each package as it is being installed or removed.
+Per-package triggers run at a specific phase of the operation
+.Pq pre-install, post-install, pre-deinstall, or post-deinstall .
+Their failure is non-blocking: the package operation continues even if the
+trigger fails.
+.El
+.Pp
+Triggers are searched for in the list of directories configured by the
+.Ev PKG_TRIGGERS_DIR
+configuration option.
+By default, this includes
+.Pa /usr/share/pkg/triggers
+and
+.Pa <localbase>/share/pkg/triggers .
+Triggers are in UCL format and should have a
+.Va .ucl
+extension.
+.Ss Per-transaction triggers
+Per-transaction trigger files are placed directly in a trigger directory.
+.Pp
+The format is the following:
+.Bl -tag -width xxxxxxxxxxx
+.It Cm description
+An optional string providing a human-readable description
+of what the trigger does.
+.It Cm path
+An array of strings containing exact paths.
+Each time a package installs a file or directory whose name is equal to one of
+the strings, the trigger will be executed at the end of the transaction.
+.It Cm path_glob
+An array of strings containing shell-style glob patterns.
+Each time a package installs a file or directory whose name matches one of the
+patterns, the trigger will be executed at the end of the transaction.
+.It Cm path_regexp
+An array of strings containing regular expressions.
+Each time a package installs a file or directory whose name matches one of the
+regular expressions, the trigger will be executed at the end of the
+transaction.
+.It Cm cleanup
+An object which represents the script to execute in case the transaction results
+in removal of the trigger from the installation.
+The object requires the following fields:
+.Bl -tag -width xxxxxxx
+.It Cm type
+The type of the script to be executed.
+The only supported type is Lua, indicated by the value
+.Dq lua
+(see
+.Xr pkg-lua-script 5 ) .
+.It Cm script
+The script itself.
+.It Cm sandbox
+A boolean controlling whether the script runs inside a
+.Xr capsicum 4
+sandbox.
+Defaults to
+.Cm true .
+When disabled, the script has full system access including
+.Fn pkg.exec .
+.El
+.It Cm trigger
+An object which represents the script to execute at the end of the transaction
+if a pattern has been matched.
+This object is required and has the following fields:
+.Bl -tag -width xxxxxxx
+.It Cm type
+The type of the script to be executed.
+The only supported type is Lua, indicated by the value
+.Dq lua
+(see
+.Xr pkg-lua-script 5 ) .
+.It Cm script
+The script itself.
+It will receive as arguments the list of paths that matched the patterns during
+the transaction.
+.It Cm sandbox
+A boolean controlling whether the script runs inside a
+.Xr capsicum 4
+sandbox.
+Defaults to
+.Cm true .
+When disabled, the script has full system access including
+.Fn pkg.exec .
+.El
+.El
+.Ss Per-package triggers
+Per-package trigger files are placed in a subdirectory of a trigger directory
+named after the phase at which they should execute:
+.Bl -tag -width "post_deinstall/" -compact
+.It Pa pre_install/
+Before the package files are extracted.
+.It Pa post_install/
+After the package files have been extracted and post-install scripts have run.
+.It Pa pre_deinstall/
+Before the package files are removed.
+.It Pa post_deinstall/
+After the package files have been removed and post-deinstall scripts have run.
+.El
+.Pp
+For example, a trigger that should run after each package installation would be
+placed in:
+.Pp
+.Pa <localbase>/share/pkg/triggers/post_install/mytrigger.ucl
+.Pp
+The file format is the same as for per-transaction triggers.
+The
+.Cm path , path_glob ,
+and
+.Cm path_regexp
+fields are used to match the files and directories of the individual package.
+The
+.Cm trigger
+object contains the script to execute.
+.Pp
+Per-package triggers are reloaded from disk before processing each package,
+so a trigger installed by an earlier package in the same transaction will
+be active for subsequent packages.
+.Pp
+In addition to the
+.Va arg
+table containing matched paths, per-package trigger scripts have access to
+the following Lua global variables:
+.Bl -tag -width "pkg_version"
+.It Va pkg_name
+The name of the package being processed.
+.It Va pkg_version
+The version of the package being processed.
+.It Va pkg_upgrade
+A boolean set to
+.Cm true
+if the operation is part of an upgrade, or
+.Cm false
+for a fresh installation or a standalone removal.
+.El
+.Sh SEE ALSO
+.Xr pkg_checksum 3 ,
+.Xr pkg_create 3 ,
+.Xr pkg_printf 3 ,
+.Xr pkg_repo_create 3 ,
+.Xr pkg_repos 3 ,
+.Xr pkg-keywords 5 ,
+.Xr pkg-lua-script 5 ,
+.Xr pkg-repository 5 ,
+.Xr pkg-script 5 ,
+.Xr pkg.conf 5 ,
+.Xr pkg 8 ,
+.Xr pkg-add 8 ,
+.Xr pkg-alias 8 ,
+.Xr pkg-annotate 8 ,
+.Xr pkg-audit 8 ,
+.Xr pkg-autoremove 8 ,
+.Xr pkg-check 8 ,
+.Xr pkg-checksum 8 ,
+.Xr pkg-clean 8 ,
+.Xr pkg-config 8 ,
+.Xr pkg-create 8 ,
+.Xr pkg-delete 8 ,
+.Xr pkg-fetch 8 ,
+.Xr pkg-help 8 ,
+.Xr pkg-info 8 ,
+.Xr pkg-install 8 ,
+.Xr pkg-key 8 ,
+.Xr pkg-lock 8 ,
+.Xr pkg-plugins 8 ,
+.Xr pkg-query 8 ,
+.Xr pkg-register 8 ,
+.Xr pkg-repo 8 ,
+.Xr pkg-repositories 8 ,
+.Xr pkg-rquery 8 ,
+.Xr pkg-rwhich 8 ,
+.Xr pkg-search 8 ,
+.Xr pkg-set 8 ,
+.Xr pkg-shell 8 ,
+.Xr pkg-shlib 8 ,
+.Xr pkg-ssh 8 ,
+.Xr pkg-stats 8 ,
+.Xr pkg-unregister 8 ,
+.Xr pkg-update 8 ,
+.Xr pkg-updating 8 ,
+.Xr pkg-upgrade 8 ,
+.Xr pkg-version 8 ,
+.Xr pkg-which 8
