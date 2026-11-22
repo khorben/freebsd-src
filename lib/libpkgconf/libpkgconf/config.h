@@ -76,7 +76,7 @@
 #define PACKAGE_NAME "pkgconf"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "pkgconf 3.0.9"
+#define PACKAGE_STRING "pkgconf 3.0.11"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pkgconf"
@@ -85,7 +85,7 @@
 #define PACKAGE_URL "https://github.com/pkgconf/pkgconf"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0.9"
+#define PACKAGE_VERSION "3.0.11"
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -93,7 +93,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.0.9"
+#define VERSION "3.0.11"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */

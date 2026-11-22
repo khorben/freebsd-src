@@ -170,6 +170,7 @@ EXTRA_DIST =	pkg.m4 \
 		t/basic/variable-env.test \
 		t/basic/variable-multiple-packages.test \
 		t/basic/variable-no-recursion.test \
+		t/basic/variable-pcfiledir-fullpath.test \
 		t/basic/variable.test \
 		t/basic/version-atleast-1.test \
 		t/basic/version-atleast-2.test \
@@ -237,6 +238,7 @@ EXTRA_DIST =	pkg.m4 \
 		t/parser/truncated-files-should-fail-to-parse.test \
 		t/parser/tuple-dequote.test \
 		t/parser/variable-fragment-expansion.test \
+		t/parser/variable-self-reference-growth.test \
 		t/parser/variable-whitespace.test \
 		t/parser/version-with-whitespace-2.test \
 		t/parser/version-with-whitespace-diagnostic.test \
@@ -264,6 +266,10 @@ EXTRA_DIST =	pkg.m4 \
 		t/solver/libs-static-ordering.test \
 		t/solver/missing-required-dep.test \
 		t/solver/modversion-provides.test \
+		t/solver/path-requires-alias.test \
+		t/solver/path-requires-file.test \
+		t/solver/path-requires-query-control.test \
+		t/solver/path-requires-traversal.test \
 		t/solver/private-libs-duplication-digraph.test \
 		t/solver/private-libs-duplication.test \
 		t/solver/provides-bar-any.test \
@@ -543,6 +549,7 @@ EXTRA_DIST =	pkg.m4 \
 		tests/lib1/flag-order-1.pc \
 		tests/lib1/flag-order-3.pc \
 		tests/lib1/variable-fragment-expansion.pc \
+		tests/lib1/variable-self-reference-growth.pc \
 		tests/lib1/variable-whitespace.pc \
 		tests/lib1/fragment-collision.pc \
 		tests/lib1/fragment-collision-intermediary.pc \
@@ -614,6 +621,11 @@ EXTRA_DIST =	pkg.m4 \
 		tests/lib1/escape-layers-bare-var.pc \
 		tests/lib1/escape-layers.pc \
 		tests/lib1/sysroot-inject-isystem-attached.pc \
+		tests/lib-path-requires/inside/alias.pc \
+		tests/lib-path-requires/inside/file.pc \
+		tests/lib-path-requires/inside/traversal.pc \
+		tests/lib-path-requires/outside/hidden-sibling.pc \
+		tests/lib-path-requires/outside/hidden.pc \
 		tests/lib-pccritic/perfect.pc \
 		tests/lib-pccritic/polluted.pc \
 		tests/lib-pccritic/nodesc.pc \
