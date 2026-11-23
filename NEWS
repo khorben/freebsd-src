@@ -1,3 +1,35 @@
+Changes from 2.9.2 to 2.9.3
+- upgrade: no longer aborts when the packages of a dependency cycle cannot be
+  scheduled as a group, the jobs are ordered instead
+- printf: pkg_asprintf() clears the result pointer again when it fails, and
+  the buffer of the pkg_printf() family is no longer leaked on failure
+- build: the major version pkg is built for is read from the target headers
+  instead of the compiler, which reports the host one with a cross compiler,
+  and no longer triggers a spurious major OS upgrade warning or a wrong
+  default INDEX file name
+- install: the metalog lists every directory the package creates, from the
+  parents to the children, so that it is a valid mtree specification
+
+Changes from 2.9.1 to 2.9.2
+- query: fix %X computes the digest of a package
+
+Changes from 2.9.0 to 2.9.1
+- pkg add: detect the dependency cycles and report them with the chain
+  of packages involved instead of recursing until the memory is exhausted
+- pkg add: reach the packages kept in the shlibs directory again when it
+  recurses through a shared library requirement
+- plugins: the name, description and version of a plugin are recorded again,
+  and its configuration file is read, they were all silently ignored
+- fetch: use a monotonic clock for the connect and SSL handshake timeouts,
+  which the handshake now honours, and build with OpenSSL 4.1
+- query: %R reports the repository recorded at installation time again,
+  and unknown-repository when the package does not carry it
+- upgrade: the summary tells which packages require a new package it is
+  about to install
+- elf: do not read past the note section data when it ends with padding or
+  with an ABI note whose descriptor does not fit, which crashed pkg create
+  on some objects
+
 Changes from 2.8.99.6 to 2.9.0
 - pkg add: resolve the paths of a package whose -r target is reached through
   a symlink instead of failing on them

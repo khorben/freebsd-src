@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
+#include <pthread.h>
 #include <pwd.h>
 #include <grp.h>
 #include <sys/time.h>
@@ -41,6 +42,12 @@
 #else
 #define NOCHANGESFLAGS	(UF_IMMUTABLE | UF_APPEND | SF_IMMUTABLE | SF_APPEND)
 #endif
+
+static int
+pkg_add_common(struct pkgdb *db, const char *path, int fd, unsigned flags,
+    const char *reloc, struct pkg *remote,
+    struct pkg *local, struct triggers *t, struct deferred_rc *rc,
+    stringset_t *pkgs_in_progress);
 
 struct external_merge_tmp_file {
 	int fd;
@@ -551,10 +558,6 @@ do_extract_dir(struct pkg_add_context* context, struct archive *a __unused, stru
 		return (EPKG_FATAL);
 	}
 
-	metalog_add(PKG_METALOG_DIR, RELATIVE_PATH(path),
-	    archive_entry_uname(ae), archive_entry_gname(ae),
-	    aest->st_mode & ~S_IFDIR, d->fflags, NULL);
-
 	return (EPKG_OK);
 }
 
@@ -957,6 +960,112 @@ do_extract_regfile(struct pkg_add_context *context, struct archive *a, struct ar
 	return (EPKG_OK);
 }
 
+/* Number of path components, used to sort the parents before the children. */
+static int
+path_depth(const char *path)
+{
+	int depth = 0;
+
+	for (; *path != '\0'; path++)
+		if (*path == '/')
+			depth++;
+
+	return (depth);
+}
+
+static int
+path_depth_cmp(const void *a, const void *b)
+{
+	const char *pa = *(const char * const *)a;
+	const char *pb = *(const char * const *)b;
+	int da = path_depth(pa);
+	int db = path_depth(pb);
+
+	if (da != db)
+		return (da < db ? -1 : 1);
+
+	return (strcmp(pa, pb));
+}
+
+/* Appends a copy of every parent directory of path to dirs. */
+static void
+collect_parents(charv_t *dirs, const char *path)
+{
+	char buf[MAXPATHLEN];
+	char *slash;
+
+	if (strlcpy(buf, path, sizeof(buf)) >= sizeof(buf))
+		return;
+
+	while ((slash = strrchr(buf, '/')) != NULL) {
+		*slash = '\0';
+		if (buf[0] == '\0')
+			break;
+		vec_push(dirs, xstrdup(buf));
+	}
+}
+
+/*
+ * Emits the metalog entries of the directories of the package: the ones it
+ * declares and the ones needed to hold its files.  A directory which is not
+ * declared and already exists is not logged: it belongs to the system or to
+ * another package.
+ *
+ * The directories are sorted from the parents to the children, as required
+ * by a mtree specification, whatever the order of the archive entries.
+ */
+static void
+log_dirs(struct pkg_add_context *context)
+{
+	struct pkg_file *f = NULL;
+	struct pkg_dir *d = NULL;
+	struct stat st;
+	charv_t dirs = vec_init();
+
+	if (ctx.metalog == NULL)
+		return;
+
+	while (pkg_files(context->pkg, &f) == EPKG_OK) {
+		if (match_ucl_lists(f->path,
+		    pkg_config_get("FILES_IGNORE_GLOB"),
+		    pkg_config_get("FILES_IGNORE_REGEX")))
+			continue;
+		collect_parents(&dirs, f->path);
+	}
+	while (pkg_dirs(context->pkg, &d) == EPKG_OK) {
+		collect_parents(&dirs, d->path);
+		vec_push(&dirs, xstrdup(d->path));
+	}
+
+	if (dirs.len == 0) {
+		vec_free(&dirs);
+		return;
+	}
+
+	qsort(dirs.d, dirs.len, sizeof(char *), path_depth_cmp);
+
+	for (size_t i = 0; i < dirs.len; i++) {
+		if (i > 0 && STREQ(dirs.d[i], dirs.d[i - 1]))
+			continue;
+		d = pkg_get_dir(context->pkg, dirs.d[i]);
+		if (d == NULL) {
+			/* implicit directory, only log the ones pkg creates */
+			if (fstatat(context->rootfd, RELATIVE_PATH(dirs.d[i]),
+			    &st, 0) == 0)
+				continue;
+			metalog_add(PKG_METALOG_DIR, RELATIVE_PATH(dirs.d[i]),
+			    "root", "wheel", 0755, 0, NULL);
+			continue;
+		}
+		metalog_add(PKG_METALOG_DIR, RELATIVE_PATH(dirs.d[i]),
+		    d->uname != NULL ? d->uname : "root",
+		    d->gname != NULL ? d->gname : "wheel",
+		    d->perm != 0 ? d->perm : 0755, d->fflags, NULL);
+	}
+
+	vec_free_and_free(&dirs, free);
+}
+
 static int
 do_extract(struct archive *a, struct archive_entry *ae,
     int nfiles, struct pkg *local, tempdirs_t *tempdirs,
@@ -975,6 +1084,8 @@ do_extract(struct archive *a, struct archive_entry *ae,
 
 	if (nfiles == 0)
 		return (EPKG_OK);
+
+	log_dirs(context);
 
 	pkg_emit_extract_begin(context->pkg);
 	pkg_emit_progress_start(NULL);
@@ -1238,15 +1349,22 @@ append_pkg_if_newer(pkgs_t *localpkgs, struct pkg *p)
 }
 
 static charv_t system_shlibs_cache = vec_init();
-static bool system_shlibs_scanned = false;
+static pthread_once_t system_shlibs_once = PTHREAD_ONCE_INIT;
 
+static void
+scan_system_shlibs_once(void)
+{
+	scan_system_shlibs(&system_shlibs_cache, ctx.pkg_rootdir);
+}
+
+/*
+ * The cache is filled once and only read afterwards, the initialisation
+ * is serialised so that concurrent callers cannot build it twice.
+ */
 static charv_t *
 get_system_shlibs(void)
 {
-	if (!system_shlibs_scanned) {
-		scan_system_shlibs(&system_shlibs_cache, ctx.pkg_rootdir);
-		system_shlibs_scanned = true;
-	}
+	pthread_once(&system_shlibs_once, scan_system_shlibs_once);
 	return (&system_shlibs_cache);
 }
 
@@ -1301,19 +1419,24 @@ select_provider_from_dir(const char *dirpath, const char *ext)
 		entries.d[0] = NULL;
 	}
 
+	char *symlink_path = NULL;
 	char *result = NULL;
 	if (selected != NULL) {
-		xasprintf(&result, "%s/%s", dirpath, selected);
+		xasprintf(&symlink_path, "%s/%s", dirpath, selected);
 		free(selected);
+		result = realpath(symlink_path, NULL);
+		free(symlink_path);
 	}
 
 	vec_autofree(&entries);
 	return (result);
 }
 
+
 static int
 pkg_add_check_pkg_archive(struct pkgdb *db, struct pkg *pkg,
-	const char *path, int flags, const char *location)
+	const char *path, int flags, const char *location,
+	stringset_t *pkgs_in_progress)
 {
 	const char	*arch;
 	int	ret, retcode;
@@ -1418,7 +1541,8 @@ pkg_add_check_pkg_archive(struct pkgdb *db, struct pkg *pkg,
 
 		if ((flags & PKG_ADD_UPGRADE) == 0 &&
 				access(dpath, F_OK) == 0) {
-			ret = pkg_add(db, dpath, PKG_ADD_AUTOMATIC, location);
+			ret = pkg_add_common(db, dpath, -1, PKG_ADD_AUTOMATIC,
+			    location, NULL, NULL, NULL, NULL, pkgs_in_progress);
 
 			if (ret != EPKG_OK)
 				goto cleanup;
@@ -1464,8 +1588,8 @@ pkg_add_check_pkg_archive(struct pkgdb *db, struct pkg *pkg,
 					goto cleanup;
 				continue;
 			}
-			ret = pkg_add(db, provider, PKG_ADD_AUTOMATIC,
-			    location);
+			ret = pkg_add_common(db, provider, -1, PKG_ADD_AUTOMATIC,
+			    location, NULL, NULL, NULL, NULL, pkgs_in_progress);
 			free(provider);
 			if (ret != EPKG_OK && ret != EPKG_INSTALLED)
 				goto cleanup;
@@ -1495,8 +1619,8 @@ pkg_add_check_pkg_archive(struct pkgdb *db, struct pkg *pkg,
 					goto cleanup;
 				continue;
 			}
-			ret = pkg_add(db, provider, PKG_ADD_AUTOMATIC,
-			    location);
+			ret = pkg_add_common(db, provider, -1, PKG_ADD_AUTOMATIC,
+			    location, NULL, NULL, NULL, NULL, pkgs_in_progress);
 			free(provider);
 			if (ret != EPKG_OK && ret != EPKG_INSTALLED)
 				goto cleanup;
@@ -1629,10 +1753,11 @@ populate_config_file_contents(struct archive *a, struct archive_entry *ae,
 	return (retcode);
 }
 
-static int
+int
 pkg_add_common(struct pkgdb *db, const char *path, int fd, unsigned flags,
     const char *reloc, struct pkg *remote,
-    struct pkg *local, struct triggers *t, struct deferred_rc *rc)
+    struct pkg *local, struct triggers *t, struct deferred_rc *rc,
+    stringset_t *pkgs_in_progress)
 {
 	struct archive		*a = NULL;
 	struct archive_entry	*ae = NULL;
@@ -1648,6 +1773,8 @@ pkg_add_common(struct pkgdb *db, const char *path, int fd, unsigned flags,
 	int			 nfiles;
 	tempdirs_t		 tempdirs = vec_init();
 	struct pkg_add_context	 context;
+	bool			 owned = (pkgs_in_progress == NULL);
+	bool			 pushed = false;
 
 	memset(&context, 0, sizeof(context));
 
@@ -1670,6 +1797,14 @@ pkg_add_common(struct pkgdb *db, const char *path, int fd, unsigned flags,
 		retcode = ret;
 		goto cleanup;
 	}
+	if (stringset_contains(pkgs_in_progress, pkg->name)) {
+		pkg_emit_error("dependency cycle detected");
+		retcode = EPKG_FATAL;
+		goto cleanup;
+	}
+	stringset_safe_add(&pkgs_in_progress, pkg->name);
+	pushed = true;
+
 	if ((flags & (PKG_ADD_UPGRADE | PKG_ADD_SPLITTED_UPGRADE)) !=
 	    PKG_ADD_UPGRADE)
 		pkg_emit_install_begin(pkg);
@@ -1692,7 +1827,8 @@ pkg_add_common(struct pkgdb *db, const char *path, int fd, unsigned flags,
 	 * Additional checks for non-remote package
 	 */
 	if (remote == NULL) {
-		ret = pkg_add_check_pkg_archive(db, pkg, path, flags, reloc);
+		ret = pkg_add_check_pkg_archive(db, pkg, path, flags, reloc,
+		    pkgs_in_progress);
 		if (ret != EPKG_OK) {
 			/* Do not return error on installed package */
 			retcode = (ret == EPKG_INSTALLED ? EPKG_OK : ret);
@@ -1910,6 +2046,10 @@ cleanup:
 		archive_read_close(a);
 		archive_read_free(a);
 	}
+	if (pushed)
+		stringset_del(pkgs_in_progress, pkg->name);
+	if (owned)
+		stringset_destroy(pkgs_in_progress);
 
 	pkg_free(pkg);
 
@@ -1925,14 +2065,14 @@ pkg_add(struct pkgdb *db, const char *path, unsigned flags,
     const char *location)
 {
 	return pkg_add_common(db, path, -1, flags, location, NULL, NULL, NULL,
-	    NULL);
+	    NULL, NULL);
 }
 
 int
 pkg_add_fd(struct pkgdb *db, int fd, unsigned flags, const char *location)
 {
 	return pkg_add_common(db, "-", fd, flags, location, NULL, NULL, NULL,
-	    NULL);
+	    NULL, NULL);
 }
 
 int
@@ -1940,7 +2080,8 @@ pkg_add_from_remote(struct pkgdb *db, const char *path, unsigned flags,
     const char *location, struct pkg *rp, struct triggers *t,
     struct deferred_rc *rc)
 {
-	return pkg_add_common(db, path, -1, flags, location, rp, NULL, t, rc);
+	return pkg_add_common(db, path, -1, flags, location, rp, NULL, t, rc,
+	    NULL);
 }
 
 int
@@ -1948,7 +2089,8 @@ pkg_add_from_remote_fd(struct pkgdb *db, int fd, unsigned flags,
     const char *location, struct pkg *rp, struct triggers *t,
     struct deferred_rc *rc)
 {
-	return pkg_add_common(db, "-", fd, flags, location, rp, NULL, t, rc);
+	return pkg_add_common(db, "-", fd, flags, location, rp, NULL, t, rc,
+	    NULL);
 }
 
 int
@@ -1961,7 +2103,8 @@ pkg_add_upgrade(struct pkgdb *db, const char *path, unsigned flags,
 	    PKG_LOAD_FILES|PKG_LOAD_SCRIPTS|PKG_LOAD_DIRS|PKG_LOAD_LUA_SCRIPTS) != EPKG_OK)
 		return (EPKG_FATAL);
 
-	return pkg_add_common(db, path, -1, flags, location, rp, lp, t, rc);
+	return pkg_add_common(db, path, -1, flags, location, rp, lp, t, rc,
+	    NULL);
 }
 
 int
@@ -1973,7 +2116,8 @@ pkg_add_upgrade_fd(struct pkgdb *db, int fd, unsigned flags,
 	    PKG_LOAD_FILES|PKG_LOAD_SCRIPTS|PKG_LOAD_DIRS|PKG_LOAD_LUA_SCRIPTS) != EPKG_OK)
 		return (EPKG_FATAL);
 
-	return pkg_add_common(db, "-", fd, flags, location, rp, lp, t, rc);
+	return pkg_add_common(db, "-", fd, flags, location, rp, lp, t, rc,
+	    NULL);
 }
 
 static int
@@ -2048,6 +2192,8 @@ pkg_add_fromdir(struct pkg *pkg, const char *src, struct pkgdb *db __unused)
 	pkg_open_root_fd(pkg);
 	context.pkg = pkg;
 	context.rootfd = pkg->rootfd;
+
+	log_dirs(&context);
 
 	while (pkg_dirs(pkg, &d) == EPKG_OK) {
 		if (fstatat(fromfd, RELATIVE_PATH(d->path), &st, 0) == -1) {
@@ -2267,20 +2413,8 @@ open_tempdir(struct pkg_add_context *context, const char *path)
 
 			flag = localpkg == NULL ? 0 : AT_SYMLINK_NOFOLLOW;
 			if (fstatat(rootfd, RELATIVE_PATH(walk), &st,
-			    flag) == -1) {
-				/*
-				 * A hack to ensure that intermediate
-				 * directories not registered with a package are
-				 * still logged in the metalog.  This is not
-				 * really the right place, but to implement this
-				 * properly we need to clean up uses of
-				 * try_mkdir().
-				 */
-				metalog_add(PKG_METALOG_DIR,
-				    RELATIVE_PATH(walk),
-				    "root", "wheel", 0755, 0, NULL);
+			    flag) == -1)
 				continue;
-			}
 			if (S_ISLNK(st.st_mode) &&
 			    localpkg != NULL &&
 			    !pkg_has_file(localpkg, walk) &&
