@@ -1,0 +1,10 @@
+include @builddir@/mk/defs.mk
+LIB=	picosat
+SRCS=	picosat.c \
+	version.c
+LOCAL_CFLAGS=	-Wno-strict-aliasing \
+		-Wno-unused -DNGETRUSAGE
+
+VPATH=	$(top_srcdir)/external/picosat
+
+include $(MK)/static-lib.mk

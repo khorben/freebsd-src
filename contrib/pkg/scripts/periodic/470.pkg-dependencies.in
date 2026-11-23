@@ -1,0 +1,86 @@
+#!/bin/sh -
+#
+
+if [ -r /etc/defaults/periodic.conf ]; then
+	. /etc/defaults/periodic.conf
+	source_periodic_confs
+fi
+
+. /etc/periodic/security/security.functions
+
+: ${security_status_pkg_dependencies_enable:=YES}
+: ${security_status_pkg_dependencies_period:=daily}
+: ${security_status_pkg_dependencies_chroots=$pkg_chroots}
+: ${security_status_pkg_dependencies_jails=$pkg_jails}
+
+check_deps_pkg() {
+	local pkgargs="$1"
+	local rc
+
+	rc=$(${pkgcmd} ${pkgargs} check -qdan 2>&1 |
+		tee /dev/stderr |
+		wc -l)
+	[ $rc -gt 1 ] && rc=1
+
+	return $rc
+}
+
+check_deps_pkg_all() {
+	local rc=0
+
+	if [ -n "${security_status_pkg_dependencies_chroots}" -o \
+		-n "${security_status_pkg_dependencies_jails}" ]; then
+	echo "Host system:"
+	fi
+
+	check_deps_pkg ''
+	[ $? -eq 1 ] && rc=1
+
+	for c in $security_status_pkg_dependencies_chroots ; do
+		echo
+		echo "chroot: $c"
+		check_deps_pkg "-c $c"
+		[ $? -eq 1 ] && rc=1
+	done
+
+	case $security_status_pkg_dependencies_jails in
+		\*)
+			jails=$(jls -q -h name | sed -e 1d)
+			;;
+		'')
+			jails=
+			;;
+		*)
+			jails=$security_status_pkg_dependencies_jails
+			;;
+	esac
+
+	for j in $jails ; do
+		echo
+		echo "jail: $j"
+		check_deps_pkg "-j $j"
+		[ $? -eq 1 ] && rc=1
+	done
+
+	return $rc
+}
+
+rc=0
+
+if check_yesno_period security_status_pkg_dependencies_enable
+then
+	pkgcmd=%prefix%/sbin/pkg
+
+	echo
+	echo 'Checking for packages with missing dependencies:'
+
+	if ! ${pkgcmd} -N >/dev/null 2>&1 ; then
+		echo 'pkg-dependencies is enabled but pkg is not used'
+		rc=2
+	else
+	    check_deps_pkg_all
+	    rc=$?
+	fi
+fi
+
+exit $rc

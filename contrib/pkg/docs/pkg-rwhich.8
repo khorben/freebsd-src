@@ -1,0 +1,194 @@
+.\"
+.\" FreeBSD pkg - a next generation package for the installation and maintenance
+.\" of non-core utilities.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\"
+.\"     @(#)pkg.8
+.\"
+.Dd April 29, 2026
+.Dt PKG-RWHICH 8
+.Os
+.Sh NAME
+.Nm "pkg rwhich"
+.Nd display which remote package provides a specific file
+.Sh SYNOPSIS
+.Nm
+.Op Fl gq
+.Op Fl r Ar reponame
+.Ar file
+.Sh DESCRIPTION
+.Nm
+queries the repository catalogues to find which remote package provides the
+specified
+.Ar file .
+.Pp
+This requires that the repository was created with the
+.Fl l
+flag to
+.Xr pkg-repo 8
+.Pq to generate the file listing ,
+and that the client has run
+.Xr pkg-update 8
+to fetch the file metadata.
+.Pp
+Unlike
+.Xr pkg-which 8 ,
+which searches locally installed packages,
+.Nm
+searches the remote repository catalogues.
+.Pp
+In glob mode (
+.Fl g
+) ,
+the pattern is split into a directory part and a filename part at the
+last slash.
+If the directory part contains no glob metacharacters, only files in
+the matching directory are tested, which significantly speeds up the search.
+Patterns without any slash are matched against the filename only,
+regardless of the directory.
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width repository
+.It Fl g , Cm --glob
+Treat
+.Ar file
+as a glob pattern.
+.It Fl q , Cm --quiet
+Be quiet.
+Only print the package name and version, one per line.
+.It Fl r Ar reponame , Cm --repository Ar reponame
+Limit the search to the named repository.
+.El
+.Sh EXAMPLES
+Find which package provides a specific binary:
+.Bd -literal -offset indent
+$ pkg rwhich /usr/local/bin/bash
+/usr/local/bin/bash is provided by package bash-5.2.26_2
+.Ed
+.Pp
+Find all packages providing a shared library with a filename-only pattern:
+.Bd -literal -offset indent
+$ pkg rwhich -g 'libcurl*'
+/usr/local/lib/libcurl.so is provided by package curl-8.7.1
+/usr/local/lib/libcurl.so.4 is provided by package curl-8.7.1
+.Ed
+.Pp
+Find packages in a specific directory (fast path, directory is matched exactly):
+.Bd -literal -offset indent
+$ pkg rwhich -g '/usr/local/bin/python*'
+/usr/local/bin/python3.11 is provided by package python311-3.11.9
+/usr/local/bin/python3 is provided by package python3-3.11.9
+.Ed
+.Pp
+Find files across all directories with a wildcard directory pattern:
+.Bd -literal -offset indent
+$ pkg rwhich -g '*/bin/ls'
+/usr/bin/ls is provided by package FreeBSD-runtime-15.1p1
+/usr/local/bin/ls is provided by package coreutils-9.5
+.Ed
+.Pp
+In glob mode, the real file path is displayed for each match, not the glob pattern.
+.Pp
+Quiet mode for scripting:
+.Bd -literal -offset indent
+$ pkg rwhich -q /usr/local/bin/python3.11
+python311-3.11.9
+.Ed
+.Pp
+Multiple files can be queried in a single invocation:
+.Bd -literal -offset indent
+$ pkg rwhich /usr/local/bin/bash /usr/local/bin/zsh
+/usr/local/bin/bash is provided by package bash-5.2.26_2
+/usr/local/bin/zsh is provided by package zsh-5.9
+.Ed
+.Sh ENVIRONMENT
+The following environment variables affect the execution of
+.Nm .
+See
+.Xr pkg.conf 5
+for further description.
+.Bl -tag -width ".Ev NO_DESCRIPTIONS"
+.It Ev PKG_DBDIR
+.It Ev PKG_RWHICH_DATABASE
+.It Ev REPOS_DIR
+.El
+.Sh CONFIGURATION
+.Nm
+is controlled by two configuration options described in
+.Xr pkg.conf 5 :
+.Bl -tag -width ".Cm PKG_RWHICH_DATABASE"
+.It Cm PKG_RWHICH_DATABASE
+Global boolean option (default:
+.Cm YES ).
+When set to
+.Cm NO ,
+disables rwhich for all repositories regardless of per-repository settings.
+.It Cm RWHICH_DATABASE
+Per-repository boolean option (default:
+.Cm YES ).
+When set to
+.Cm NO ,
+the file listing database is not downloaded for that specific repository
+and
+.Nm
+will not search it.
+.El
+.Sh SEE ALSO
+.Xr pkg_checksum 3 ,
+.Xr pkg_create 3 ,
+.Xr pkg_printf 3 ,
+.Xr pkg_repo_create 3 ,
+.Xr pkg_repos 3 ,
+.Xr pkg-keywords 5 ,
+.Xr pkg-lua-script 5 ,
+.Xr pkg-repository 5 ,
+.Xr pkg-script 5 ,
+.Xr pkg-triggers 5 ,
+.Xr pkg.conf 5 ,
+.Xr pkg 8 ,
+.Xr pkg-add 8 ,
+.Xr pkg-alias 8 ,
+.Xr pkg-annotate 8 ,
+.Xr pkg-audit 8 ,
+.Xr pkg-autoremove 8 ,
+.Xr pkg-check 8 ,
+.Xr pkg-checksum 8 ,
+.Xr pkg-clean 8 ,
+.Xr pkg-config 8 ,
+.Xr pkg-create 8 ,
+.Xr pkg-delete 8 ,
+.Xr pkg-fetch 8 ,
+.Xr pkg-help 8 ,
+.Xr pkg-info 8 ,
+.Xr pkg-install 8 ,
+.Xr pkg-key 8 ,
+.Xr pkg-lock 8 ,
+.Xr pkg-plugins 8 ,
+.Xr pkg-query 8 ,
+.Xr pkg-register 8 ,
+.Xr pkg-repo 8 ,
+.Xr pkg-repositories 8 ,
+.Xr pkg-rquery 8 ,
+.Xr pkg-search 8 ,
+.Xr pkg-set 8 ,
+.Xr pkg-shell 8 ,
+.Xr pkg-shlib 8 ,
+.Xr pkg-ssh 8 ,
+.Xr pkg-stats 8 ,
+.Xr pkg-triggers 8 ,
+.Xr pkg-unregister 8 ,
+.Xr pkg-update 8 ,
+.Xr pkg-updating 8 ,
+.Xr pkg-upgrade 8 ,
+.Xr pkg-version 8 ,
+.Xr pkg-which 8

@@ -1,0 +1,6 @@
+include @builddir@/mk/defs.mk
+DIRS=	libblake2 libpicosat liblinenoise libfetch libsqlite libucl liblua libyxml libder libecc
+@if libelf-internal
+DIRS+=	libelf
+@endif
+include $(MK)/dir.mk
